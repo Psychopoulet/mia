@@ -13,6 +13,9 @@
 
 // types & interfaces
 
+    // externals
+	import type Pluginsmanager from "node-pluginsmanager";
+
 	// locals
 	import type { iLogger } from "./tools/generateLogger";
 
@@ -79,6 +82,35 @@
 	}).then((): Promise<void> => {
 
 		return generateServer(container);
+
+    // catch
+    }).then((): void => {
+
+        process.on("SIGINT", (): void => {
+
+			const pluginsManager: Pluginsmanager = container.get("plugins-manager") as Pluginsmanager;
+
+			pluginsManager.releaseAll().then((): Promise<void> => {
+
+				return pluginsManager.destroyAll();
+
+			}).then((): void => {
+
+				process.exit(0);
+
+			}).catch((err: Error): void => {
+
+                console.error("");
+                console.error("Impossible to properly end the application");
+                console.error(err);
+                console.error("");
+
+                process.exitCode = 1;
+                process.exit(1);
+
+			});
+
+        });
 
 	// fail to run
 	}).catch((err: Error): void => {

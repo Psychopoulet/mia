@@ -77,14 +77,8 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
             logger.warning("All plugins released");
         })
 
-        .on("released", (plugin: Orchestrator): void => {
-            logger.debug("Plugin " + plugin.name + " (v" + plugin.version + ") released");
-        }).on("allreleased", (): void => {
-            logger.warning("All plugins released");
-        })
-
-        .on("destroyed", (plugin: Orchestrator): void => {
-            logger.warning("Plugin " + plugin.name + " (v" + plugin.version + ") destroyed");
+        .on("destroyed", (pluginName: string): void => {
+            logger.warning("Plugin " + pluginName + " destroyed");
         }).on("alldestroyed", (): void => {
             logger.warning("All plugins destroyed");
         })
