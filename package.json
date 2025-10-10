@@ -5,19 +5,25 @@
   "typings": "./lib/cjs/main.d.cts",
   "main": "./lib/cjs/main.cjs",
   "scripts": {
+
     "prepare": "husky",
+
     "lint": "npx eslint --config \".eslintrc-src.js\" --ext .cts,.ts \"./lib/src/**/*\" && npx eslint --config \".eslintrc-tests.js\" \"./bin/*.js\" \"./test/**/*.js\"",
     "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --overkill \"fs-extra\" \"node-promfs\"",
     "check-updates": "npx check-version-modules",
     "unit-tests": "npm run-script build && npx nyc --reporter=html --reporter=text mocha",
     "tests": "npm run-script lint && npm run-script check-requires && npm run-script check-updates && npm run-script unit-tests",
+
     "clean": "npx rimraf \"./lib/cjs\"",
     "build": "npm run-script clean && npx tsc --project \"./tsconfig.json\"",
     "ci": "npm run-script tests && npx nyc report --reporter=text-lcov | coveralls",
+
     "start": "node lib/cjs/main.cjs",
-    "daemon-start": "npx pm2 start lib/cjs/main.cjs --name mia",
-    "daemon-restart": "npx pm2 restart lib/cjs/main.cjs mia",
-    "daemon-stop": "npx pm2 stop mia && npx pm2 delete mia"
+
+    "daemon-start": "npx pm2 start pm2.json",
+    "daemon-restart": "npx pm2 reload pm2.json",
+    "daemon-stop": "npx pm2 stop pm2.json && npx pm2 delete pm2.json"
+
   },
   "files": [
     "/bin",
