@@ -1,0 +1,11 @@
+{
+  "apps" : [
+        {
+            "name": "mia",
+            "script": "./lib/cjs/main.cjs",
+            "instances": 2,
+            "exec_mode": "cluster",
+            "autorestart": true
+        }
+    ]
+}
