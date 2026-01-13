@@ -1,15 +1,15 @@
 // deps
 
-	// natives
-	import { join } from "node:path";
+    // natives
+    import { join } from "node:path";
 
     // externals
-	import ConfManager from "node-confmanager";
+    import ConfManager from "node-confmanager";
 
 // types & interfaces
 
     // externals
-	import type ContainerPattern from "node-containerpattern";
+    import type ContainerPattern from "node-containerpattern";
 
     // locals
     import type { iLogger } from "./generateLogger";

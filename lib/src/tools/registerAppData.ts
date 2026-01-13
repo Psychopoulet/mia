@@ -1,28 +1,35 @@
 // deps
 
-	// natives
-	import { readFile } from "node:fs";
-	import { homedir } from "node:os";
-	import { join } from "node:path";
+    // natives
+    import { readFile } from "node:fs";
+    import { homedir } from "node:os";
+    import { join } from "node:path";
 
 // types & interfaces
 
     // externals
-	import type ContainerPattern from "node-containerpattern";
+    import type ContainerPattern from "node-containerpattern";
+
+    // locals
+    interface iPackageData {
+        "name": string;
+        "version": string;
+        "description": string;
+    }
 
 // module
 
 export default function registerAppData (container: ContainerPattern): Promise<void> {
 
-    return new Promise((resolve: (content: { "name": string; "version": string; "description": string; }) => void, reject: (err: Error) => void): void => {
+    return new Promise((resolve: (content: iPackageData) => void, reject: (err: Error) => void): void => {
 
         const packageFile: string = join(__dirname, "..", "..", "..", "package.json");
 
         return readFile(packageFile, "utf-8", (err: Error | null, content: string): void => {
-            return err ? reject(err) : resolve(JSON.parse(content));
+            return err ? reject(err) : resolve(JSON.parse(content) as iPackageData);
         });
 
-    }).then((packageData: { "name": string; "version": string; "description": string; }): void => {
+    }).then((packageData: iPackageData): void => {
 
         container
             .skeleton("app", "object")

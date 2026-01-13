@@ -1,9 +1,9 @@
 // deps
 
     // externals
-	import ContainerPattern from "node-containerpattern";
+    import ContainerPattern from "node-containerpattern";
 
-	// locals
+    // locals
     import registerAppData from "./tools/registerAppData";
     import ensureAppDirectories from "./tools/ensureAppDirectories";
     import generateConf from "./tools/generateConf";
@@ -14,91 +14,91 @@
 // types & interfaces
 
     // externals
-	import type Pluginsmanager from "node-pluginsmanager";
+    import type Pluginsmanager from "node-pluginsmanager";
 
-	// locals
-	import type { iLogger } from "./tools/generateLogger";
+    // locals
+    import type { iLogger } from "./tools/generateLogger";
 
 // consts
 
-	const container: ContainerPattern = new ContainerPattern();
+    const container: ContainerPattern = new ContainerPattern();
 
 // run
 
-	// generate basic logger
+    // generate basic logger
 
-	Promise.resolve().then((): void => {
+    Promise.resolve().then((): void => {
 
-		container
-			.set("log", {
-				"debug": console.debug,
-				"info": console.info,
-				"success": console.log,
-				"warning": console.warn,
-				"error": console.error
-			})
-			.document("log", "App logger");
+        container
+            .set("log", {
+                "debug": console.debug,
+                "info": console.info,
+                "success": console.log,
+                "warning": console.warn,
+                "error": console.error
+            })
+            .document("log", "App logger");
 
-	// register app data
+    // register app data
 
-	}).then((): Promise<void> => {
+    }).then((): Promise<void> => {
 
-		return registerAppData(container);
+        return registerAppData(container);
 
-	// ensure app directories
+    // ensure app directories
 
-	}).then((): Promise<void> => {
+    }).then((): Promise<void> => {
 
-		return ensureAppDirectories(container);
+        return ensureAppDirectories(container);
 
-	// generate and load conf file
+    // generate and load conf file
 
-	}).then((): Promise<void> => {
+    }).then((): Promise<void> => {
 
-		return generateConf(container);
+        return generateConf(container);
 
-	// generate advanced logger
+    // generate advanced logger
 
-	}).then((): void => {
+    }).then((): void => {
 
-		return generateLogger(container);
+        return generateLogger(container);
 
-	// log basic data
+    // log basic data
 
-	}).then((): void => {
+    }).then((): void => {
 
-		container.get("log").success(container.get("app.name") + " (v" + container.get("app.version") + ")");
-		container.get("log").debug("conf file : " + container.get("conf-file"));
-		container.get("log").debug("logs file : " + container.get("logs-file"));
+        container.get("log").success(container.get("app.name") + " (v" + container.get("app.version") + ")");
+        container.get("log").debug("conf file : " + container.get("conf-file"));
+        container.get("log").debug("logs file : " + container.get("logs-file"));
 
-	// load plugins
+    // load plugins
 
-	}).then((): Promise<void> => {
+    }).then((): Promise<void> => {
 
-		return managePlugins(container);
+        return managePlugins(container);
 
-	// create server
+    // create server
 
-	}).then((): Promise<void> => {
+    }).then((): Promise<void> => {
 
-		return generateServer(container);
+        return generateServer(container);
 
     // catch
     }).then((): void => {
 
         process.on("SIGINT", (): void => {
 
-			const pluginsManager: Pluginsmanager = container.get("plugins-manager") as Pluginsmanager;
+            const pluginsManager: Pluginsmanager = container.get("plugins-manager") as Pluginsmanager;
 
-			pluginsManager.releaseAll().then((): Promise<void> => {
+            pluginsManager.releaseAll().then((): Promise<void> => {
 
-				return pluginsManager.destroyAll();
+                return pluginsManager.destroyAll();
 
-			}).then((): void => {
+            }).then((): void => {
 
-				process.exit(0);
+                process.exit(0);
 
-			}).catch((err: Error): void => {
+            }).catch((err: Error): void => {
 
                 console.error("");
                 console.error("Impossible to properly end the application");
@@ -108,28 +108,28 @@
                 process.exitCode = 1;
                 process.exit(1);
 
-			});
+            });
 
         });
 
-	// fail to run
-	}).catch((err: Error): void => {
+    // fail to run
+    }).catch((err: Error): void => {
 
-		if (container && container.has("log")) {
+        if (container && container.has("log")) {
 
-			(container.get("log") as iLogger).error("Global script failed");
-			(container.get("log") as iLogger).error(err.message);
+            (container.get("log") as iLogger).error("Global script failed");
+            (container.get("log") as iLogger).error(err.message);
             (container.get("log") as iLogger).debug(err.stack as string);
 
-		}
-		else {
+        }
+        else {
 
-			console.error("Global script failed");
-			console.error(err);
+            console.error("Global script failed");
+            console.error(err);
 
-		}
+        }
 
         process.exitCode = 1;
         process.exit(1);
 
-	});
+    });

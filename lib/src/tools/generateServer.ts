@@ -1,9 +1,9 @@
 // deps
 
-	// natives
+    // natives
     import { readFile } from "node:fs";
     import { createServer } from "node:http";
-	import { join } from "node:path";
+    import { join } from "node:path";
 
     // externals
     import compression from "compression";
@@ -12,19 +12,19 @@
     import helmet from "helmet";
     import { WebSocketServer } from "ws";
 
-	// locals
+    // locals
     import getRequestPath from "./getRequestPath";
 
 // types & interfaces
 
-	// natives
+    // natives
     import type { Server } from "node:http";
 
     // externals
     import type { Express, Request, Response, NextFunction } from "express";
-	import type ConfManager from "node-confmanager";
+    import type ConfManager from "node-confmanager";
     import type ContainerPattern from "node-containerpattern";
-	import type Pluginsmanager from "node-pluginsmanager";
+    import type Pluginsmanager from "node-pluginsmanager";
     import type { WebSocket } from "ws";
 
     // locals
@@ -58,9 +58,9 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 }
 
                 res.status(200).send(content
-                        .replace(/{{app.name}}/g, container.get("app.name") as string)
-                        .replace(/{{app.version}}/g, container.get("app.version") as string)
-                        .replace(/{{app.description}}/g, container.get("app.description") as string)
+                    .replace(/{{app.name}}/g, container.get("app.name") as string)
+                    .replace(/{{app.version}}/g, container.get("app.version") as string)
+                    .replace(/{{app.description}}/g, container.get("app.description") as string)
                 );
 
             });
@@ -115,10 +115,22 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // pictures
 
-        app.get([ "favicon.ico", "/favicon.ico", "/public/pictures/favicon.ico" ], (req: Request, res: Response): void => {
+        app.get([
+            "favicon.ico",
+            "/favicon.ico",
+            "/public/pictures/favicon.ico"
+        ], (req: Request, res: Response): void => {
+
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
-        }).get([ "favicon.png", "/favicon.png", "/public/pictures/favicon.png" ], (req: Request, res: Response): void => {
+
+        }).get([
+            "favicon.png",
+            "/favicon.png",
+            "/public/pictures/favicon.png"
+        ], (req: Request, res: Response): void => {
+
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
+
         });
 
         // link request to plugins

@@ -1,13 +1,13 @@
 // deps
 
     // externals
-	import winston from "winston";
+    import winston from "winston";
 
 // types & interfaces
 
     // externals
-	import type ConfManager from "node-confmanager";
-	import type ContainerPattern from "node-containerpattern";
+    import type ConfManager from "node-confmanager";
+    import type ContainerPattern from "node-containerpattern";
 
     // local
 
@@ -32,7 +32,7 @@ export default function generateLogger (container: ContainerPattern): void {
                 "filename": container.get("logs-file") as string,
                 "format": winston.format.combine(
                     winston.format.timestamp({
-                        "format": "YYYY-MM-DD HH:mm:ss",
+                        "format": "YYYY-MM-DD HH:mm:ss"
                     }),
                     winston.format.json()
                 )
@@ -65,12 +65,12 @@ export default function generateLogger (container: ContainerPattern): void {
             "level": "debug",
             "format": winston.format.combine(
                 winston.format.timestamp({
-                    "format": "YYYY-MM-DD HH:mm:ss",
+                    "format": "YYYY-MM-DD HH:mm:ss"
                 }),
                 winston.format.colorize({
                     "level": true
                 }),
-                winston.format.printf(({ level, message, timestamp }) => {
+                winston.format.printf(({ level, message, timestamp }): string => {
                     return timestamp + " " + level + ": " + message;
                 })
             )

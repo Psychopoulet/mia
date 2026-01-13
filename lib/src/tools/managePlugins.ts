@@ -1,13 +1,13 @@
 // deps
 
     // externals
-	import Pluginsmanager from "node-pluginsmanager";
+    import Pluginsmanager from "node-pluginsmanager";
 
 // types & interfaces
 
     // externals
-	import type ContainerPattern from "node-containerpattern";
-	import type { Orchestrator, tLogType } from "node-pluginsmanager-plugin";
+    import type ContainerPattern from "node-containerpattern";
+    import type { Orchestrator, tLogType } from "node-pluginsmanager-plugin";
 
     // locals
     import type { iLogger } from "./generateLogger";
@@ -21,9 +21,9 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
     const pluginsManager: Pluginsmanager = new Pluginsmanager({
         "directory": container.get("plugins-directory") as string,
         "externalRessourcesDirectory": container.get("data-directory") as string,
-        "logger": (type: tLogType, message: string | Error, bold?: boolean, pluginName?: string): void => {
+        "logger": (type: tLogType, message: string | Error): void => {
 
-            let msg: string = (message as Error).message ? (message as Error).message : message as string;
+            const msg: string = (message as Error).message ? (message as Error).message : message as string;
 
             switch (type) {
 
