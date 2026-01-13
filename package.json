@@ -8,7 +8,11 @@
 
     "prepare": "husky",
 
-    "lint": "npx eslint --config \".eslintrc-src.js\" --ext .cts,.ts \"./lib/src/**/*\" && npx eslint --config \".eslintrc-tests.js\" \"./bin/*.js\" \"./test/**/*.js\"",
+    "lint-back": "npx eslint --config .eslintrc-back.js --ext .cts,.ts ./lib/src/**/*",
+    "lint-front": "npx eslint --config .eslintrc-front.js --ext .tsx,.ts ./public/src/**/*",
+    "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js ./tests/**/*",
+
+    "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
     "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --overkill \"fs-extra\" \"node-promfs\"",
     "check-updates": "npx check-version-modules",
     "unit-tests": "npm run-script build && npx nyc --reporter=html --reporter=text mocha",
