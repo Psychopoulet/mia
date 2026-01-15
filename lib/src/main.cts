@@ -1,3 +1,7 @@
+/*
+    eslint-disable n/no-process-exit
+*/
+
 // deps
 
     // externals
@@ -67,9 +71,11 @@
 
     }).then((): void => {
 
-        container.get("log").success(container.get("app.name") + " (v" + container.get("app.version") + ")");
-        container.get("log").debug("conf file : " + container.get("conf-file"));
-        container.get("log").debug("logs file : " + container.get("logs-file"));
+        const log: iLogger = container.get("log") as iLogger;
+
+        log.success(container.get("app.name") + " (v" + container.get("app.version") + ")");
+        log.debug("conf file : " + container.get("conf-file"));
+        log.debug("logs file : " + container.get("logs-file"));
 
     // load plugins
 
@@ -115,7 +121,7 @@
     // fail to run
     }).catch((err: Error): void => {
 
-        if (container && container.has("log")) {
+        if (container.has("log")) {
 
             (container.get("log") as iLogger).error("Global script failed");
             (container.get("log") as iLogger).error(err.message);

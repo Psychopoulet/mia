@@ -54,7 +54,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             readFile(file, "utf-8", (err: Error | null, content: string): void => {
 
                 if (err) {
-                    return next(err);
+                    next(err);
+                    return;
                 }
 
                 res.status(200).send(content
@@ -146,16 +147,14 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             (container.get("log") as iLogger).warning(getRequestPath(container, req) + " not found");
 
             if (res.headersSent) {
-                return next(getRequestPath(container, req) + " not found");
+                next(getRequestPath(container, req) + " not found");
+                return;
             }
-            else {
 
-                res.status(404).json({
-                    "code": 404,
-                    "message": getRequestPath(container, req) + " not found"
-                });
-
-            }
+            res.status(404).json({
+                "code": 404,
+                "message": getRequestPath(container, req) + " not found"
+            });
 
         });
 

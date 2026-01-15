@@ -71,7 +71,7 @@ export default function generateLogger (container: ContainerPattern): void {
                     "level": true
                 }),
                 winston.format.printf(({ level, message, timestamp }): string => {
-                    return timestamp + " " + level + ": " + message;
+                    return String(timestamp) + " " + String(level) + ": " + String(message);
                 })
             )
         }));

@@ -1,3 +1,7 @@
+/*
+    eslint-disable n/no-process-env
+*/
+
 // deps
 
     // natives
@@ -47,7 +51,7 @@ export default function generateConf (container: ContainerPattern): Promise<void
 
     }).then((): void => {
 
-        if (!confManager.get("debug") as boolean) {
+        if (!(confManager.get("debug") as boolean)) {
             process.env.NODE_ENV = "production";
         }
 
