@@ -47,8 +47,6 @@
     "node-confmanager": "1.9.0",
     "node-containerpattern": "1.8.0",
     "node-pluginsmanager": "2.5.2",
-    "node-pluginsmanager-plugin": "6.5.0",
-    "pm2": "6.0.14",
     "winston": "3.19.0",
     "ws": "8.19.0"
   },
@@ -64,10 +62,14 @@
     "eslint-plugin-personnallinter": "git+ssh://git@github.com/Psychopoulet/eslint-plugin-personnallinter",
     "husky": "9.1.7",
     "mocha": "11.7.5",
+    "node-pluginsmanager-plugin": "6.5.0",
     "nyc": "17.1.0",
     "rimraf": "6.1.2",
     "typescript": "5.9.3",
     "used-deps-analyzer": "0.1.8"
+  },
+  "optionalDependencies": {
+    "pm2": "6.0.14"
   },
   "husky": {
     "hooks": {
