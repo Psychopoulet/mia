@@ -13,7 +13,7 @@
     "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js ./tests/**/*",
 
     "lint": "npm run lint-back",
-    "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --overkill \"fs-extra\" \"node-promfs\"",
+    "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\"",
     "check-updates": "npx check-version-modules",
     "unit-tests": "npm run-script build && npx nyc --reporter=html --reporter=text mocha",
     "tests": "npm run-script lint && npm run-script check-requires && npm run-script check-updates && npm run-script unit-tests",
