@@ -81,12 +81,12 @@
   "author": "Sébastien VIDAL",
   "contributors": [],
   "license": "ISC",
-  "homepage": "https://github.com/Psychopoulet/MIA#readme",
+  "homepage": "https://github.com/Psychopoulet/mia#readme",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Psychopoulet/MIA"
+    "url": "git://github.com/Psychopoulet/mia"
   },
   "bugs": {
-    "url": "https://github.com/Psychopoulet/MIA/issues"
+    "url": "https://github.com/Psychopoulet/mia/issues"
   }
 }
