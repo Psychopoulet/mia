@@ -1,26 +1,44 @@
 {
+
   "name": "mia",
   "version": "1.0.1",
-  "description": "MIA - easy IOT",
+  "description": "MIA - easy IOT.",
+
+  "type": "commonjs",
   "typings": "./lib/cjs/main.d.cts",
   "main": "./lib/cjs/main.cjs",
+
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./lib/cjs/main.d.cts",
+        "default": "./lib/cjs/main.cjs"
+      }
+    }
+  },
+
   "scripts": {
 
-    "prepare": "husky",
+    "prepare": "npx husky || true",
 
-    "lint-back": "npx eslint --config .eslintrc-back.js --ext .cts,.ts ./lib/src/**/*",
+    "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
     "lint-front": "npx eslint --config .eslintrc-front.js --ext .tsx,.ts ./public/src/**/*",
-    "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js ./tests/**/*",
+    "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js,.cjs,.mjs ./test/**/*",
+    "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
 
-    "lint": "npm run lint-back",
+    "clean-back": "npx rimraf ./lib/cjs",
+    "clean-front": "npx rimraf ./public/cjs",
+    "clean": "npm run clean-back && npm run clean-front",
+
+    "build-back": "npm run clean-back && npx tsc --project ./tsconfig.json",
+    "build-front": "echo 'Frontend build not implemented yet.'",
+    "build": "npm run build-back && npm run build-front",
+
     "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\"",
-    "check-updates": "npx check-version-modules",
+    "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch",
     "unit-tests": "npm run-script build && npx nyc --reporter=html --reporter=text mocha",
-    "tests": "npm run-script lint && npm run-script check-requires && npm run-script check-updates && npm run-script unit-tests",
 
-    "clean": "npx rimraf \"./lib/cjs\"",
-    "build": "npm run-script clean && npx tsc --project \"./tsconfig.json\"",
-    "ci": "npm run-script tests && npx nyc report --reporter=text-lcov | coveralls",
+    "tests": "npm run-script lint && npm run-script check-requires && npm run-script check-updates && npm run-script unit-tests",
 
     "start": "node lib/cjs/main.cjs",
 
@@ -29,14 +47,15 @@
     "daemon-stop": "npx pm2 stop pm2.json && npx pm2 delete pm2.json"
 
   },
+
   "files": [
-    "/bin",
-    "/lib/cjs",
-    "/public"
+    "lib/cjs",
+    "public/dist"
   ],
   "engines": {
     "node": ">=22.22.0"
   },
+
   "dependencies": {
     "@fortawesome/fontawesome-free": "7.2.0",
     "bootstrap": "5.3.8",
@@ -71,22 +90,24 @@
   "optionalDependencies": {
     "pm2": "6.0.14"
   },
+
   "husky": {
     "hooks": {
-      "pre-commit": "npm run-script lint",
-      "pre-push": "npm run-script unit-tests",
-      "pre-receive": "npm run-script tests"
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run unit-tests"
     }
   },
   "author": "Sébastien VIDAL",
   "contributors": [],
   "license": "ISC",
+
   "homepage": "https://github.com/Psychopoulet/mia#readme",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Psychopoulet/mia"
+    "url": "git://github.com/Psychopoulet/mia.git"
   },
   "bugs": {
     "url": "https://github.com/Psychopoulet/mia/issues"
   }
+
 }
