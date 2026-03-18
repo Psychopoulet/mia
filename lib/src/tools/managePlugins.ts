@@ -20,7 +20,7 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
 
     const pluginsManager: Pluginsmanager = new Pluginsmanager({
         "directory": container.get("plugins-directory") as string,
-        "externalRessourcesDirectory": container.get("data-directory") as string,
+        "externalResourcesDirectory": container.get("data-directory") as string,
         "logger": (type: tLogType, message: string | Error): void => {
 
             const msg: string = (message as Error).message ? (message as Error).message : message as string;
