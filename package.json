@@ -63,8 +63,8 @@
     "cors": "2.8.6",
     "express": "5.2.1",
     "helmet": "8.1.0",
-    "node-confmanager": "1.9.0",
-    "node-containerpattern": "1.8.0",
+    "node-confmanager": "1.10.0",
+    "node-containerpattern": "1.9.0",
     "node-pluginsmanager": "3.0.1",
     "winston": "3.19.0",
     "ws": "8.19.0"
