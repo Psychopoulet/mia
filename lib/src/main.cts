@@ -73,9 +73,9 @@
 
         const log: iLogger = container.get("log") as iLogger;
 
-        log.success(container.get("app.name") + " (v" + container.get("app.version") + ")");
-        log.debug("conf file : " + container.get("conf-file"));
-        log.debug("logs file : " + container.get("logs-file"));
+        log.success((container.get("app.name") as string) + " (v" + (container.get("app.version") as string) + ")");
+        log.debug("conf file : " + (container.get("conf-file") as string));
+        log.debug("logs file : " + (container.get("logs-file") as string));
 
     // load plugins
 

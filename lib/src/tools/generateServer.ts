@@ -206,7 +206,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         server.listen((container.get("conf") as ConfManager).get("port") as number, (): void => {
 
-            (container.get("log") as iLogger).success("started on port " + (container.get("conf") as ConfManager).get("port"));
+            (container.get("log") as iLogger).success("started on port " + ((container.get("conf") as ConfManager).get("port") as number));
 
             resolve();
 

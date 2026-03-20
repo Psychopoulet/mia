@@ -38,7 +38,7 @@ export default function ensureAppDirectories (container: ContainerPattern): Prom
 
             return mkdir(dataDir, {
                 "recursive": true
-            }, (err: Error | null): void => {
+            }, (err: NodeJS.ErrnoException | null): void => {
                 return err ? reject(err) : resolve();
             });
 
