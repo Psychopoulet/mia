@@ -49,7 +49,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         app.get([ "/", "/public/index.html" ], (req: Request, res: Response, next: NextFunction): void => {
 
-            const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
+            const file: string = join(__dirname, "..", "..", "..", "public", "dist", "index.html");
 
             readFile(file, "utf-8", (err: Error | null, content: string): void => {
 
@@ -67,7 +67,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             });
 
         }).get("/public/bundle.js", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "bundle.js"));
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.js"));
         });
 
         // libs
@@ -122,7 +122,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             "/public/pictures/favicon.ico"
         ], (req: Request, res: Response): void => {
 
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "pictures", "favicon.ico"));
 
         }).get([
             "favicon.png",
@@ -130,7 +130,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             "/public/pictures/favicon.png"
         ], (req: Request, res: Response): void => {
 
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "pictures", "favicon.png"));
 
         });
 
