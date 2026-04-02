@@ -44,13 +44,18 @@
 
     "daemon-start": "npx pm2 start pm2.json",
     "daemon-restart": "npx pm2 reload pm2.json",
-    "daemon-stop": "npx pm2 stop pm2.json && npx pm2 delete pm2.json"
+    "daemon-stop": "npx pm2 stop pm2.json && npx pm2 delete pm2.json",
+
+    "docker-build": "docker image build --rm -t image-mia .",
+    "docker-run": "docker container run -dti --name container-mia -p 8000:8000 image-mia",
+    "docker-stop": "docker container stop container-mia && docker container remove -f container-mia"
 
   },
 
   "files": [
     "lib/cjs",
-    "public/dist"
+    "public/dist",
+    "pm2.json"
   ],
   "engines": {
     "node": ">=22.22.0"
