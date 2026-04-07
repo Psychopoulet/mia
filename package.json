@@ -48,7 +48,8 @@
 
     "docker-build": "docker image build --rm -t image-mia .",
     "docker-run": "docker container run -dti --name container-mia -p 8000:8000 image-mia",
-    "docker-stop": "docker container stop container-mia && docker container remove -f container-mia"
+    "docker-stop": "docker container stop container-mia && docker container remove -f container-mia",
+    "docker-remove": "docker image remove -f image-mia"
 
   },
 

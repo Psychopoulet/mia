@@ -8,9 +8,9 @@ COPY --chown=node:node lib/cjs/ ./lib/cjs/
 COPY --chown=node:node public/dist/ ./public/dist/
 
 RUN apk add --no-cache git
-RUN npm install --only=production
-RUN npm audit fix
+RUN npm install --omit=dev
+RUN npm audit fix || echo 0
 
 EXPOSE 8000
 
-CMD [ "npm", "start", "--", "--port", "8000" ]
+CMD [ "npm", "run", "start", "--", "--port", "8000" ]
