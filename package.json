@@ -73,13 +73,13 @@
     "node-containerpattern": "1.9.0",
     "node-pluginsmanager": "3.1.0",
     "winston": "3.19.0",
-    "ws": "8.19.0"
+    "ws": "8.20.0"
   },
   "devDependencies": {
     "@types/compression": "1.8.1",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
-    "@types/node": "25.5.0",
+    "@types/node": "25.5.2",
     "@types/socket.io": "3.0.2",
     "@types/ws": "8.18.1",
     "check-version-modules": "2.2.2",
