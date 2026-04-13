@@ -57,6 +57,8 @@
   "files": [
     "lib/cjs",
     "public/dist",
+    "public/pictures",
+    "public/index.html",
     "pm2.json"
   ],
   "engines": {

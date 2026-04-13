@@ -6,6 +6,8 @@ COPY --chown=node:node package.json ./
 COPY --chown=node:node pm2.json ./
 COPY --chown=node:node lib/cjs/ ./lib/cjs/
 COPY --chown=node:node public/dist/ ./public/dist/
+COPY --chown=node:node public/pictures/ ./public/pictures/
+COPY --chown=node:node public/index.html ./public/index.html
 
 RUN apk add --no-cache git
 RUN npm install --omit=dev
