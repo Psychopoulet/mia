@@ -1,15 +1,15 @@
 // deps
 
-	// natives
-	import { stat, mkdir } from "node:fs";
+    // natives
+    import { stat, mkdir } from "node:fs";
 
 // types & interfaces
 
-	// natives
-	import type { Stats } from "node:fs";
+    // natives
+    import type { Stats } from "node:fs";
 
     // externals
-	import type ContainerPattern from "node-containerpattern";
+    import type ContainerPattern from "node-containerpattern";
 
     // locals
     import type { iLogger } from "./generateLogger";
@@ -23,7 +23,7 @@ export default function ensureAppDirectories (container: ContainerPattern): Prom
     return new Promise((resolve: (result: boolean) => void): void => {
 
         return stat(dataDir, (err: Error | null, stats: Stats): void => {
-            return err || !stats.isDirectory() ? resolve(false) : resolve(true);
+            return Boolean(err) || !stats.isDirectory() ? resolve(false) : resolve(true);
         });
 
     }).then((result: boolean): Promise<void> => {
@@ -38,7 +38,7 @@ export default function ensureAppDirectories (container: ContainerPattern): Prom
 
             return mkdir(dataDir, {
                 "recursive": true
-            }, (err: Error | null): void => {
+            }, (err: NodeJS.ErrnoException | null): void => {
                 return err ? reject(err) : resolve();
             });
 

@@ -1,5 +1,6 @@
-package-lock.json
-.husky/
 .nyc_output/
+package-lock.json
 coverage/
+lib/cjs/
+public/dist/
 node_modules/
