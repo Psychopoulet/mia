@@ -1,4 +1,6 @@
 .nyc_output/
 package-lock.json
 coverage/
+lib/cjs/
+public/dist/
 node_modules/
