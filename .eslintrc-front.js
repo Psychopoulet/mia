@@ -1,14 +1,17 @@
 // deps
 
     // externals
-    const { defineConfig } = require("eslint/config");
+    const { defineConfig, globalIgnores } = require("eslint/config");
     const personnallinter = require("eslint-plugin-personnallinter");
 
 // module
 
-module.exports = defineConfig({
-    "plugins": {
-        personnallinter
+module.exports = defineConfig([
+    {
+        "plugins": {
+            personnallinter
+        },
+        "extends": [ personnallinter.configs["react"] ]
     },
-    "extends": [ personnallinter.configs["react"] ]
-});
+    globalIgnores([ "public/src/descriptor.ts" ])
+]);
