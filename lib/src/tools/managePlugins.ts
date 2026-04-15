@@ -16,11 +16,11 @@
 
 export default function managePlugins (container: ContainerPattern): Promise<void> {
 
-    const logger: iLogger = container.get("log") as iLogger;
+    const logger: iLogger = container.get<iLogger>("log");
 
     const pluginsManager: Pluginsmanager = new Pluginsmanager({
-        "directory": container.get("plugins-directory") as string,
-        "externalResourcesDirectory": container.get("plugins-data-directory") as string,
+        "directory": container.get<string>("plugins-directory"),
+        "externalResourcesDirectory": container.get<string>("plugins-data-directory"),
         "logger": (type: tLogType, message: string | Error): void => {
 
             const msg: string = (message as Error).message ? (message as Error).message : message as string;

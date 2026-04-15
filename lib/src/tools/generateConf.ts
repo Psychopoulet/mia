@@ -22,7 +22,7 @@
 
 export default function generateConf (container: ContainerPattern): Promise<void> {
 
-    const confFile: string = join(container.get("data-directory") as string, "conf.json");
+    const confFile: string = join(container.get<string>("data-directory"), "conf.json");
 
     const confManager: ConfManager = new ConfManager(confFile);
 
@@ -39,7 +39,7 @@ export default function generateConf (container: ContainerPattern): Promise<void
             return Promise.resolve();
         }
 
-        (container.get("log") as iLogger).warning("Conf file not detected, create one at " + confFile);
+        container.get<iLogger>("log").warning("Conf file not detected, create one at " + confFile);
 
         confManager.set("port", 8000);
         confManager.set("debug", true);

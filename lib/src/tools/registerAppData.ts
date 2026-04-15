@@ -50,24 +50,24 @@ export default function registerAppData (container: ContainerPattern): Promise<v
 
         container
             .skeleton("data-directory", "string")
-            .set("data-directory", join(homedir(), container.get("app.name") as string, "data"))
+            .set("data-directory", join(homedir(), container.get<string>("app.name"), "data"))
             .document("data-directory", "Where the application's data are registered")
 
             .skeleton("plugins-data-directory", "string")
-            .set("plugins-data-directory", join(homedir(), container.get("app.name") as string, "data", "plugins"))
+            .set("plugins-data-directory", join(homedir(), container.get<string>("app.name"), "data", "plugins"))
             .document("plugins-data-directory", "Where the application's plugins data are registered")
 
             .skeleton("plugins-directory", "string")
-            .set("plugins-directory", join(homedir(), container.get("app.name") as string, "plugins"))
+            .set("plugins-directory", join(homedir(), container.get<string>("app.name"), "plugins"))
             .document("plugins-directory", "Where the application's plugins are stored and executed");
 
         container
             .skeleton("conf-file", "string")
-            .set("conf-file", join(container.get("data-directory") as string, "conf.json"))
+            .set("conf-file", join(container.get<string>("data-directory"), "conf.json"))
             .document("conf-file", "The application's file where the configuration is registered")
 
             .skeleton("logs-file", "string")
-            .set("logs-file", join(container.get("data-directory") as string, "logs.txt"))
+            .set("logs-file", join(container.get<string>("data-directory"), "logs.txt"))
             .document("logs-file", "The application's file where the logs are registered");
 
     });

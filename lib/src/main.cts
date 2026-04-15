@@ -71,11 +71,11 @@
 
     }).then((): void => {
 
-        const log: iLogger = container.get("log") as iLogger;
+        const log: iLogger = container.get<iLogger>("log");
 
-        log.success((container.get("app.name") as string) + " (v" + (container.get("app.version") as string) + ")");
-        log.debug("conf file : " + (container.get("conf-file") as string));
-        log.debug("logs file : " + (container.get("logs-file") as string));
+        log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
+        log.debug("conf file : " + container.get<string>("conf-file"));
+        log.debug("logs file : " + container.get<string>("logs-file"));
 
     // load plugins
 
@@ -94,7 +94,7 @@
 
         process.on("SIGINT", (): void => {
 
-            const pluginsManager: Pluginsmanager = container.get("plugins-manager") as Pluginsmanager;
+            const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
 
             pluginsManager.releaseAll().then((): Promise<void> => {
 
@@ -123,9 +123,9 @@
 
         if (container.has("log")) {
 
-            (container.get("log") as iLogger).error("Global script failed");
-            (container.get("log") as iLogger).error(err.message);
-            (container.get("log") as iLogger).debug(err.stack as string);
+            container.get<iLogger>("log").error("Global script failed");
+            container.get<iLogger>("log").error(err.message);
+            container.get<iLogger>("log").debug(err.stack as string);
 
         }
         else {
