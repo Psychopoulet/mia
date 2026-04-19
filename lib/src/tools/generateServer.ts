@@ -66,8 +66,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
             });
 
-        }).get("/public/bundle.js", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.js"));
+        }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
         });
 
         // libs

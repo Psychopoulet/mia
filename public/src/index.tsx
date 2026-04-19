@@ -11,4 +11,4 @@
 
 // private
 
-createRoot(document.getElementById("Warcraft3SoundsApp") as HTMLElement).render(<App />);
+createRoot(document.getElementById("MIAApp") as HTMLElement).render(<App />);
