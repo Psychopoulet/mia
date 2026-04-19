@@ -50,7 +50,7 @@ export default function generateConf (container: ContainerPattern): Promise<void
         return confManager.load();
     }).then((): void => {
 
-        if (!(confManager.get("debug") as boolean)) {
+        if (!confManager.get<boolean>("debug")) {
             process.env.NODE_ENV = "production";
         }
 

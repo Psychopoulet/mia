@@ -59,9 +59,9 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 }
 
                 res.status(200).send(content
-                    .replace(/{{app.name}}/g, container.get("app.name") as string)
-                    .replace(/{{app.version}}/g, container.get("app.version") as string)
-                    .replace(/{{app.description}}/g, container.get("app.description") as string)
+                    .replace(/{{app.name}}/g, container.get<string>("app.name"))
+                    .replace(/{{app.version}}/g, container.get<string>("app.version"))
+                    .replace(/{{app.description}}/g, container.get<string>("app.description"))
                 );
 
             });
@@ -137,7 +137,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         // link request to plugins
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
-            (container.get("plugins-manager") as Pluginsmanager).appMiddleware(req, res, next);
+            container.get<Pluginsmanager>("plugins-manager").appMiddleware(req, res, next);
         });
 
         // not found
@@ -200,13 +200,13 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // link socket to plugins
 
-        (container.get("plugins-manager") as Pluginsmanager).socketMiddleware(wss);
+        container.get<Pluginsmanager>("plugins-manager").socketMiddleware(wss);
 
         // run http server
 
-        server.listen((container.get("conf") as ConfManager).get("port") as number, (): void => {
+        server.listen(container.get<ConfManager>("conf").get<number>("port"), (): void => {
 
-            container.get<iLogger>("log").success("started on port " + ((container.get("conf") as ConfManager).get("port") as number));
+            container.get<iLogger>("log").success("started on port " + container.get<ConfManager>("conf").get<number>("port"));
 
             resolve();
 
