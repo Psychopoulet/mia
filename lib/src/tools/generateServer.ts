@@ -59,15 +59,15 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 }
 
                 res.status(200).send(content
-                    .replace(/{{app.name}}/g, container.get("app.name") as string)
-                    .replace(/{{app.version}}/g, container.get("app.version") as string)
-                    .replace(/{{app.description}}/g, container.get("app.description") as string)
+                    .replace(/{{app.name}}/g, container.get<string>("app.name"))
+                    .replace(/{{app.version}}/g, container.get<string>("app.version"))
+                    .replace(/{{app.description}}/g, container.get<string>("app.description"))
                 );
 
             });
 
-        }).get("/public/bundle.js", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.js"));
+        }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
         });
 
         // libs
@@ -137,14 +137,14 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         // link request to plugins
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
-            (container.get("plugins-manager") as Pluginsmanager).appMiddleware(req, res, next);
+            container.get<Pluginsmanager>("plugins-manager").appMiddleware(req, res, next);
         });
 
         // not found
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
 
-            (container.get("log") as iLogger).warning(getRequestPath(container, req) + " not found");
+            container.get<iLogger>("log").warning(getRequestPath(container, req) + " not found");
 
             if (res.headersSent) {
                 next(getRequestPath(container, req) + " not found");
@@ -169,13 +169,13 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         });
 
         wss.on("error", (err: Error): void => {
-            (container.get("log") as iLogger).error(err.message);
+            container.get<iLogger>("log").error(err.message);
         }).on("connection", (ws: WebSocket): void => {
 
-            (container.get("log") as iLogger).debug("Socket created");
+            container.get<iLogger>("log").debug("Socket created");
 
             ws.on("error", (err: Error): void => {
-                (container.get("log") as iLogger).warning(err.message);
+                container.get<iLogger>("log").warning(err.message);
             });
 
             ws.on("close", (code: number, reason: Buffer): void => {
@@ -183,15 +183,15 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 if (code) {
 
                     if (reason.length) {
-                        (container.get("log") as iLogger).info("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
+                        container.get<iLogger>("log").info("Socket closed with code " + code + " (reason : " + reason.toString("utf-8") + ")");
                     }
                     else {
-                        (container.get("log") as iLogger).info("Socket closed with code " + code);
+                        container.get<iLogger>("log").info("Socket closed with code " + code);
                     }
 
                 }
                 else {
-                    (container.get("log") as iLogger).debug("Socket closed");
+                    container.get<iLogger>("log").debug("Socket closed");
                 }
 
             });
@@ -200,13 +200,13 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // link socket to plugins
 
-        (container.get("plugins-manager") as Pluginsmanager).socketMiddleware(wss);
+        container.get<Pluginsmanager>("plugins-manager").socketMiddleware(wss);
 
         // run http server
 
-        server.listen((container.get("conf") as ConfManager).get("port") as number, (): void => {
+        server.listen(container.get<ConfManager>("conf").get<number>("port"), (): void => {
 
-            (container.get("log") as iLogger).success("started on port " + ((container.get("conf") as ConfManager).get("port") as number));
+            container.get<iLogger>("log").success("started on port " + container.get<ConfManager>("conf").get<number>("port"));
 
             resolve();
 

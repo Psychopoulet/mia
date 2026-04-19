@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+
+		"target": "es2022",
+		"module": "es6",
+
+		"outDir": "./public/dist/",
+		"sourceMap": true,
+
+		"moduleResolution": "node",
+
+		"alwaysStrict": true,
+		"strict": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+
+		"jsx": "react"
+
+	},
+	"exclude": [
+		"node_modules"
+	],
+	"compileOnSave": false
+}

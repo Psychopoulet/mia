@@ -9,6 +9,6 @@
 
 export default function getRequestPath (container: ContainerPattern, req: Request): string {
 
-    return "[" + req.method + "]" + req.protocol + "://" + req.hostname + ":" + ((container.get("conf") as ConfManager).get("port") as number) + (req.path.length ? req.path : "");
+    return "[" + req.method + "]" + req.protocol + "://" + req.hostname + ":" + container.get<ConfManager>("conf").get<number>("port") + (req.path.length ? req.path : "");
 
 }

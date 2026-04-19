@@ -1,0 +1,174 @@
+{
+	"openapi": "3.0.2",
+	"info": {
+		"title": "mia",
+		"version": "1.2.0",
+		"description": "MIA - easy IOT.",
+		"contact": {
+			"name": "Sébastien VIDAL",
+			"url": "https://github.com/Psychopoulet/mia/issues"
+		},
+		"license": {
+			"name": "ISC",
+			"url": "https://en.wikipedia.org/wiki/ISC_license"
+		}
+	},
+	"paths": {
+
+		"/api/descriptor": {
+			"get": {
+				"description": "",
+				"summary": "API Swagger",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+
+		"/": {
+			"get": {
+				"description": "",
+				"summary": "Front page",
+				"responses": {
+					"301": {
+						"description": "Redirection to /public/index.html"
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/index.html": {
+			"get": {
+				"description": "",
+				"summary": "Front page",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"text/html": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/bundle.min.js": {
+			"get": {
+				"description": "",
+				"summary": "Front app",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"text/javascript": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/bundle.min.js.map": {
+			"get": {
+				"description": "",
+				"summary": "Front app map",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"text/javascript": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+	},
+	"components": {
+		"schemas": {
+			"Error": {
+				"type": "object",
+				"properties": {
+					"code": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [ "code", "message" ]
+			}
+		}
+	},
+	"externalDocs": {
+		"description": "Find out more about this API",
+		"url": "https://github.com/Psychopoulet/mia#readme"
+	}
+}
