@@ -46,13 +46,10 @@
     "start": "node lib/cjs/main.cjs",
 
     "daemon-start": "npx pm2 start pm2.json",
-    "daemon-restart": "npx pm2 reload pm2.json",
     "daemon-stop": "npx pm2 stop pm2.json && npx pm2 delete pm2.json",
 
-    "docker-build": "docker image build --rm -t image-mia .",
-    "docker-run": "docker container run -dti -p 8000:8000 --name container-mia image-mia",
-    "docker-stop": "docker container stop container-mia && docker container remove -f container-mia",
-    "docker-remove": "docker image remove -f image-mia"
+    "docker-start": "docker image build --rm -t image-mia . && docker container run -d -p 8000:8000 --name container-mia image-mia",
+    "docker-stop": "docker container stop container-mia && docker container remove -f container-mia && docker image remove -f image-mia"
 
   },
 
