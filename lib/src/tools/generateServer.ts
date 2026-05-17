@@ -147,13 +147,36 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             container.get<iLogger>("log").warning(getRequestPath(container, req) + " not found");
 
             if (res.headersSent) {
-                next(getRequestPath(container, req) + " not found");
+                next(new Error(getRequestPath(container, req) + " not found"));
                 return;
             }
 
             res.status(404).json({
                 "code": 404,
                 "message": getRequestPath(container, req) + " not found"
+            });
+
+        });
+
+        // error
+
+        app.use((err: unknown, req: Request, res: Response, next: NextFunction): void => {
+
+            const msg: string = err instanceof Error ? err.message : String(err);
+
+            container.get<iLogger>("log").error(getRequestPath(container, req) + " " + msg);
+            if (err instanceof Error && "string" === typeof err.stack) {
+                container.get<iLogger>("log").debug(err.stack);
+            }
+
+            if (res.headersSent) {
+                next(err);
+                return;
+            }
+
+            res.status(500).json({
+                "code": 500,
+                "message": "Internal server error"
             });
 
         });
