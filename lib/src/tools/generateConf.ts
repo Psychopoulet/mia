@@ -15,40 +15,30 @@
     // externals
     import type ContainerPattern from "node-containerpattern";
 
-    // locals
-    import type { iLogger } from "./generateLogger";
-
 // module
 
 export default function generateConf (container: ContainerPattern): Promise<void> {
 
-    const confFile: string = join(container.get<string>("data-directory"), "conf.json");
-
-    const confManager: ConfManager = new ConfManager(confFile);
+    const confManager: ConfManager = new ConfManager("");
 
         container
             .set("conf", confManager)
             .document("conf", "The application's configuration (instance of 'node-confmanager' package)");
 
-        confManager.skeleton("port", "integer");
-        confManager.skeleton("debug", "boolean");
+        confManager
+            .skeleton("port", "integer")
+            .skeleton("debug", "boolean");
 
-    return confManager.fileExists().then((exists: boolean): Promise<void> => {
+        // default values
+        confManager
+            .set("port", 8000)
+            .set("debug", true);
 
-        if (exists) {
-            return Promise.resolve();
-        }
-
-        container.get<iLogger>("log").warning("Conf file not detected, create one at " + confFile);
-
-        confManager.set("port", 8000);
-        confManager.set("debug", true);
-
-        return confManager.save();
-
-    }).then((): Promise<void> => {
-        return confManager.load();
-    }).then((): void => {
+     return confManager.load({
+        "loadConsole": true,
+        "loadEnv": true,
+        "loadEnvFile": join(container.get<string>("data-directory"), ".env")
+     }).then((): void => {
 
         if (!confManager.get<boolean>("debug")) {
             process.env.NODE_ENV = "production";
