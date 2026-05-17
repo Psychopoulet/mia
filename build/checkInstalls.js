@@ -35,6 +35,7 @@ Promise.resolve().then(() => {
     }).then((exists) => {
 
         if (!exists) {
+            console.log("plugins directory", pluginsDirectory, "not detected, exiting");
             process.exit(0);
             return;
         }

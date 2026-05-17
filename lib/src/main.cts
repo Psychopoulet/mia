@@ -92,7 +92,7 @@
     // catch
     }).then((): void => {
 
-        process.on("SIGINT", (): void => {
+        function _handleKill (): void {
 
             const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
 
@@ -116,7 +116,11 @@
 
             });
 
-        });
+        }
+
+        process
+            .on("SIGTERM", _handleKill)
+            .on("SIGINT", _handleKill);
 
     // fail to run
     }).catch((err: Error): void => {
