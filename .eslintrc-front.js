@@ -13,5 +13,5 @@ module.exports = defineConfig([
         },
         "extends": [ personnallinter.configs["react"] ]
     },
-    globalIgnores([ "public/src/descriptor.ts" ])
+    globalIgnores([ "public/src/Descriptor.ts" ])
 ]);

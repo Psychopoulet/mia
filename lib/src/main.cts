@@ -12,6 +12,7 @@
     import ensureAppDirectories from "./tools/ensureAppDirectories";
     import generateConf from "./tools/generateConf";
     import generateLogger from "./tools/generateLogger";
+    import checkDescriptor from "./tools/checkDescriptor";
     import managePlugins from "./tools/managePlugins";
     import generateServer from "./tools/generateServer";
 
@@ -48,6 +49,12 @@
     }).then((): Promise<void> => {
 
         return registerAppData(container);
+
+    // check descriptor
+
+    }).then((): Promise<void> => {
+
+        return checkDescriptor(container);
 
     // ensure app directories
 
@@ -92,7 +99,7 @@
     // catch
     }).then((): void => {
 
-        process.on("SIGINT", (): void => {
+        function _handleKill (): void {
 
             const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
 
@@ -116,7 +123,11 @@
 
             });
 
-        });
+        }
+
+        process
+            .on("SIGTERM", _handleKill)
+            .on("SIGINT", _handleKill);
 
     // fail to run
     }).catch((err: Error): void => {
