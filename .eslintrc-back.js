@@ -13,5 +13,5 @@ module.exports = defineConfig([
         },
         "extends": [ personnallinter.configs["ts-back"] ]
     },
-    globalIgnores([ "lib/src/Descriptor.ts" ])
+    globalIgnores([ "lib/src/api/Descriptor.ts" ])
 ]);
