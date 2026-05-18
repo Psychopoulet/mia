@@ -129,9 +129,10 @@
 					"200": {
 						"description": "Everything is fine",
 						"content": {
-							"text/javascript": {
+							"application/json": {
 								"schema": {
-									"type": "string"
+									"type": "object",
+									"additionalProperties": true
 								}
 							}
 						}
