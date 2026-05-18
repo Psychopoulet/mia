@@ -4,9 +4,6 @@
 
 // deps
 
-    // natives
-    import { join } from "node:path";
-
     // externals
     import ConfManager from "node-confmanager";
 
@@ -19,7 +16,7 @@
 
 export default function generateConf (container: ContainerPattern): Promise<void> {
 
-    const confManager: ConfManager = new ConfManager("");
+    const confManager: ConfManager = new ConfManager("whatever");
 
         container
             .set("conf", confManager)
@@ -29,16 +26,20 @@ export default function generateConf (container: ContainerPattern): Promise<void
             .skeleton("port", "integer")
             .skeleton("debug", "boolean");
 
-        // default values
-        confManager
-            .set("port", 8000)
-            .set("debug", true);
-
      return confManager.load({
         "loadConsole": true,
-        "loadEnv": true,
-        "loadEnvFile": join(container.get<string>("data-directory"), ".env")
+        "loadEnv": true
      }).then((): void => {
+
+        // default values
+
+        if (!confManager.has("port")) {
+            confManager.set("port", 8000);
+        }
+
+        if (!confManager.has("debug")) {
+            confManager.set("debug", true);
+        }
 
         if (!confManager.get<boolean>("debug")) {
             process.env.NODE_ENV = "production";
