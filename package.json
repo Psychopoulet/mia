@@ -21,7 +21,7 @@
 
     "prepare": "npx husky || true",
 
-    "transpile-openapi": "npx openapi-typescript ./lib/data/descriptor.json -o ./lib/src/descriptor.ts",
+    "transpile-openapi": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/Descriptor.ts",
 
     "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
     "lint-front": "echo 'Frontend lint not implemented yet.'",
