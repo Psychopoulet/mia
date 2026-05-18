@@ -48,20 +48,26 @@ Promise.resolve().then(() => {
 
     console.log("plugins directory:", pluginsDirectory);
 
-    return readdir(pluginsDirectory).then((plugins) => {
+    return readdir(pluginsDirectory, { "withFileTypes": true }).then((entries) => {
 
-        console.log("plugins detected:", plugins);
+        const pluginDirs = entries.filter((entry) => {
+            return entry.isDirectory() && "." !== entry.name && ".." !== entry.name;
+        });
 
-        return Promise.all(plugins.map((plugin) => {
+        console.log("plugins detected:", pluginDirs.map((entry) => entry.name));
 
-            pluginsDirectories.push(join(pluginsDirectory, plugin));
+        return Promise.all(pluginDirs.map((entry) => {
 
-            return readdir(join(pluginsDirectory, plugin)).then((files) => {
+            const pluginDirectory = join(pluginsDirectory, entry.name);
+
+            pluginsDirectories.push(pluginDirectory);
+
+            return readdir(pluginDirectory).then((files) => {
 
                 files.forEach((file) => {
 
                     if ([ "node_modules", "package-lock.json" ].includes(file)) {
-                        filesToRemove.push(join(pluginsDirectory, plugin, file));
+                        filesToRemove.push(join(pluginDirectory, file));
                     }
 
                 });
