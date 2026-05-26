@@ -19,8 +19,6 @@
 
   "scripts": {
 
-    "prepare": "npx husky || true",
-
     "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/api/Descriptor.ts",
     "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
 
@@ -109,12 +107,6 @@
     "pm2": "7.0.1"
   },
 
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint",
-      "pre-push": "npm run build && npm run unit-tests-local"
-    }
-  },
   "author": "Sébastien VIDAL",
   "contributors": [],
   "license": "ISC",
