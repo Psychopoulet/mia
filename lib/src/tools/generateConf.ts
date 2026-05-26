@@ -16,7 +16,7 @@
 
 export default function generateConf (container: ContainerPattern): Promise<void> {
 
-    const confManager: ConfManager = new ConfManager("whatever");
+    const confManager: ConfManager = new ConfManager();
 
         container
             .set("conf", confManager)
