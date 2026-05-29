@@ -14,6 +14,7 @@
 
     // locals
     import getRequestPath from "./getRequestPath";
+    import getPlugins from "../api/getPlugins";
 
 // types & interfaces
 
@@ -29,7 +30,6 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-
 // module
 
 export default function generateServer (container: ContainerPattern): Promise<void> {
@@ -134,6 +134,12 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
 
+        });
+
+        // api
+
+        app.get("/api/plugins", (req: Request, res: Response): void => {
+            res.json(getPlugins(container));
         });
 
         // link request to plugins

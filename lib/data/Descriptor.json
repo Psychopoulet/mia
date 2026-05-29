@@ -149,6 +149,39 @@
 					}
 				}
 			}
+		},
+
+		"/api/plugins": {
+			"get": {
+				"description": "",
+				"summary": "Get all plugins",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"uniqueItems": true,
+									"items": {
+										"$ref": "#/components/schemas/Plugin"
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 	},
@@ -165,6 +198,46 @@
 					}
 				},
 				"required": [ "code", "message" ]
+			},
+			"Plugin": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"dependencies": {
+						"type": "object",
+						"additionalProperties": true
+					},
+					"engines": {
+						"type": "object",
+						"properties": {
+							"node": {
+								"type": "string"
+							}
+						}
+					},
+					"authors": {
+						"type": "array",
+						"uniqueItems": true,
+						"items": {
+							"type": "string"
+						}
+					},
+					"license": {
+						"type": "string"
+					}
+				},
+				"required": [ "name", "version", "description", "enabled", "dependencies", "engines", "authors", "license" ]
 			}
 		}
 	},
