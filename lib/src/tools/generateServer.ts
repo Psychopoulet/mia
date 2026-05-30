@@ -66,6 +66,10 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
             });
 
+        }).get("/public/menu.min.js", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js"));
+        }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js.map"));
         }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
         }).get("/public/bundle.min.js.map", (req: Request, res: Response): void => {
