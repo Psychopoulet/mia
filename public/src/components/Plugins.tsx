@@ -85,79 +85,77 @@ export default class Plugins extends React.Component<iProps, iState> {
         }
         else {
 
-            return <div className="mt-3">
+            return <Card>
 
-                <Card>
+                <CardHeader>Plugins</CardHeader>
 
-                    <CardHeader>Plugins</CardHeader>
+                <CardBody>
 
-                    <CardBody>
+                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
-                        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        { this.state.plugins.map((plugin: components["schemas"]["Plugin"]): React.JSX.Element => {
 
-                            { this.state.plugins.map((plugin: components["schemas"]["Plugin"]): React.JSX.Element => {
+                            return <div key={ plugin.name } className="col">
 
-                                return <div key={ plugin.name } className="col">
+                                <Card>
 
-                                    <Card>
+                                    <CardHeader>
+                                        <a href={ "/" + plugin.name + "/public/index.html" }>{ plugin.name }</a>
+                                    </CardHeader>
 
-                                        <CardHeader>{ plugin.name }</CardHeader>
+                                    <CardList>
 
-                                        <CardList>
+                                        <ListItem justify>
+                                            Version <span>{ plugin.version }</span>
+                                        </ListItem>
 
-                                            <ListItem justify>
-                                                Version <span>{ plugin.version }</span>
-                                            </ListItem>
+                                        <ListItem justify>
+                                            Description <span className="text-muted">{ plugin.description }</span>
+                                        </ListItem>
 
-                                            <ListItem justify>
-                                                Description <span className="text-muted">{ plugin.description }</span>
-                                            </ListItem>
+                                        <ListItem className={ plugin.enabled ? "text-success" : "text-warning" }>
+                                            { plugin.enabled ? "Enabled" : "Disabled" }
+                                        </ListItem>
 
-                                            <ListItem className={ plugin.enabled ? "text-success" : "text-warning" }>
-                                                { plugin.enabled ? "Enabled" : "Disabled" }
-                                            </ListItem>
+                                        <ListItem>
 
-                                            <ListItem>
+                                            <span className="text-decoration-underline">Dependencies :</span>
 
-                                                <span className="text-decoration-underline">Dependencies :</span>
+                                            <ul className="m-0">
 
-                                                <ul className="m-0">
+                                                { Object.keys(plugin.dependencies).map((dependency: string): React.JSX.Element => {
+                                                    return <li key={ dependency }>{ dependency }</li>;
+                                                }) }
 
-                                                    { Object.keys(plugin.dependencies).map((dependency: string): React.JSX.Element => {
-                                                        return <li key={ dependency }>{ dependency }</li>;
-                                                    }) }
+                                            </ul>
 
-                                                </ul>
+                                        </ListItem>
 
-                                            </ListItem>
+                                        <ListItem justify>
+                                            Engines <span className="text-muted">{ plugin.engines.node }</span>
+                                        </ListItem>
 
-                                            <ListItem justify>
-                                                Engines <span className="text-muted">{ plugin.engines.node }</span>
-                                            </ListItem>
+                                        <ListItem justify>
+                                            Authors <span className="text-muted">{ plugin.authors.join(", ") }</span>
+                                        </ListItem>
 
-                                            <ListItem justify>
-                                                Authors <span className="text-muted">{ plugin.authors.join(", ") }</span>
-                                            </ListItem>
+                                        <ListItem justify>
+                                            License <span className="text-muted">{ plugin.license }</span>
+                                        </ListItem>
 
-                                            <ListItem justify>
-                                                License <span className="text-muted">{ plugin.license }</span>
-                                            </ListItem>
+                                    </CardList>
 
-                                        </CardList>
+                                </Card>
 
-                                    </Card>
+                            </div>;
 
-                                </div>;
+                        }) }
 
-                            }) }
+                    </div>
 
-                        </div>
+                </CardBody>
 
-                    </CardBody>
-
-                </Card>
-
-            </div>;
+            </Card>;
 
         }
 
