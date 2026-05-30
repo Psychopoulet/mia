@@ -19,6 +19,7 @@
 			"get": {
 				"description": "",
 				"summary": "API Swagger",
+				"operationId": "getDescriptor",
 				"responses": {
 					"200": {
 						"description": "Everything is fine",
@@ -155,6 +156,7 @@
 			"get": {
 				"description": "",
 				"summary": "Get all plugins",
+				"operationId": "getPlugins",
 				"responses": {
 					"200": {
 						"description": "Everything is fine",
