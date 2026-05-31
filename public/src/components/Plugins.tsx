@@ -5,7 +5,8 @@
     import {
         Alert,
         Card, CardHeader, CardBody, CardList,
-        ListItem
+        ListItem,
+        Icon
     } from "react-bootstrap-fontawesome";
 
     // locals
@@ -80,7 +81,7 @@ export default class Plugins extends React.Component<iProps, iState> {
 
         if (this.state.loading) {
 
-            return <Alert variant="warning">Loading...</Alert>;
+            return <Alert variant="info">Loading...</Alert>;
 
         }
         else {
@@ -91,7 +92,7 @@ export default class Plugins extends React.Component<iProps, iState> {
 
                 <CardBody>
 
-                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    { this.state.plugins.length ? <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
                         { this.state.plugins.map((plugin: components["schemas"]["Plugin"]): React.JSX.Element => {
 
@@ -99,8 +100,17 @@ export default class Plugins extends React.Component<iProps, iState> {
 
                                 <Card>
 
-                                    <CardHeader>
-                                        <a href={ "/" + plugin.name + "/public/index.html" }>{ plugin.name }</a>
+                                    <CardHeader justify>
+
+                                        <a href={ "/" + plugin.name + "/public/index.html" }>
+                                            { plugin.name }
+                                        </a>
+
+                                        { plugin.enabled
+                                            ? <Icon type="check" variant="success" title="Enabled" />
+                                            : <Icon type="times" variant="danger" title="Disabled" />
+                                        }
+
                                     </CardHeader>
 
                                     <CardList>
@@ -111,10 +121,6 @@ export default class Plugins extends React.Component<iProps, iState> {
 
                                         <ListItem justify>
                                             Description <span className="text-muted">{ plugin.description }</span>
-                                        </ListItem>
-
-                                        <ListItem className={ plugin.enabled ? "text-success" : "text-warning" }>
-                                            { plugin.enabled ? "Enabled" : "Disabled" }
                                         </ListItem>
 
                                         <ListItem>
@@ -151,7 +157,7 @@ export default class Plugins extends React.Component<iProps, iState> {
 
                         }) }
 
-                    </div>
+                    </div> : "No plugins found" }
 
                 </CardBody>
 

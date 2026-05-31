@@ -17,7 +17,7 @@
     import type { components, operations } from "./Descriptor";
 
     interface iState {
-        "loading": boolean;
+        "status": "DISCONNECTED" | "CONNECTED" | "LOADING" | "LOADED";
         "plugins": components["schemas"]["Plugin"][];
         "error": components["schemas"]["Error"] | null;
     }
@@ -45,7 +45,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         // state
 
         this.state = {
-            "loading": true,
+            "status": "DISCONNECTED",
             "plugins": [],
             "error": null
         };
@@ -55,21 +55,57 @@ export default class Menu extends React.Component<iPropsNode, iState> {
     public componentDidMount (): void {
 
         this.setState({
+            "status": "LOADING",
             "plugins": [],
-            "loading": true
+            "error": null
+        });
+
+        this._sdk
+            .on("connected", this._onConnected)
+            .on("disconnected", this._onDisconnected)
+            .on("error", this._onError);
+
+        this._sdk.connect();
+
+    }
+
+    public componentWillUnmount (): void {
+
+        this._sdk.disconnect();
+
+        this._sdk
+            .off("connected", this._onConnected)
+            .off("disconnected", this._onDisconnected)
+            .off("error", this._onError);
+
+        this.setState({
+            "plugins": [],
+            "error": null
+        });
+
+    }
+
+    // sdk events
+
+    private readonly _onConnected = (): void => {
+
+        this.setState({
+            "status": "LOADING",
+            "plugins": [],
+            "error": null
         });
 
         this._sdk.getPlugins().then((plugins: operations["getPlugins"]["responses"]["200"]["content"]["application/json"]): void => {
 
             this.setState({
-                "loading": false,
+                "status": "LOADED",
                 "plugins": plugins
             });
 
         }).catch((err: Error): void => {
 
             this.setState({
-                "loading": false,
+                "status": "CONNECTED",
                 "error": {
                     "code": "unknown",
                     "message": err.message
@@ -78,33 +114,49 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
         });
 
-    }
+    };
 
-    public componentWillUnmount (): void {
+    private readonly _onDisconnected = (): void => {
 
         this.setState({
-            "loading": false,
+            "status": "DISCONNECTED",
             "plugins": [],
             "error": null
         });
 
-    }
+    };
+
+    private readonly _onError = (data: components["schemas"]["Error"]): void => {
+
+        this.setState({
+            "status": "CONNECTED",
+            "error": data
+        });
+
+    };
 
     // render
 
     private readonly _renderContent = (): React.JSX.Element[] | React.JSX.Element => {
 
-        if (this.state.loading) {
+        if ("LOADING" === this.state.status) {
 
             return <li className="nav-item">
-                <a className="nav-link disabled text-warning" aria-disabled="true">Loading...</a>
+                <a className="nav-link disabled text-info" aria-disabled="true">Loading...</a>
             </li>;
 
         }
-        else if (this.state.error) {
+        else if ("CONNECTED" === this.state.status && this.state.error) {
 
             return <li className="nav-item">
                 <a className="nav-link disabled text-danger" aria-disabled="true">{ this.state.error.message }</a>
+            </li>;
+
+        }
+        else if (0 >= this.state.plugins.length) {
+
+            return <li className="nav-item">
+                <a className="nav-link disabled text-warning" aria-disabled="true">No plugins found</a>
             </li>;
 
         }
@@ -119,9 +171,13 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     };
 
-    public render (): React.JSX.Element {
+    public render (): React.JSX.Element | undefined {
 
-        return <nav className="navbar navbar-expand-lg bg-body-tertiary">
+        if ("DISCONNECTED" === this.state.status) {
+            return;
+        }
+
+        return <nav className="navbar navbar-expand">
 
             <div className="container-fluid">
 
