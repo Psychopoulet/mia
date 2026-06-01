@@ -171,14 +171,14 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         if ("LOADED" !== this.state.status) {
 
             return <li className="nav-item">
-                <a className="nav-link disabled text-info" aria-disabled="true">{ this.state.status }</a>
+                <span className="nav-link disabled text-info">{ this.state.status }</span>
             </li>;
 
         }
         else if (0 >= this.state.plugins.length) {
 
             return <li className="nav-item">
-                <a className="nav-link disabled text-warning" aria-disabled="true">No plugins found</a>
+                <span className="nav-link disabled text-warning">No plugins found</span>
             </li>;
 
         }
@@ -207,9 +207,9 @@ export default class Menu extends React.Component<iPropsNode, iState> {
                     onClose={ this._handleCloseAddPluginFromGitHub }
                 /> }
 
-                <span className="navbar-brand">
+                <a className="navbar-brand" href="/">
                     <Image src="/public/pictures/favicon.png" alt="Home" width={ 32 } height={ 32 } /> Home
-                </span>
+                </a>
 
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-collapser" aria-controls="navbar-collapser" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
@@ -220,7 +220,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
 
                         { this.state.error ? <li className="nav-item">
-                            <a className="nav-link disabled text-danger" aria-disabled="true">{ this.state.error.message }</a>
+                            <span className="nav-link disabled text-danger">{ this.state.error.message }</span>
                         </li> : this._renderContent() }
 
                     </ul>
