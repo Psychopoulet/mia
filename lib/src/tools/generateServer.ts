@@ -10,9 +10,8 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
+    import { formateError } from "node-pluginsmanager-plugin";
     import { WebSocketServer } from "ws";
-
-    import { UnauthorizedError, NotFoundError, LockedError } from "node-pluginsmanager-plugin";
 
     // locals
     import getRequestPath from "./getRequestPath";
@@ -29,6 +28,7 @@
     import type ConfManager from "node-confmanager";
     import type ContainerPattern from "node-containerpattern";
     import type Pluginsmanager from "node-pluginsmanager";
+    import type { iFormattedError } from "node-pluginsmanager-plugin";
     import type { WebSocket } from "ws";
 
     // locals
@@ -200,71 +200,12 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 return;
             }
 
-            if (err instanceof ReferenceError) {
+            const formattedError: iFormattedError = formateError(err as Error);
 
-                res.status(400).json({
-                    "code": "MISSING_PARAMETER",
-                    "message": msg
-                });
-
-            }
-            else if (err instanceof TypeError) {
-
-                res.status(400).json({
-                    "code": "WRONG_TYPE_PARAMETER",
-                    "message": msg
-                });
-
-            }
-            else if (err instanceof RangeError) {
-
-                res.status(400).json({
-                    "code": "EMPTY_OR_RANGE_OR_ENUM_PARAMETER",
-                    "message": msg
-                });
-
-            }
-            else if (err instanceof SyntaxError) {
-
-                res.status(400).json({
-                    "code": "JSON_PARSE",
-                    "message": msg
-                });
-
-            }
-            else if (err instanceof UnauthorizedError) {
-
-                res.status(401).json({
-                    "code": "UNAUTHORIZED",
-                    "message": msg
-                });
-
-            }
-            else if (err instanceof NotFoundError) {
-
-                res.status(404).json({
-                    "code": "NOT_FOUND",
-                    "message": msg
-                });
-
-            }
-            else if (err instanceof LockedError) {
-
-                res.status(423).json({
-                    "code": "LOCKED",
-                    "message": msg
-                });
-
-            }
-
-            else {
-
-                res.status(500).json({
-                    "code": "INTERNAL_SERVER_ERROR",
-                    "message": msg
-                });
-
-            }
+            res.status(formattedError.httpCode).json({
+                "code": formattedError.code,
+                "message": formattedError.message
+            });
 
         });
 
