@@ -49,18 +49,27 @@
 
 export default function installPlugin (container: ContainerPattern, body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
 
-    if ("object" !== typeof body || null === body) {
+    if ("undefined" === typeof body) {
         return Promise.reject(new ReferenceError("Missing body"));
     }
-
-    const github: string = body.path;
-
-    if ("string" !== typeof github || !github.trim()) {
+    else if ("object" !== typeof body) {
+        return Promise.reject(new TypeError("Body is not an object"));
+    }
+    else if (null === body) {
+        return Promise.reject(new ReferenceError("Body is null"));
+    }
+    if ("undefined" === typeof body.path) {
         return Promise.reject(new ReferenceError("Missing \"path\" in body"));
+    }
+    else if ("string" !== typeof body.path) {
+        return Promise.reject(new TypeError("\"path\" in body is not a string"));
+    }
+    else if (0 >= body.path.trim().length) {
+        return Promise.reject(new RangeError("\"path\" in body is empty"));
     }
 
     return Promise.resolve().then((): iGithubRepository => {
-        return _parseGithubPath(github);
+        return _parseGithubPath(body.path);
     }).then(({ user, repo }: iGithubRepository): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> => {
         return container.get<Pluginsmanager>("plugins-manager").installViaGithub(user, repo, container);
     });
