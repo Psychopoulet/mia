@@ -12,9 +12,12 @@
     import helmet from "helmet";
     import { WebSocketServer } from "ws";
 
+    import { UnauthorizedError, NotFoundError, LockedError } from "node-pluginsmanager-plugin";
+
     // locals
     import getRequestPath from "./getRequestPath";
     import getPlugins from "../api/getPlugins";
+    import installPlugin from "../api/installPlugin";
 
 // types & interfaces
 
@@ -30,6 +33,8 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
+    import type { operations } from "../api/Descriptor";
+
 // module
 
 export default function generateServer (container: ContainerPattern): Promise<void> {
@@ -43,7 +48,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             .use(helmet({
                 "contentSecurityPolicy": false
             }))
-            .use(compression());
+            .use(compression())
+            .use(express.json());
 
         // basic roots
 
@@ -144,6 +150,14 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         app.get("/api/plugins", (req: Request, res: Response): void => {
             res.json(getPlugins(container));
+        }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
+
+            installPlugin(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
         });
 
         // link request to plugins
@@ -186,10 +200,71 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 return;
             }
 
-            res.status(500).json({
-                "code": 500,
-                "message": "Internal server error"
-            });
+            if (err instanceof ReferenceError) {
+
+                res.status(400).json({
+                    "code": "MISSING_PARAMETER",
+                    "message": msg
+                });
+
+            }
+            else if (err instanceof TypeError) {
+
+                res.status(400).json({
+                    "code": "WRONG_TYPE_PARAMETER",
+                    "message": msg
+                });
+
+            }
+            else if (err instanceof RangeError) {
+
+                res.status(400).json({
+                    "code": "EMPTY_OR_RANGE_OR_ENUM_PARAMETER",
+                    "message": msg
+                });
+
+            }
+            else if (err instanceof SyntaxError) {
+
+                res.status(400).json({
+                    "code": "JSON_PARSE",
+                    "message": msg
+                });
+
+            }
+            else if (err instanceof UnauthorizedError) {
+
+                res.status(401).json({
+                    "code": "UNAUTHORIZED",
+                    "message": msg
+                });
+
+            }
+            else if (err instanceof NotFoundError) {
+
+                res.status(404).json({
+                    "code": "NOT_FOUND",
+                    "message": msg
+                });
+
+            }
+            else if (err instanceof LockedError) {
+
+                res.status(423).json({
+                    "code": "LOCKED",
+                    "message": msg
+                });
+
+            }
+
+            else {
+
+                res.status(500).json({
+                    "code": 500,
+                    "message": "Internal server error"
+                });
+
+            }
 
         });
 

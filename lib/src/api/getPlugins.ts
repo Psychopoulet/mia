@@ -10,7 +10,7 @@
 
 // module
 
-export default function getPlugins(container: ContainerPattern): Array<components["schemas"]["Plugin"]> {
+export default function getPlugins (container: ContainerPattern): Array<components["schemas"]["Plugin"]> {
 
     return container.get<Pluginsmanager>("plugins-manager").plugins.map((plugin: Orchestrator): components["schemas"]["Plugin"] => {
 

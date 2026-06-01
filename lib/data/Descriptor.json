@@ -216,7 +216,7 @@
 				"operationId": "getPlugins",
 				"responses": {
 					"200": {
-						"description": "Everything is fine",
+						"description": "Plugins list",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -227,6 +227,46 @@
 									}
 								}
 							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"description": "",
+				"summary": "Add a plugin from a GitHub repository",
+				"operationId": "installPluginFromGithub",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string",
+										"description": "GitHub repository path (owner/repo)"
+									}
+								},
+								"required": [ "path" ]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
 						}
 					},
 					"default": {
