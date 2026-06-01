@@ -260,8 +260,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             else {
 
                 res.status(500).json({
-                    "code": 500,
-                    "message": "Internal server error"
+                    "code": "INTERNAL_SERVER_ERROR",
+                    "message": msg
                 });
 
             }
