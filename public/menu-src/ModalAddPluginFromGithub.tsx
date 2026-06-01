@@ -119,9 +119,9 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
                 <div className="input-group mb-3">
                     <span className="input-group-text">https://github.com/</span>
-                    <InputText value={ this.state.user } onChange={ this._handleChangeUser } />
+                    <InputText value={ this.state.user } disabled={ this.state.running } onChange={ this._handleChangeUser } />
                     <span className="input-group-text">/</span>
-                    <InputText value={ this.state.repository } onChange={ this._handleChangeRepository } />
+                    <InputText value={ this.state.repository } disabled={ this.state.running } onChange={ this._handleChangeRepository } />
                 </div>
 
                 { this.state.error && <InvalidFeedBack alert={ this.state.error.message } /> }
