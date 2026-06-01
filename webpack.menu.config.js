@@ -16,7 +16,7 @@ module.exports = {
 
     ...webpackConfig,
 
-    "entry": join(PUBLIC, "src", "menu.tsx"),
+    "entry": join(PUBLIC, "menu-src", "index.tsx"),
 
     "output": {
         "filename": "menu.min.js",

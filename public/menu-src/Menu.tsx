@@ -2,10 +2,13 @@
 
     // externals
     import React from "react";
-    import { createRoot } from "react-dom/client";
+    import {
+        Button, Image
+    } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "./SDK";
+    import getSDK from "../src/SDK";
+    import ModalAddPluginFromGithub from "./ModalAddPluginFromGithub";
 
 // types & interfaces
 
@@ -13,16 +16,15 @@
     import type { iPropsNode } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "./SDK";
-    import type { components, operations } from "./Descriptor";
+    import type { SDK } from "../src/SDK";
+    import type { components, operations } from "../src/Descriptor";
 
     interface iState {
         "status": "DISCONNECTED" | "CONNECTED" | "LOADING" | "LOADED";
         "plugins": components["schemas"]["Plugin"][];
         "error": components["schemas"]["Error"] | null;
+        "addPluginModalOpened": boolean;
     }
-
-// private
 
 // component
 
@@ -47,7 +49,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         this.state = {
             "status": "DISCONNECTED",
             "plugins": [],
-            "error": null
+            "error": null,
+            "addPluginModalOpened": false
         };
 
     }
@@ -135,21 +138,40 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     };
 
+    // interface handlers
+
+    private readonly _handleAddPluginFromGitHub = (e: React.MouseEvent<HTMLButtonElement>): void => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.setState({
+            "addPluginModalOpened": true
+        });
+
+    };
+
+    private readonly _handleCloseAddPluginFromGitHub = (e?: React.MouseEvent<HTMLButtonElement>): void => {
+
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        this.setState({
+            "addPluginModalOpened": false
+        });
+
+    };
+
     // render
 
     private readonly _renderContent = (): React.JSX.Element[] | React.JSX.Element => {
 
-        if ("LOADING" === this.state.status) {
+        if ("LOADED" !== this.state.status) {
 
             return <li className="nav-item">
-                <a className="nav-link disabled text-info" aria-disabled="true">Loading...</a>
-            </li>;
-
-        }
-        else if ("CONNECTED" === this.state.status && this.state.error) {
-
-            return <li className="nav-item">
-                <a className="nav-link disabled text-danger" aria-disabled="true">{ this.state.error.message }</a>
+                <a className="nav-link disabled text-info" aria-disabled="true">{ this.state.status }</a>
             </li>;
 
         }
@@ -177,15 +199,41 @@ export default class Menu extends React.Component<iPropsNode, iState> {
             return;
         }
 
-        return <nav className="navbar navbar-expand">
+        return <nav className="navbar navbar-expand-md">
 
             <div className="container-fluid">
 
-                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                { this.state.addPluginModalOpened && <ModalAddPluginFromGithub
+                    onClose={ this._handleCloseAddPluginFromGitHub }
+                /> }
 
-                    { this._renderContent() }
+                <span className="navbar-brand">
+                    <Image src="/public/pictures/favicon.png" alt="Home" width={ 32 } height={ 32 } /> Home
+                </span>
 
-                </ul>
+                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-collapser" aria-controls="navbar-collapser" aria-expanded="false" aria-label="Toggle navigation">
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+
+                <div id="navbar-collapser" className="collapse navbar-collapse">
+
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        { this.state.error ? <li className="nav-item">
+                            <a className="nav-link disabled text-danger" aria-disabled="true">{ this.state.error.message }</a>
+                        </li> : this._renderContent() }
+
+                    </ul>
+
+                    <Button icon="plus"
+                        variant="success" outline
+                        disabled={ this.state.addPluginModalOpened }
+                        onClick={ this._handleAddPluginFromGitHub }
+                    >
+                        Add plugin from GitHub
+                    </Button>
+
+                </div>
 
             </div>
 
@@ -194,5 +242,3 @@ export default class Menu extends React.Component<iPropsNode, iState> {
     }
 
 }
-
-createRoot(document.getElementById("MIAMenu") as HTMLElement).render(<Menu />);

@@ -164,6 +164,39 @@ export class SDK extends EventEmitter<{
 
     }
 
+    public installPlugin (path: string): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/api/plugins";
+        const method: HttpMethodsOf<typeof url> = "put";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": JSON.stringify({
+                "path": path
+            })
+        }).then((res: Response): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> => {
+
+            if (res.ok) {
+                return res.json();
+            }
+
+            return new Promise((resolve: unknown, reject: (error: Error) => void): void => {
+
+                res.json().then((content: operations["installPluginFromGithub"]["responses"]["default"]["content"]["application/json"]): void => {
+                    return reject(new Error(content.message));
+                }).catch((): void => {
+                    return reject(new Error("Problem with request installPlugin has status '" + res.status + "' (" + res.statusText + ")"));
+                });
+
+            });
+
+        });
+
+    }
+
 }
 
 let _sdk: SDK | null = null;
