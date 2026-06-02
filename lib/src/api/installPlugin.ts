@@ -55,7 +55,7 @@ export default function installPlugin (container: ContainerPattern, body: operat
     else if ("object" !== typeof body) {
         return Promise.reject(new TypeError("Body is not an object"));
     }
-    else if (null === body) {
+    else if (null === body as unknown) { // had to force type to avoid lint error
         return Promise.reject(new ReferenceError("Body is null"));
     }
     if ("undefined" === typeof body.path) {
