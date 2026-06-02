@@ -38,8 +38,8 @@
     "check-node-engine": "npx check-node-engine",
     "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\"",
     "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch",
-    "unit-tests": "echo 'not unit tests here'",
-    "unit-tests-local": "echo 'not unit tests here'",
+    "unit-tests": "npx mocha",
+    "unit-tests-local": "npx nyc --reporter=html --reporter=text mocha",
 
     "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests-local",
 
