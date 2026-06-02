@@ -5,8 +5,8 @@
     import { createRoot } from "react-dom/client";
 
     // locals
-    import App from "./App";
+    import Menu from "./Menu";
 
 // private
 
-createRoot(document.getElementById("MIAApp") as HTMLElement).render(<App />);
+createRoot(document.getElementById("MIAMenu") as HTMLElement).render(<Menu />);

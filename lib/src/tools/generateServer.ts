@@ -10,10 +10,13 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
+    import { formateError } from "node-pluginsmanager-plugin";
     import { WebSocketServer } from "ws";
 
     // locals
     import getRequestPath from "./getRequestPath";
+    import getPlugins from "../api/getPlugins";
+    import installPlugin from "../api/installPlugin";
 
 // types & interfaces
 
@@ -25,10 +28,12 @@
     import type ConfManager from "node-confmanager";
     import type ContainerPattern from "node-containerpattern";
     import type Pluginsmanager from "node-pluginsmanager";
+    import type { iFormattedError } from "node-pluginsmanager-plugin";
     import type { WebSocket } from "ws";
 
     // locals
     import type { iLogger } from "./generateLogger";
+    import type { operations } from "../api/Descriptor";
 
 // module
 
@@ -43,7 +48,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             .use(helmet({
                 "contentSecurityPolicy": false
             }))
-            .use(compression());
+            .use(compression())
+            .use(express.json());
 
         // basic roots
 
@@ -66,6 +72,10 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
             });
 
+        }).get("/public/menu.min.js", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js"));
+        }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
+            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js.map"));
         }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
             return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
         }).get("/public/bundle.min.js.map", (req: Request, res: Response): void => {
@@ -136,6 +146,20 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         });
 
+        // api
+
+        app.get("/api/plugins", (req: Request, res: Response): void => {
+            res.json(getPlugins(container));
+        }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
+
+            installPlugin(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
+        });
+
         // link request to plugins
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
@@ -176,9 +200,11 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 return;
             }
 
-            res.status(500).json({
-                "code": 500,
-                "message": "Internal server error"
+            const formattedError: iFormattedError = formateError(err as Error);
+
+            res.status(formattedError.httpCode).json({
+                "code": formattedError.code,
+                "message": formattedError.message
             });
 
         });

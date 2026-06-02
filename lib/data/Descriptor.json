@@ -2,7 +2,7 @@
 	"openapi": "3.0.2",
 	"info": {
 		"title": "mia",
-		"version": "1.3.0",
+		"version": "1.4.0",
 		"description": "MIA - easy IOT.",
 		"contact": {
 			"name": "Sébastien VIDAL",
@@ -19,6 +19,7 @@
 			"get": {
 				"description": "",
 				"summary": "API Swagger",
+				"operationId": "getDescriptor",
 				"responses": {
 					"200": {
 						"description": "Everything is fine",
@@ -93,6 +94,63 @@
 				}
 			}
 		},
+		"/public/menu.min.js": {
+			"get": {
+				"description": "",
+				"summary": "Global app menu",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"text/javascript": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/menu.min.js.map": {
+			"get": {
+				"description": "",
+				"summary": "Global app menu map",
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/public/bundle.min.js": {
 			"get": {
 				"description": "",
@@ -149,6 +207,80 @@
 					}
 				}
 			}
+		},
+
+		"/api/plugins": {
+			"get": {
+				"description": "",
+				"summary": "Get all plugins",
+				"operationId": "getPlugins",
+				"responses": {
+					"200": {
+						"description": "Plugins list",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"uniqueItems": true,
+									"items": {
+										"$ref": "#/components/schemas/Plugin"
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"description": "",
+				"summary": "Add a plugin from a GitHub repository",
+				"operationId": "installPluginFromGithub",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string",
+										"description": "GitHub repository path (owner/repo)"
+									}
+								},
+								"required": [ "path" ]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 	},
@@ -165,6 +297,46 @@
 					}
 				},
 				"required": [ "code", "message" ]
+			},
+			"Plugin": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"dependencies": {
+						"type": "object",
+						"additionalProperties": true
+					},
+					"engines": {
+						"type": "object",
+						"properties": {
+							"node": {
+								"type": "string"
+							}
+						}
+					},
+					"authors": {
+						"type": "array",
+						"uniqueItems": true,
+						"items": {
+							"type": "string"
+						}
+					},
+					"license": {
+						"type": "string"
+					}
+				},
+				"required": [ "name", "version", "description", "enabled", "dependencies", "engines", "authors", "license" ]
 			}
 		}
 	},
