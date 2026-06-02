@@ -21,6 +21,7 @@
 
     "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/api/Descriptor.ts",
     "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
+    "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
 
     "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
     "lint-front": "echo 'Frontend lint not implemented yet.'",
