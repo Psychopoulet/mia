@@ -9,16 +9,13 @@
     type Timeout = ReturnType<typeof setTimeout>;
 
     // locals
-    import type { paths, operations } from "./Descriptor";
+    import type { components, operations, paths } from "./Descriptor";
 
-    type NonNeverKeys<T> = {
-        [K in keyof T]: T[K] extends never ? never : K
-    }[keyof T];
-
-    type HttpMethodsOf<P extends keyof paths> = Exclude<
-        NonNeverKeys<paths[P]>,
-        "parameters"
-    >;
+    type HttpMethodsOf<P extends keyof paths> = {
+        [M in keyof paths[P]]: paths[P][M] extends { "responses": unknown }
+            ? M
+            : never;
+    }[keyof paths[P]];
 
 // component
 
@@ -40,6 +37,44 @@ export class SDK extends EventEmitter<{
 
         this._socket = null;
         this._reconnectTimeout = null;
+
+    }
+
+    // protected methods
+
+    protected _parseResponse (res: Response): Promise<unknown> {
+
+        if (res.ok) {
+
+            return new Promise((resolve: (content: unknown) => void, reject: (error: Error) => void): void => {
+
+                res.text().then((content: string): void => {
+
+                    try {
+                        return resolve(JSON.parse(content));
+                    }
+                    catch (e: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
+                        return resolve(content);
+                    }
+
+                }).catch((err: Error): void => {
+                    console.warn(err);
+                    return reject(new Error("Impossible to parse response"));
+                });
+
+            });
+
+        }
+
+        return new Promise((resolve: unknown, reject: (error: Error) => void): void => {
+
+            res.json().then((content: components["schemas"]["Error"]): void => {
+                return reject(new Error(content.message));
+            }).catch((): void => {
+                return reject(new Error("Problem with request, has status '" + res.status + "' (" + res.statusText + ")"));
+            });
+
+        });
 
     }
 
@@ -116,19 +151,7 @@ export class SDK extends EventEmitter<{
             }
         }).then((res: Response): Promise<operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]> => {
 
-            if (res.ok) {
-                return res.json();
-            }
-
-            return new Promise((resolve: unknown, reject: (error: Error) => void): void => {
-
-                res.json().then((content: operations["getDescriptor"]["responses"]["default"]["content"]["application/json"]): void => {
-                    return reject(new Error(content.message));
-                }).catch((): void => {
-                    return reject(new Error("Problem with request getDescriptor has status '" + res.status + "' (" + res.statusText + ")"));
-                });
-
-            });
+            return this._parseResponse(res) as Promise<operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]>;
 
         });
 
@@ -146,19 +169,7 @@ export class SDK extends EventEmitter<{
             }
         }).then((res: Response): Promise<operations["getPlugins"]["responses"]["200"]["content"]["application/json"]> => {
 
-            if (res.ok) {
-                return res.json();
-            }
-
-            return new Promise((resolve: unknown, reject: (error: Error) => void): void => {
-
-                res.json().then((content: operations["getPlugins"]["responses"]["default"]["content"]["application/json"]): void => {
-                    return reject(new Error(content.message));
-                }).catch((): void => {
-                    return reject(new Error("Problem with request getPlugins has status '" + res.status + "' (" + res.statusText + ")"));
-                });
-
-            });
+            return this._parseResponse(res) as Promise<operations["getPlugins"]["responses"]["200"]["content"]["application/json"]>;
 
         });
 
@@ -179,19 +190,7 @@ export class SDK extends EventEmitter<{
             })
         }).then((res: Response): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> => {
 
-            if (res.ok) {
-                return res.json();
-            }
-
-            return new Promise((resolve: unknown, reject: (error: Error) => void): void => {
-
-                res.json().then((content: operations["installPluginFromGithub"]["responses"]["default"]["content"]["application/json"]): void => {
-                    return reject(new Error(content.message));
-                }).catch((): void => {
-                    return reject(new Error("Problem with request installPlugin has status '" + res.status + "' (" + res.statusText + ")"));
-                });
-
-            });
+            return this._parseResponse(res) as Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]>;
 
         });
 
