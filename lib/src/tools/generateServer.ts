@@ -249,6 +249,10 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         });
 
+        // register server socket
+
+        container.set("server-socket", wss);
+
         // link socket to plugins
 
         container.get<Pluginsmanager>("plugins-manager").socketMiddleware(wss);

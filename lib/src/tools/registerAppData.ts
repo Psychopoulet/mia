@@ -31,23 +31,24 @@ export default function registerAppData (container: ContainerPattern): Promise<v
 
     }).then((packageData: iPackageData): void => {
 
+        // app
         container
             .skeleton("app", "object")
-            .document("app", "Application's data (extracted from package.json)");
+            .document("app", "Application's data (extracted from package.json)")
 
-        container
-            .skeleton("app.name", "string")
-            .set("app.name", packageData.name)
-            .document("app.name", "Application's name")
+                .skeleton("app.name", "string")
+                .set("app.name", packageData.name)
+                .document("app.name", "Application's name")
 
-            .skeleton("app.version", "string")
-            .set("app.version", packageData.version)
-            .document("app.version", "Application's version")
+                .skeleton("app.version", "string")
+                .set("app.version", packageData.version)
+                .document("app.version", "Application's version")
 
-            .skeleton("app.description", "string")
-            .set("app.description", packageData.description)
-            .document("app.description", "Application's description");
+                .skeleton("app.description", "string")
+                .set("app.description", packageData.description)
+                .document("app.description", "Application's description");
 
+        // directories
         container
             .skeleton("data-directory", "string")
             .set("data-directory", join(homedir(), container.get<string>("app.name"), "data"))
@@ -61,14 +62,21 @@ export default function registerAppData (container: ContainerPattern): Promise<v
             .set("plugins-directory", join(homedir(), container.get<string>("app.name"), "plugins"))
             .document("plugins-directory", "Where the application's plugins are stored and executed");
 
+        // conf
         container
             .skeleton("conf-file", "string")
             .set("conf-file", join(container.get<string>("data-directory"), "conf.json"))
-            .document("conf-file", "The application's file where the configuration is registered")
+            .document("conf-file", "The application's file where the configuration is registered");
 
+        // logs
+        container
             .skeleton("logs-file", "string")
             .set("logs-file", join(container.get<string>("data-directory"), "logs.txt"))
             .document("logs-file", "The application's file where the logs are registered");
+
+        // server socket
+        container
+            .document("server-socket", "The application's server websocket");
 
     });
 
