@@ -74,7 +74,7 @@
     "helmet": "8.2.0",
     "node-confmanager": "1.15.0",
     "node-containerpattern": "1.12.0",
-    "node-pluginsmanager": "3.5.0",
+    "node-pluginsmanager": "3.5.1",
     "node-pluginsmanager-plugin": "7.3.2",
     "uniqid": "5.4.0",
     "winston": "3.19.0",
