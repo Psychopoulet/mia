@@ -1,7 +1,7 @@
 {
 
   "name": "mia",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "MIA - easy IOT.",
 
   "type": "commonjs",
@@ -74,8 +74,9 @@
     "helmet": "8.2.0",
     "node-confmanager": "1.15.0",
     "node-containerpattern": "1.12.0",
-    "node-pluginsmanager": "3.4.0",
-    "node-pluginsmanager-plugin": "7.3.1",
+    "node-pluginsmanager": "3.5.1",
+    "node-pluginsmanager-plugin": "7.3.2",
+    "uniqid": "5.4.0",
     "winston": "3.19.0",
     "ws": "8.21.0"
   },
@@ -83,10 +84,11 @@
     "@types/compression": "1.8.1",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
-    "@types/node": "25.9.1",
-    "@types/react": "19.2.16",
+    "@types/node": "25.9.2",
+    "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@types/socket.io": "3.0.2",
+    "@types/uniqid": "5.3.4",
     "@types/ws": "8.18.1",
     "check-node-engine": "1.1.0",
     "check-version-modules": "2.5.0",

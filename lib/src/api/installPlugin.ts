@@ -1,11 +1,18 @@
+// deps
+
+    // locals
+    import socketPush from "../tools/socketPush";
+
 // types & interfaces
 
     // externals
     import type ContainerPattern from "node-containerpattern";
     import type Pluginsmanager from "node-pluginsmanager";
+    import type { Server as WebSocketServer } from "ws";
+    import type { Orchestrator } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { operations } from "./Descriptor";
+    import type { operations, components } from "./Descriptor";
 
     interface iGithubRepository {
         "user": string;
@@ -69,9 +76,34 @@ export default function installPlugin (container: ContainerPattern, body: operat
     }
 
     return Promise.resolve().then((): iGithubRepository => {
+
         return _parseGithubPath(body.path);
-    }).then(({ user, repo }: iGithubRepository): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> => {
+
+    }).then(({ user, repo }: iGithubRepository): Promise<Orchestrator> => {
+
+        const command: components["schemas"]["PushEventPluginInstallRunning"]["command"] = "plugin-install-running";
+        const data: components["schemas"]["PushEventPluginInstallRunning"]["data"] = repo;
+
+        socketPush(container.get<WebSocketServer>("server-socket"), command, data);
+
         return container.get<Pluginsmanager>("plugins-manager").installViaGithub(user, repo, container);
+
+    }).then((plugin: Orchestrator): void => {
+
+        const command: components["schemas"]["PushEventPluginInstallSuccess"]["command"] = "plugin-install-success";
+        const data: components["schemas"]["PushEventPluginInstallSuccess"]["data"] = plugin.name;
+
+        socketPush(container.get<WebSocketServer>("server-socket"), command, data);
+
+    }).catch((err: Error): Promise<Error> => {
+
+        const command: components["schemas"]["PushEventPluginInstallFail"]["command"] = "plugin-install-fail";
+        const data: components["schemas"]["PushEventPluginInstallFail"]["data"] = err.message;
+
+        socketPush(container.get<WebSocketServer>("server-socket"), command, data);
+
+        return Promise.reject(err);
+
     });
 
 }

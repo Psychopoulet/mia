@@ -2,7 +2,7 @@
 	"openapi": "3.0.2",
 	"info": {
 		"title": "mia",
-		"version": "1.4.0",
+		"version": "1.4.1",
 		"description": "MIA - easy IOT.",
 		"contact": {
 			"name": "Sébastien VIDAL",
@@ -337,6 +337,66 @@
 					}
 				},
 				"required": [ "name", "version", "description", "enabled", "dependencies", "engines", "authors", "license" ]
+			},
+			"PushEventPluginInstallRunning": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-install-running" ]
+					},
+					"data": {
+						"type": "string"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginInstallSuccess": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-install-success" ]
+					},
+					"data": {
+						"type": "string"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginInstallFail": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-install-fail" ]
+					},
+					"data": {
+						"type": "string"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
 			}
 		}
 	},

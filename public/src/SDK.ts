@@ -10,6 +10,7 @@
 
     // locals
     import type { components, operations, paths } from "./Descriptor";
+    type tEvents = components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"];
 
     type HttpMethodsOf<P extends keyof paths> = {
         [M in keyof paths[P]]: paths[P][M] extends { "responses": unknown }
@@ -22,6 +23,9 @@
 export class SDK extends EventEmitter<{
     "connected": [];
     "disconnected": [ number, string ];
+    "plugin-install-running": [ string ];
+    "plugin-install-success": [ string ];
+    "plugin-install-fail": [ string ];
 }> {
 
     // protected
@@ -112,6 +116,34 @@ export class SDK extends EventEmitter<{
                 this._reconnectTimeout = null;
                 return this.connect();
             }, 1000);
+
+        };
+
+        this._socket.onmessage = (event: MessageEvent<string>): void => {
+
+            const parsedMessage: tEvents = JSON.parse(event.data) as tEvents;
+
+            if ("core" === parsedMessage.plugin as string) { // must be forced string type to avoid useless type error
+
+                switch (parsedMessage.command) {
+
+                    case "plugin-install-running":
+                        this.emit("plugin-install-running", parsedMessage.data);
+                    break;
+                    case "plugin-install-success":
+                        this.emit("plugin-install-success", parsedMessage.data);
+                    break;
+                    case "plugin-install-fail":
+                        this.emit("plugin-install-fail", parsedMessage.data);
+                    break;
+
+                    default:
+                        // nothing to do here
+                    break;
+
+                }
+
+            }
 
         };
 

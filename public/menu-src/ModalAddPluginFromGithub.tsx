@@ -6,7 +6,8 @@
         Modal, ModalBody, ModalFooter,
         InputText,
         InvalidFeedBack,
-        Button
+        Button,
+        generateFocus
     } from "react-bootstrap-fontawesome";
 
     // locals
@@ -15,7 +16,7 @@
 // types & interfaces
 
     // externals
-    import type { iPropsNode } from "react-bootstrap-fontawesome";
+    import type { iPropsNode, iGenerateFocusCallback } from "react-bootstrap-fontawesome";
 
     // locals
     import type { SDK } from "../src/SDK";
@@ -42,6 +43,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
     // private
 
         private readonly _sdk: SDK = getSDK();
+        private readonly _generateFocus: iGenerateFocusCallback = generateFocus<HTMLInputElement>();
 
     // constructor
 
@@ -54,11 +56,56 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
         this.state = {
             "running": false,
             "error": null,
-            "user": "",
+            "user": "Psychopoulet",
             "repository": ""
         };
 
     }
+
+    public componentDidMount (): void {
+
+        this._sdk
+            .on("plugin-install-running", this._onPluginInstallRunning)
+            .on("plugin-install-success", this._onPluginInstallSuccess)
+            .on("plugin-install-fail", this._onPluginInstallFail);
+
+        // focus
+
+        this._generateFocus.setFocus();
+
+    }
+
+    public componentWillUnmount (): void {
+
+        this._sdk
+            .off("plugin-install-running", this._onPluginInstallRunning)
+            .off("plugin-install-success", this._onPluginInstallSuccess)
+            .off("plugin-install-fail", this._onPluginInstallFail);
+
+    }
+
+    // sdk events
+
+    private readonly _onPluginInstallRunning = (): void => {
+
+        this.setState({
+            "running": true
+        });
+    };
+
+    private readonly _onPluginInstallSuccess = (): void => {
+
+        this.setState({
+            "running": false
+        });
+    };
+
+    private readonly _onPluginInstallFail = (): void => {
+
+        this.setState({
+            "running": false
+        });
+    };
 
     // interface handlers
 
@@ -83,22 +130,16 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
         e.stopPropagation();
 
         this.setState({
-            "running": true,
             "error": null
         });
 
         this._sdk.installPlugin("https://github.com/" + this.state.user + "/" + this.state.repository).then((): void => {
-
-            this.setState({
-                "running": false
-            });
 
             this.props.onClose();
 
         }).catch((err: Error): void => {
 
             this.setState({
-                "running": false,
                 "error": err
             });
 
@@ -117,11 +158,21 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
             <ModalBody>
 
-                <div className="input-group mb-3">
+                <div className={ "input-group" + (this.state.error ? " mb-2" : "") }>
+
                     <span className="input-group-text">https://github.com/</span>
-                    <InputText value={ this.state.user } disabled={ this.state.running } onChange={ this._handleChangeUser } />
+
+                    <InputText disabled={ this.state.running }
+                        value={ this.state.user } onChange={ this._handleChangeUser }
+                    />
+
                     <span className="input-group-text">/</span>
-                    <InputText value={ this.state.repository } disabled={ this.state.running } onChange={ this._handleChangeRepository } />
+
+                    <InputText disabled={ this.state.running }
+                        value={ this.state.repository } onChange={ this._handleChangeRepository }
+                        _ref={ this._generateFocus.ref as React.RefObject<HTMLInputElement> }
+                    />
+
                 </div>
 
                 { this.state.error && <InvalidFeedBack alert={ this.state.error.message } /> }

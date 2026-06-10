@@ -21,29 +21,29 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
     const pluginsManager: Pluginsmanager = new Pluginsmanager({
         "directory": container.get<string>("plugins-directory"),
         "externalResourcesDirectory": container.get<string>("plugins-data-directory"),
-        "logger": (type: tLogType, message: string | Error): void => {
+        "logger": (type: tLogType, message: string | Error, bold?: boolean, pluginName?: string): void => {
 
             const msg: string = (message as Error).message ? (message as Error).message : message as string;
 
             switch (type) {
 
                 case "info":
-                    return logger.info(msg);
+                    return logger.info(("string" === typeof pluginName ? "[" + pluginName + "] " : "") + msg);
 
                 case "success":
-                    return logger.success(msg);
+                    return logger.success(("string" === typeof pluginName ? "[" + pluginName + "] " : "") + msg);
 
                 case "warning":
-                    return logger.warning(msg);
+                    return logger.warning(("string" === typeof pluginName ? "[" + pluginName + "] " : "") + msg);
 
                 case "error":
-                    return logger.error(msg);
+                    return logger.error(("string" === typeof pluginName ? "[" + pluginName + "] " : "") + msg);
 
                 // "data"
                 // "debug"
                 // "log"
                 default:
-                    return logger.debug(msg);
+                    return logger.debug(("string" === typeof pluginName ? "[" + pluginName + "] " : "") + msg);
 
             }
 

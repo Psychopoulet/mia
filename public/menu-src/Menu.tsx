@@ -24,6 +24,7 @@
         "plugins": components["schemas"]["Plugin"][];
         "error": components["schemas"]["Error"] | null;
         "addPluginModalOpened": boolean;
+        "installingPlugin": boolean;
     }
 
 // component
@@ -50,7 +51,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
             "status": "DISCONNECTED",
             "plugins": [],
             "error": null,
-            "addPluginModalOpened": false
+            "addPluginModalOpened": false,
+            "installingPlugin": false
         };
 
     }
@@ -66,7 +68,10 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         this._sdk
             .on("connected", this._onConnected)
             .on("disconnected", this._onDisconnected)
-            .on("error", this._onError);
+            .on("error", this._onError)
+            .on("plugin-install-running", this._onPluginInstallRunning)
+            .on("plugin-install-success", this._onPluginInstallSuccess)
+            .on("plugin-install-fail", this._onPluginInstallFail);
 
         this._sdk.connect();
 
@@ -79,7 +84,10 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         this._sdk
             .off("connected", this._onConnected)
             .off("disconnected", this._onDisconnected)
-            .off("error", this._onError);
+            .off("error", this._onError)
+            .off("plugin-install-running", this._onPluginInstallRunning)
+            .off("plugin-install-success", this._onPluginInstallSuccess)
+            .off("plugin-install-fail", this._onPluginInstallFail);
 
         this.setState({
             "plugins": [],
@@ -88,9 +96,9 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     }
 
-    // sdk events
+    // private
 
-    private readonly _onConnected = (): void => {
+    private _loadPlugins = (): void => {
 
         this.setState({
             "status": "LOADING",
@@ -119,6 +127,12 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     };
 
+    // sdk events
+
+    private readonly _onConnected = (): void => {
+        return this._loadPlugins();
+    };
+
     private readonly _onDisconnected = (): void => {
 
         this.setState({
@@ -134,6 +148,32 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         this.setState({
             "status": "CONNECTED",
             "error": data
+        });
+
+    };
+
+    private readonly _onPluginInstallRunning = (): void => {
+
+        this.setState({
+            "installingPlugin": true
+        });
+
+    };
+
+    private readonly _onPluginInstallSuccess = (): void => {
+
+        this.setState({
+            "installingPlugin": false
+        });
+
+        return this._loadPlugins();
+
+    };
+
+    private readonly _onPluginInstallFail = (): void => {
+
+        this.setState({
+            "installingPlugin": false
         });
 
     };
@@ -168,10 +208,10 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     private readonly _renderContent = (): React.JSX.Element[] | React.JSX.Element => {
 
-        if ("LOADED" !== this.state.status) {
+        if ("LOADED" !== this.state.status && !this.state.installingPlugin) {
 
             return <li className="nav-item">
-                <span className="nav-link disabled text-info">{ this.state.status }</span>
+                <span className="nav-link disabled text-info">Unknown status: { this.state.status }</span>
             </li>;
 
         }
@@ -227,7 +267,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
                     <Button icon="plus"
                         variant="success" outline
-                        disabled={ this.state.addPluginModalOpened }
+                        disabled={ this.state.addPluginModalOpened || this.state.installingPlugin }
                         onClick={ this._handleAddPluginFromGitHub }
                     >
                         Add plugin from GitHub
