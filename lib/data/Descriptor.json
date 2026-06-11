@@ -254,7 +254,8 @@
 								"properties": {
 									"path": {
 										"type": "string",
-										"description": "GitHub repository path (owner/repo)"
+										"description": "GitHub repository path (owner/repo)",
+										"minLength": 8
 									}
 								},
 								"required": [ "path" ]
@@ -298,17 +299,26 @@
 				},
 				"required": [ "code", "message" ]
 			},
+			"PluginName": {
+				"type": "string",
+				"minLength": 1
+			},
+			"Version": {
+				"type": "string",
+				"minLength": 1
+			},
 			"Plugin": {
 				"type": "object",
 				"properties": {
 					"name": {
-						"type": "string"
+						"$ref": "#/components/schemas/PluginName"
 					},
 					"version": {
-						"type": "string"
+						"$ref": "#/components/schemas/Version"
 					},
 					"description": {
-						"type": "string"
+						"type": "string",
+						"minLength": 1
 					},
 					"enabled": {
 						"type": "boolean"
@@ -321,7 +331,7 @@
 						"type": "object",
 						"properties": {
 							"node": {
-								"type": "string"
+								"$ref": "#/components/schemas/Version"
 							}
 						}
 					},
@@ -342,7 +352,8 @@
 				"type": "object",
 				"properties": {
 					"id": {
-						"type": "string"
+						"type": "string",
+						"minLength": 1
 					},
 					"plugin": {
 						"type": "string",
@@ -353,7 +364,7 @@
 						"enum": [ "plugin-install-running" ]
 					},
 					"data": {
-						"type": "string"
+						"$ref": "#/components/schemas/PluginName"
 					}
 				},
 				"required": [ "id", "plugin", "command", "data" ]
@@ -362,7 +373,8 @@
 				"type": "object",
 				"properties": {
 					"id": {
-						"type": "string"
+						"type": "string",
+						"minLength": 1
 					},
 					"plugin": {
 						"type": "string",
@@ -373,7 +385,7 @@
 						"enum": [ "plugin-install-success" ]
 					},
 					"data": {
-						"type": "string"
+						"$ref": "#/components/schemas/PluginName"
 					}
 				},
 				"required": [ "id", "plugin", "command", "data" ]
@@ -382,7 +394,8 @@
 				"type": "object",
 				"properties": {
 					"id": {
-						"type": "string"
+						"type": "string",
+						"minLength": 1
 					},
 					"plugin": {
 						"type": "string",
@@ -393,7 +406,7 @@
 						"enum": [ "plugin-install-fail" ]
 					},
 					"data": {
-						"type": "string"
+						"$ref": "#/components/schemas/PluginName"
 					}
 				},
 				"required": [ "id", "plugin", "command", "data" ]
