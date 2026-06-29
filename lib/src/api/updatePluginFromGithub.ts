@@ -15,10 +15,10 @@
 
 // module
 
-export default function getPluginLatestTag (
+export default function updatePluginFromGithub (
     container: ContainerPattern,
-    urlParamsPath: operations["getPluginLatestTag"]["parameters"]["path"]
-): Promise<operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]> {
+    urlParamsPath: operations["updatePluginFromGithub"]["parameters"]["path"]
+): Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]> {
 
     if ("undefined" === typeof urlParamsPath) {
         return Promise.reject(new ReferenceError("Missing urlParamsPath"));
@@ -47,7 +47,7 @@ export default function getPluginLatestTag (
             return Promise.reject(new NotFoundError("Plugin \"" + urlParamsPath.name + "\" not found"));
         }
 
-        return pluginsManager.getLatestGithubTag(plugin);
+        return pluginsManager.updateViaGithub(plugin);
 
     }
     catch (err: unknown) {
