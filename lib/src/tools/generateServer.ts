@@ -17,6 +17,7 @@
     import getRequestPath from "./getRequestPath";
     import getPlugins from "../api/getPlugins";
     import installPlugin from "../api/installPlugin";
+    import getPluginLatestTag from "../api/getPluginLatestTag";
 
 // types & interfaces
 
@@ -153,6 +154,14 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
 
             installPlugin(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
+        }).get("/api/plugins/:name/latest-tag", (req: Request, res: Response, next: NextFunction): void => {
+
+            getPluginLatestTag(container, req.params as unknown as operations["getPluginLatestTag"]["parameters"]["path"]).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
                 res.json(data);
             }).catch((err: Error): void => {
                 next(err);

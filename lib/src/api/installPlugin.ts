@@ -54,7 +54,10 @@
 
 // module
 
-export default function installPlugin (container: ContainerPattern, body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
+export default function installPlugin (
+    container: ContainerPattern,
+    body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]
+): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
 
     if ("undefined" === typeof body) {
         return Promise.reject(new ReferenceError("Missing body"));
