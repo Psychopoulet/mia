@@ -282,8 +282,114 @@
 					}
 				}
 			}
+		},
+		"/api/plugins/{name}": {
+			"post": {
+				"description": "",
+				"summary": "Update a plugin from its GitHub repository",
+				"operationId": "updatePluginFromGithub",
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Delete a plugin",
+				"operationId": "deletePlugin",
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/plugins/{name}/latest-tag": {
+			"get": {
+				"description": "",
+				"summary": "Get the latest tag of a plugin",
+				"operationId": "getPluginLatestTag",
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
-
 	},
 	"components": {
 		"schemas": {
