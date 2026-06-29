@@ -18,6 +18,7 @@
     import getPlugins from "../api/getPlugins";
     import installPluginFromGithub from "../api/installPluginFromGithub";
     import updatePluginFromGithub from "../api/updatePluginFromGithub";
+    import deletePlugin from "../api/deletePlugin";
     import getPluginLatestTag from "../api/getPluginLatestTag";
 
 // types & interfaces
@@ -163,6 +164,14 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         }).post("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
 
             updatePluginFromGithub(container, req.params as unknown as operations["updatePluginFromGithub"]["parameters"]["path"]).then((data: operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
+        }).delete("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
+
+            deletePlugin(container, req.params as unknown as operations["deletePlugin"]["parameters"]["path"]).then((data: operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]): void => {
                 res.json(data);
             }).catch((err: Error): void => {
                 next(err);
