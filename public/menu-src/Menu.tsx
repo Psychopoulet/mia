@@ -265,8 +265,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
                     </ul>
 
-                    <Button icon="plus"
-                        variant="success" outline
+                    <Button title="Add plugin from GitHub"
+                        icon="plus" variant="success" outline
                         disabled={ this.state.addPluginModalOpened || this.state.installingPlugin }
                         onClick={ this._handleAddPluginFromGitHub }
                     >

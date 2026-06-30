@@ -143,7 +143,7 @@ export default class App extends React.Component<iPropsNode, iState> {
 
             return <div className="container-fluid">
 
-                { this.state.error && <Modal appId="{{plugin.name}}-app" title="Error" variant="danger" centered size="sm" onClose={ this._handleCloseError }>
+                { this.state.error && <Modal appId="MIAApp" title="Error" variant="danger" centered size="sm" onClose={ this._handleCloseError }>
                     <ModalBody>
                         { this.state.error.message || "An error occurred" }
                     </ModalBody>
