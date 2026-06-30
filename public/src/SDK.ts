@@ -228,6 +228,51 @@ export class SDK extends EventEmitter<{
 
     }
 
+    public getLastTag (name: string): Promise<operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/api/plugins/{name}/latest-tag";
+        const method: HttpMethodsOf<typeof url> = "get";
+
+        return fetch(url.replace("{name}", name), {
+            "method": method,
+        }).then((res: Response): Promise<operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]> => {
+            return this._parseResponse(res) as Promise<operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]>;
+        });
+
+    }
+
+    public updatePlugin (name: string): Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/api/plugins/{name}";
+        const method: HttpMethodsOf<typeof url> = "post";
+
+        return fetch(url.replace("{name}", name), {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }).then((res: Response): Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]> => {
+            return this._parseResponse(res) as Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]>;
+        });
+
+    }
+
+    public deletePlugin (name: string): Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/api/plugins/{name}";
+        const method: HttpMethodsOf<typeof url> = "delete";
+
+        return fetch(url.replace("{name}", name), {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }).then((res: Response): Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]> => {
+            return this._parseResponse(res) as Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]>;
+        });
+
+    }
+
 }
 
 let _sdk: SDK | null = null;
