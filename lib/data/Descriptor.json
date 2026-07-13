@@ -450,6 +450,10 @@
 					},
 					"license": {
 						"type": "string"
+					},
+					"repository": {
+						"type": "string",
+						"format": "uri"
 					}
 				},
 				"required": [ "name", "version", "description", "enabled", "dependencies", "engines", "authors", "license" ]

@@ -24,7 +24,8 @@ export default function getPlugins (
             "dependencies": plugin.dependencies as Record<string, string>,
             "engines": plugin.engines as Record<string, string>,
             "authors": plugin.authors,
-            "license": plugin.license
+            "license": plugin.license,
+            "repository": plugin.repository
         };
 
     });
