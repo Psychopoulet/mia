@@ -475,6 +475,42 @@
 				},
 				"required": [ "id", "plugin", "command", "data" ]
 			},
+			"PushEventPluginInstallStep": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-install-step" ]
+					},
+					"data": {
+						"type": "object",
+						"properties": {
+							"pluginName": {
+								"$ref": "#/components/schemas/PluginName"
+							},
+							"currentStep": {
+								"type": "number"
+							},
+							"maxSteps": {
+								"type": "number"
+							},
+							"stepMessage": {
+								"type": "string"
+							}
+						},
+						"required": [ "pluginName", "currentStep", "maxSteps", "stepMessage" ]
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
 			"PushEventPluginInstallSuccess": {
 				"type": "object",
 				"properties": {
@@ -510,6 +546,105 @@
 					"command": {
 						"type": "string",
 						"enum": [ "plugin-install-fail" ]
+					},
+					"data": {
+						"$ref": "#/components/schemas/PluginName"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUpdateRunning": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-update-running" ]
+					},
+					"data": {
+						"$ref": "#/components/schemas/PluginName"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUpdateStep": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-update-step" ]
+					},
+					"data": {
+						"type": "object",
+						"properties": {
+							"pluginName": {
+								"$ref": "#/components/schemas/PluginName"
+							},
+							"currentStep": {
+								"type": "number"
+							},
+							"maxSteps": {
+								"type": "number"
+							},
+							"stepMessage": {
+								"type": "string"
+							}
+						},
+						"required": [ "pluginName", "currentStep", "maxSteps", "stepMessage" ]
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUpdateSuccess": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-update-success" ]
+					},
+					"data": {
+						"$ref": "#/components/schemas/PluginName"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUpdateFail": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-update-fail" ]
 					},
 					"data": {
 						"$ref": "#/components/schemas/PluginName"

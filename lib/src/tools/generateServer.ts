@@ -15,6 +15,7 @@
 
     // locals
     import getRequestPath from "./getRequestPath";
+    import socketPush from "./socketPush";
     import getPlugins from "../api/getPlugins";
     import installPluginFromGithub from "../api/installPluginFromGithub";
     import updatePluginFromGithub from "../api/updatePluginFromGithub";
@@ -36,7 +37,7 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-    import type { operations } from "../api/Descriptor";
+    import type { operations, components } from "../api/Descriptor";
 
 // module
 
@@ -273,6 +274,34 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 }
 
             });
+
+        });
+
+        // register plugins manager events
+
+        container.get<Pluginsmanager>("plugins-manager").on("installing", (pluginName: string, currentStep: number, maxSteps: number, stepMessage: string): void => {
+
+            const command: components["schemas"]["PushEventPluginInstallStep"]["command"] = "plugin-install-step";
+            const data: components["schemas"]["PushEventPluginInstallStep"]["data"] = {
+                pluginName,
+                currentStep,
+                maxSteps,
+                stepMessage
+            };
+
+            socketPush(wss, command, data);
+
+        }).on("updating", (pluginName: string, currentStep: number, maxSteps: number, stepMessage: string): void => {
+
+            const command: components["schemas"]["PushEventPluginUpdateStep"]["command"] = "plugin-update-step";
+            const data: components["schemas"]["PushEventPluginUpdateStep"]["data"] = {
+                pluginName,
+                currentStep,
+                maxSteps,
+                stepMessage
+            };
+
+            socketPush(wss, command, data);
 
         });
 

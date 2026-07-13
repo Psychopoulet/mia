@@ -1,5 +1,8 @@
 // deps
 
+    // locals
+    import socketPush from "../tools/socketPush";
+
     // externals
     import { NotFoundError } from "node-pluginsmanager-plugin";
 
@@ -8,10 +11,11 @@
     // externals
     import type ContainerPattern from "node-containerpattern";
     import type Pluginsmanager from "node-pluginsmanager";
+    import type { Server as WebSocketServer } from "ws";
     import type { Orchestrator } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { operations } from "./Descriptor";
+    import type { operations, components } from "./Descriptor";
 
 // module
 
@@ -36,7 +40,7 @@ export default function updatePluginFromGithub (
             return Promise.reject(new RangeError("\"name\" in urlParamsPath is empty"));
         }
 
-    try {
+    return Promise.resolve().then((): Promise<Orchestrator> => {
 
         const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
         const plugin: Orchestrator | undefined = pluginsManager.plugins.find((p: Orchestrator): boolean => {
@@ -44,14 +48,25 @@ export default function updatePluginFromGithub (
         });
 
         if (!plugin) {
-            return Promise.reject(new NotFoundError("Plugin \"" + urlParamsPath.name + "\" not found"));
+            throw new NotFoundError("Plugin \"" + urlParamsPath.name + "\" not found");
         }
+
+        const command: components["schemas"]["PushEventPluginUpdateRunning"]["command"] = "plugin-update-running";
+        const data: components["schemas"]["PushEventPluginUpdateRunning"]["data"] = urlParamsPath.name;
+
+        socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 
         return pluginsManager.updateViaGithub(plugin);
 
-    }
-    catch (err: unknown) {
+    }).catch((err: Error): Promise<Error> => {
+
+        const command: components["schemas"]["PushEventPluginUpdateFail"]["command"] = "plugin-update-fail";
+        const data: components["schemas"]["PushEventPluginUpdateFail"]["data"] = err.message;
+
+        socketPush(container.get<WebSocketServer>("server-socket"), command, data);
+
         return Promise.reject(err);
-    }
+
+    });
 
 }
