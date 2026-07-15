@@ -10,7 +10,9 @@
 
     // locals
     import type { components, operations, paths } from "./Descriptor";
-    type tEvents = components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"];
+    type tEvents = components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"]
+        | components["schemas"]["PushEventPluginUpdateRunning"] | components["schemas"]["PushEventPluginUpdateSuccess"] | components["schemas"]["PushEventPluginUpdateFail"]
+        | components["schemas"]["PushEventPluginInstallStep"]| components["schemas"]["PushEventPluginUpdateStep"];
 
     type HttpMethodsOf<P extends keyof paths> = {
         [M in keyof paths[P]]: paths[P][M] extends { "responses": unknown }
@@ -130,11 +132,27 @@ export class SDK extends EventEmitter<{
                     case "plugin-install-running":
                         this.emit("plugin-install-running", parsedMessage.data);
                     break;
+                    case "plugin-install-step":
+                        this.emit("plugin-install-step", parsedMessage.data);
+                    break;
                     case "plugin-install-success":
                         this.emit("plugin-install-success", parsedMessage.data);
                     break;
                     case "plugin-install-fail":
                         this.emit("plugin-install-fail", parsedMessage.data);
+                    break;
+
+                    case "plugin-update-running":
+                        this.emit("plugin-update-running", parsedMessage.data);
+                    break;
+                    case "plugin-update-step":
+                        this.emit("plugin-update-step", parsedMessage.data);
+                    break;
+                    case "plugin-update-success":
+                        this.emit("plugin-update-success", parsedMessage.data);
+                    break;
+                    case "plugin-update-fail":
+                        this.emit("plugin-update-fail", parsedMessage.data);
                     break;
 
                     default:
