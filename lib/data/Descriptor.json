@@ -552,10 +552,19 @@
 						"enum": [ "plugin-install-fail" ]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"type": "object",
+						"properties": {
+							"pluginName": {
+								"$ref": "#/components/schemas/PluginName"
+							},
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [ "pluginName", "error" ]
 					}
 				},
-				"required": [ "id", "plugin", "command", "data" ]
+				"required": [ "id", "plugin", "command", "data", "error" ]
 			},
 			"PushEventPluginUpdateRunning": {
 				"type": "object",
@@ -651,7 +660,88 @@
 						"enum": [ "plugin-update-fail" ]
 					},
 					"data": {
+						"type": "object",
+						"properties": {
+							"pluginName": {
+								"$ref": "#/components/schemas/PluginName"
+							},
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [ "pluginName", "error" ]
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUninstallRunning": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-uninstall-running" ]
+					},
+					"data": {
 						"$ref": "#/components/schemas/PluginName"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUninstallSuccess": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-uninstall-success" ]
+					},
+					"data": {
+						"$ref": "#/components/schemas/PluginName"
+					}
+				},
+				"required": [ "id", "plugin", "command", "data" ]
+			},
+			"PushEventPluginUninstallFail": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1
+					},
+					"plugin": {
+						"type": "string",
+						"enum": [ "core" ]
+					},
+					"command": {
+						"type": "string",
+						"enum": [ "plugin-uninstall-fail" ]
+					},
+					"data": {
+						"type": "object",
+						"properties": {
+							"pluginName": {
+								"$ref": "#/components/schemas/PluginName"
+							},
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [ "pluginName", "error" ]
 					}
 				},
 				"required": [ "id", "plugin", "command", "data" ]

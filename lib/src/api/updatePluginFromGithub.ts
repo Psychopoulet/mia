@@ -61,7 +61,10 @@ export default function updatePluginFromGithub (
     }).catch((err: Error): Promise<Error> => {
 
         const command: components["schemas"]["PushEventPluginUpdateFail"]["command"] = "plugin-update-fail";
-        const data: components["schemas"]["PushEventPluginUpdateFail"]["data"] = err.message;
+        const data: components["schemas"]["PushEventPluginUpdateFail"]["data"] = {
+            "pluginName": urlParamsPath.name,
+            "error": err.message
+        };
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 

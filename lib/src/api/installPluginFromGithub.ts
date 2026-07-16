@@ -101,7 +101,10 @@ export default function installPluginFromGithub (
     }).catch((err: Error): Promise<Error> => {
 
         const command: components["schemas"]["PushEventPluginInstallFail"]["command"] = "plugin-install-fail";
-        const data: components["schemas"]["PushEventPluginInstallFail"]["data"] = err.message;
+        const data: components["schemas"]["PushEventPluginInstallFail"]["data"] = {
+            "pluginName": body.path,
+            "error": err.message
+        };
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 
