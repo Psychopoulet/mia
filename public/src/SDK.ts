@@ -10,9 +10,9 @@
 
     // locals
     import type { components, operations, paths } from "./Descriptor";
-    type tEvents = components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"]
-        | components["schemas"]["PushEventPluginUpdateRunning"] | components["schemas"]["PushEventPluginUpdateSuccess"] | components["schemas"]["PushEventPluginUpdateFail"]
-        | components["schemas"]["PushEventPluginInstallStep"]| components["schemas"]["PushEventPluginUpdateStep"];
+    type tEvents = components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallStep"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"]
+        | components["schemas"]["PushEventPluginUpdateRunning"]| components["schemas"]["PushEventPluginUpdateStep"] | components["schemas"]["PushEventPluginUpdateSuccess"] | components["schemas"]["PushEventPluginUpdateFail"]
+        | components["schemas"]["PushEventPluginUninstallRunning"] | components["schemas"]["PushEventPluginUninstallSuccess"] | components["schemas"]["PushEventPluginUninstallFail"];
 
     type HttpMethodsOf<P extends keyof paths> = {
         [M in keyof paths[P]]: paths[P][M] extends { "responses": unknown }
@@ -25,9 +25,17 @@
 export class SDK extends EventEmitter<{
     "connected": [];
     "disconnected": [ number, string ];
-    "plugin-install-running": [ string ];
-    "plugin-install-success": [ string ];
-    "plugin-install-fail": [ string ];
+    "plugin-install-running": [ components["schemas"]["PushEventPluginInstallRunning"]["data"] ];
+    "plugin-install-step": [ components["schemas"]["PushEventPluginInstallStep"]["data"] ];
+    "plugin-install-success": [ components["schemas"]["PushEventPluginInstallSuccess"]["data"] ];
+    "plugin-install-fail": [ components["schemas"]["PushEventPluginInstallFail"]["data"] ];
+    "plugin-update-running": [ components["schemas"]["PushEventPluginUpdateRunning"]["data"] ];
+    "plugin-update-step": [ components["schemas"]["PushEventPluginUpdateStep"]["data"] ];
+    "plugin-update-success": [ components["schemas"]["PushEventPluginUpdateSuccess"]["data"] ];
+    "plugin-update-fail": [ components["schemas"]["PushEventPluginUpdateFail"]["data"] ];
+    "plugin-uninstall-running": [ components["schemas"]["PushEventPluginUninstallRunning"]["data"] ];
+    "plugin-uninstall-success": [ components["schemas"]["PushEventPluginUninstallSuccess"]["data"] ];
+    "plugin-uninstall-fail": [ components["schemas"]["PushEventPluginUninstallFail"]["data"] ];
 }> {
 
     // protected
@@ -153,6 +161,16 @@ export class SDK extends EventEmitter<{
                     break;
                     case "plugin-update-fail":
                         this.emit("plugin-update-fail", parsedMessage.data);
+                    break;
+
+                    case "plugin-uninstall-running":
+                        this.emit("plugin-uninstall-running", parsedMessage.data);
+                    break;
+                    case "plugin-uninstall-success":
+                        this.emit("plugin-uninstall-success", parsedMessage.data);
+                    break;
+                    case "plugin-uninstall-fail":
+                        this.emit("plugin-uninstall-fail", parsedMessage.data);
                     break;
 
                     default:

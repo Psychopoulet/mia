@@ -73,20 +73,22 @@ export default class Plugins extends React.Component<iProps, iState> {
         });
 
         this._sdk
-            .on("plugin-install-success", this._onPluginInstallSuccess);
+            .on("plugin-install-success", this._onPluginsChange)
+            .on("plugin-uninstall-success", this._onPluginsChange);
 
     }
 
     public componentWillUnmount (): void {
 
         this._sdk
-            .off("plugin-install-success", this._onPluginInstallSuccess);
+            .off("plugin-install-success", this._onPluginsChange)
+            .off("plugin-uninstall-success", this._onPluginsChange);
 
     }
 
     // sdk events
 
-    private readonly _onPluginInstallSuccess = (data: components["schemas"]["PushEventPluginInstallSuccess"]["data"]): void => {
+    private readonly _onPluginsChange = (): void => {
 
         this._sdk.getPlugins().then((plugins: operations["getPlugins"]["responses"]["200"]["content"]["application/json"]): void => {
 
