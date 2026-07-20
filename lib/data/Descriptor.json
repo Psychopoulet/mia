@@ -459,292 +459,37 @@
 				"required": [ "name", "version", "description", "enabled", "dependencies", "engines", "authors", "license" ]
 			},
 			"PushEventPluginInstallRunning": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-running" ]
-					},
-					"data": {
-						"$ref": "#/components/schemas/PluginName"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallRunning"
 			},
 			"PushEventPluginInstallStep": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-step" ]
-					},
-					"data": {
-						"type": "object",
-						"properties": {
-							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
-							},
-							"currentStep": {
-								"type": "number"
-							},
-							"maxSteps": {
-								"type": "number"
-							},
-							"stepMessage": {
-								"type": "string"
-							}
-						},
-						"required": [ "pluginName", "currentStep", "maxSteps", "stepMessage" ]
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallStep"
 			},
 			"PushEventPluginInstallSuccess": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-success" ]
-					},
-					"data": {
-						"$ref": "#/components/schemas/PluginName"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallSuccess"
 			},
 			"PushEventPluginInstallFail": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-fail" ]
-					},
-					"data": {
-						"type": "object",
-						"properties": {
-							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
-							},
-							"error": {
-								"type": "string"
-							}
-						},
-						"required": [ "pluginName", "error" ]
-					}
-				},
-				"required": [ "id", "plugin", "command", "data", "error" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallFail"
 			},
 			"PushEventPluginUpdateRunning": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-update-running" ]
-					},
-					"data": {
-						"$ref": "#/components/schemas/PluginName"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateRunning"
 			},
 			"PushEventPluginUpdateStep": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-update-step" ]
-					},
-					"data": {
-						"type": "object",
-						"properties": {
-							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
-							},
-							"currentStep": {
-								"type": "number"
-							},
-							"maxSteps": {
-								"type": "number"
-							},
-							"stepMessage": {
-								"type": "string"
-							}
-						},
-						"required": [ "pluginName", "currentStep", "maxSteps", "stepMessage" ]
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateStep"
 			},
 			"PushEventPluginUpdateSuccess": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-update-success" ]
-					},
-					"data": {
-						"$ref": "#/components/schemas/PluginName"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateSuccess"
 			},
 			"PushEventPluginUpdateFail": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-update-fail" ]
-					},
-					"data": {
-						"type": "object",
-						"properties": {
-							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
-							},
-							"error": {
-								"type": "string"
-							}
-						},
-						"required": [ "pluginName", "error" ]
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateFail"
 			},
 			"PushEventPluginUninstallRunning": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-uninstall-running" ]
-					},
-					"data": {
-						"$ref": "#/components/schemas/PluginName"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallRunning"
 			},
 			"PushEventPluginUninstallSuccess": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-uninstall-success" ]
-					},
-					"data": {
-						"$ref": "#/components/schemas/PluginName"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallSuccess"
 			},
 			"PushEventPluginUninstallFail": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string",
-						"minLength": 1
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-uninstall-fail" ]
-					},
-					"data": {
-						"type": "object",
-						"properties": {
-							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
-							},
-							"error": {
-								"type": "string"
-							}
-						},
-						"required": [ "pluginName", "error" ]
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallFail"
 			}
 		}
 	},
