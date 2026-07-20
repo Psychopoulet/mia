@@ -66,7 +66,7 @@
   },
 
   "dependencies": {
-    "@fortawesome/fontawesome-free": "7.3.0",
+    "@fortawesome/fontawesome-free": "7.3.1",
     "bootstrap": "5.3.8",
     "compression": "1.8.1",
     "cors": "2.8.6",
@@ -78,7 +78,7 @@
     "node-pluginsmanager-plugin": "7.4.2",
     "uniqid": "5.4.0",
     "winston": "3.19.0",
-    "ws": "8.21.0"
+    "ws": "8.21.1"
   },
   "devDependencies": {
     "@types/compression": "1.8.1",
