@@ -4,6 +4,7 @@
     import React from "react";
     import {
         Card, CardHeader, CardList,
+        Modal, ModalBody,
         ButtonGroup, Button,
         ListItem,
         Icon
@@ -88,6 +89,14 @@ export default class Plugin extends React.Component<iProps, iState> {
 
     };
 
+    private readonly _handleCloseLastTag = (): void => {
+
+        this.setState({
+            "lastTag": null
+        });
+
+    };
+
     private readonly _handleUpdate = (e: React.MouseEvent<HTMLButtonElement>): void => {
 
         e.preventDefault();
@@ -138,90 +147,108 @@ export default class Plugin extends React.Component<iProps, iState> {
 
     public render (): React.JSX.Element {
 
-        return <Card>
+        return <>
 
-            <CardHeader justify>
+            { this.state.lastTag && <Modal appId="MIAApp" title={ this.props.plugin.name }
+                centered
+                onClose={ this._handleCloseLastTag }
+            >
 
-                <span>
+                <ModalBody>
 
-                    { this.props.plugin.enabled
-                        ? <Icon type="check" variant="success" title="Enabled" />
-                        : <Icon type="times" variant="danger" title="Disabled" />
-                    }
+                    Current tag : { this.props.plugin.version }<br />
+                    Last tag : { this.state.lastTag }
 
-                    <a href={ "/" + this.props.plugin.name + "/public/index.html" } className="ms-1">
-                        { this.props.plugin.name }
-                    </a>
+                </ModalBody>
 
-                </span>
+            </Modal> }
 
-                <ButtonGroup>
+            <Card>
 
-                    <Button title="Get last tag"
-                        variant="info" icon="eye" size="sm" outline
-                        disabled={ this.state.running }
-                        onClick={ this._handleGetLastTag }
-                    />
+                <CardHeader justify>
 
-                    <Button title="Update plugin"
-                        variant="warning" icon="cog" size="sm" outline
-                        disabled={ this.state.running }
-                        onClick={ this._handleUpdate }
-                    />
+                    <span>
 
-                    <Button title="Delete plugin"
-                        variant="danger" icon="trash" size="sm" outline
-                        disabled={ this.state.running }
-                        onClick={ this._handleDelete }
-                    />
+                        { this.props.plugin.enabled
+                            ? <Icon type="check" variant="success" title="Enabled" />
+                            : <Icon type="times" variant="danger" title="Disabled" />
+                        }
 
-                </ButtonGroup>
+                        <a href={ "/" + this.props.plugin.name + "/public/index.html" } className="ms-1">
+                            { this.props.plugin.name }
+                        </a>
 
-            </CardHeader>
+                    </span>
 
-            <CardList>
+                    <ButtonGroup>
 
-                <ListItem justify>
-                    Version <span>{ this.props.plugin.version }</span>
-                </ListItem>
+                        <Button title="Get last tag"
+                            variant="info" icon="eye" size="sm" outline
+                            disabled={ this.state.running }
+                            onClick={ this._handleGetLastTag }
+                        />
 
-                { this.state.lastTag && <ListItem variant="secondary" justify>
-                    Last tag: <span>{ this.state.lastTag }</span>
-                </ListItem> }
+                        <Button title="Update plugin"
+                            variant="warning" icon="cog" size="sm" outline
+                            disabled={ this.state.running }
+                            onClick={ this._handleUpdate }
+                        />
 
-                <ListItem justify>
-                    Description <span className="text-muted">{ this.props.plugin.description }</span>
-                </ListItem>
+                        <Button title="Delete plugin"
+                            variant="danger" icon="trash" size="sm" outline
+                            disabled={ this.state.running }
+                            onClick={ this._handleDelete }
+                        />
 
-                <ListItem>
+                    </ButtonGroup>
 
-                    <span className="text-decoration-underline">Dependencies :</span>
+                </CardHeader>
 
-                    <ul className="m-0">
+                <CardList>
 
-                        { Object.keys(this.props.plugin.dependencies).map((dependency: string): React.JSX.Element => {
-                            return <li key={ dependency }>{ dependency }</li>;
-                        }) }
+                    <ListItem justify>
+                        Version <span className="text-muted">{ this.props.plugin.version }</span>
+                    </ListItem>
 
-                    </ul>
+                    <ListItem justify>
+                        Description <span className="text-muted">{ this.props.plugin.description }</span>
+                    </ListItem>
 
-                </ListItem>
+                    <ListItem>
 
-                <ListItem justify>
-                    Engines <span className="text-muted">{ this.props.plugin.engines.node }</span>
-                </ListItem>
+                        <span className="text-decoration-underline">Dependencies :</span>
 
-                <ListItem justify>
-                    Authors <span className="text-muted">{ this.props.plugin.authors.join(", ") }</span>
-                </ListItem>
+                        <ul className="m-0">
 
-                <ListItem justify>
-                    License <span className="text-muted">{ this.props.plugin.license }</span>
-                </ListItem>
+                            { Object.keys(this.props.plugin.dependencies).map((dependency: string): React.JSX.Element => {
+                                return <li key={ dependency }>{ dependency }</li>;
+                            }) }
 
-            </CardList>
+                        </ul>
 
-        </Card>;
+                    </ListItem>
+
+                    <ListItem justify>
+                        Repository <span className="text-muted">{ this.props.plugin.repository }</span>
+                    </ListItem>
+
+                    <ListItem justify>
+                        Engines <span className="text-muted">{ this.props.plugin.engines.node }</span>
+                    </ListItem>
+
+                    <ListItem justify>
+                        Authors <span className="text-muted">{ this.props.plugin.authors.join(", ") }</span>
+                    </ListItem>
+
+                    <ListItem justify>
+                        License <span className="text-muted">{ this.props.plugin.license }</span>
+                    </ListItem>
+
+                </CardList>
+
+            </Card>
+
+        </>;
 
     }
 
