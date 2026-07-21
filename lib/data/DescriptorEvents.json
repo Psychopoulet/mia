@@ -2,7 +2,7 @@
 	"openapi": "3.0.2",
 	"info": {
 		"title": "mia - events",
-		"version": "1.4.1",
+		"version": "1.5.0",
 		"description": "MIA - easy IOT. Events description.",
 		"license": {
 			"name": "ISC",
