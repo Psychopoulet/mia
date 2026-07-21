@@ -2,7 +2,7 @@
 	"openapi": "3.0.2",
 	"info": {
 		"title": "mia",
-		"version": "1.4.1",
+		"version": "1.5.0",
 		"description": "MIA - easy IOT.",
 		"contact": {
 			"name": "Sébastien VIDAL",
@@ -254,7 +254,8 @@
 								"properties": {
 									"path": {
 										"type": "string",
-										"description": "GitHub repository path (owner/repo)"
+										"description": "GitHub repository path (owner/repo)",
+										"minLength": 8
 									}
 								},
 								"required": [ "path" ]
@@ -281,8 +282,114 @@
 					}
 				}
 			}
+		},
+		"/api/plugins/{name}": {
+			"post": {
+				"description": "",
+				"summary": "Update a plugin from its GitHub repository",
+				"operationId": "updatePluginFromGithub",
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Delete a plugin",
+				"operationId": "deletePlugin",
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/plugins/{name}/latest-tag": {
+			"get": {
+				"description": "",
+				"summary": "Get the latest tag of a plugin",
+				"operationId": "getPluginLatestTag",
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
-
 	},
 	"components": {
 		"schemas": {
@@ -298,17 +405,26 @@
 				},
 				"required": [ "code", "message" ]
 			},
+			"PluginName": {
+				"type": "string",
+				"minLength": 1
+			},
+			"Version": {
+				"type": "string",
+				"minLength": 1
+			},
 			"Plugin": {
 				"type": "object",
 				"properties": {
 					"name": {
-						"type": "string"
+						"$ref": "#/components/schemas/PluginName"
 					},
 					"version": {
-						"type": "string"
+						"$ref": "#/components/schemas/Version"
 					},
 					"description": {
-						"type": "string"
+						"type": "string",
+						"minLength": 1
 					},
 					"enabled": {
 						"type": "boolean"
@@ -321,7 +437,7 @@
 						"type": "object",
 						"properties": {
 							"node": {
-								"type": "string"
+								"$ref": "#/components/schemas/Version"
 							}
 						}
 					},
@@ -334,69 +450,46 @@
 					},
 					"license": {
 						"type": "string"
+					},
+					"repository": {
+						"type": "string",
+						"format": "uri"
 					}
 				},
 				"required": [ "name", "version", "description", "enabled", "dependencies", "engines", "authors", "license" ]
 			},
 			"PushEventPluginInstallRunning": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-running" ]
-					},
-					"data": {
-						"type": "string"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallRunning"
+			},
+			"PushEventPluginInstallStep": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallStep"
 			},
 			"PushEventPluginInstallSuccess": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-success" ]
-					},
-					"data": {
-						"type": "string"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallSuccess"
 			},
 			"PushEventPluginInstallFail": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"plugin": {
-						"type": "string",
-						"enum": [ "core" ]
-					},
-					"command": {
-						"type": "string",
-						"enum": [ "plugin-install-fail" ]
-					},
-					"data": {
-						"type": "string"
-					}
-				},
-				"required": [ "id", "plugin", "command", "data" ]
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallFail"
+			},
+			"PushEventPluginUpdateRunning": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateRunning"
+			},
+			"PushEventPluginUpdateStep": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateStep"
+			},
+			"PushEventPluginUpdateSuccess": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateSuccess"
+			},
+			"PushEventPluginUpdateFail": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateFail"
+			},
+			"PushEventPluginUninstallRunning": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallRunning"
+			},
+			"PushEventPluginUninstallSuccess": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallSuccess"
+			},
+			"PushEventPluginUninstallFail": {
+                "$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallFail"
 			}
 		}
 	},

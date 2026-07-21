@@ -1,4 +1,4 @@
-// deps
+// types & interfaces
 
     // externals
     import type ContainerPattern from "node-containerpattern";
@@ -10,7 +10,9 @@
 
 // module
 
-export default function getPlugins (container: ContainerPattern): Array<components["schemas"]["Plugin"]> {
+export default function getPlugins (
+    container: ContainerPattern
+): Array<components["schemas"]["Plugin"]> {
 
     return container.get<Pluginsmanager>("plugins-manager").plugins.map((plugin: Orchestrator): components["schemas"]["Plugin"] => {
 
@@ -22,7 +24,8 @@ export default function getPlugins (container: ContainerPattern): Array<componen
             "dependencies": plugin.dependencies as Record<string, string>,
             "engines": plugin.engines as Record<string, string>,
             "authors": plugin.authors,
-            "license": plugin.license
+            "license": plugin.license,
+            "repository": plugin.repository
         };
 
     });

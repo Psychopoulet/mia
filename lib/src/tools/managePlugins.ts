@@ -89,8 +89,8 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
 
         .on("installed", (plugin: Orchestrator): void => {
             logger.success("Plugin " + plugin.name + " (v" + plugin.version + ") installed");
-        }).on("uninstalled", (plugin: Orchestrator): void => {
-            logger.warning("Plugin " + plugin.name + " (v" + plugin.version + ") uninstalled");
+        }).on("uninstalled", (pluginName: string): void => {
+            logger.warning("Plugin " + pluginName + " uninstalled");
         });
 
     return pluginsManager.loadAll(container).then((): Promise<void> => {

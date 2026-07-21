@@ -54,7 +54,10 @@
 
 // module
 
-export default function installPlugin (container: ContainerPattern, body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
+export default function installPluginFromGithub (
+    container: ContainerPattern,
+    body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]
+): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
 
     if ("undefined" === typeof body) {
         return Promise.reject(new ReferenceError("Missing body"));
@@ -98,7 +101,10 @@ export default function installPlugin (container: ContainerPattern, body: operat
     }).catch((err: Error): Promise<Error> => {
 
         const command: components["schemas"]["PushEventPluginInstallFail"]["command"] = "plugin-install-fail";
-        const data: components["schemas"]["PushEventPluginInstallFail"]["data"] = err.message;
+        const data: components["schemas"]["PushEventPluginInstallFail"]["data"] = {
+            "pluginName": body.path,
+            "error": err.message
+        };
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 

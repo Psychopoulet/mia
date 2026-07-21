@@ -15,8 +15,12 @@
 
     // locals
     import getRequestPath from "./getRequestPath";
+    import socketPush from "./socketPush";
     import getPlugins from "../api/getPlugins";
-    import installPlugin from "../api/installPlugin";
+    import installPluginFromGithub from "../api/installPluginFromGithub";
+    import updatePluginFromGithub from "../api/updatePluginFromGithub";
+    import deletePlugin from "../api/deletePlugin";
+    import getPluginLatestTag from "../api/getPluginLatestTag";
 
 // types & interfaces
 
@@ -33,7 +37,7 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-    import type { operations } from "../api/Descriptor";
+    import type { operations, components } from "../api/Descriptor";
 
 // module
 
@@ -152,7 +156,31 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             res.json(getPlugins(container));
         }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
 
-            installPlugin(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
+            installPluginFromGithub(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
+        }).post("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
+
+            updatePluginFromGithub(container, req.params as unknown as operations["updatePluginFromGithub"]["parameters"]["path"]).then((data: operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
+        }).delete("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
+
+            deletePlugin(container, req.params as unknown as operations["deletePlugin"]["parameters"]["path"]).then((data: operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]): void => {
+                res.json(data);
+            }).catch((err: Error): void => {
+                next(err);
+            });
+
+        }).get("/api/plugins/:name/latest-tag", (req: Request, res: Response, next: NextFunction): void => {
+
+            getPluginLatestTag(container, req.params as unknown as operations["getPluginLatestTag"]["parameters"]["path"]).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
                 res.json(data);
             }).catch((err: Error): void => {
                 next(err);
@@ -246,6 +274,34 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 }
 
             });
+
+        });
+
+        // register plugins manager events
+
+        container.get<Pluginsmanager>("plugins-manager").on("installing", (pluginName: string, currentStep: number, maxSteps: number, stepMessage: string): void => {
+
+            const command: components["schemas"]["PushEventPluginInstallStep"]["command"] = "plugin-install-step";
+            const data: components["schemas"]["PushEventPluginInstallStep"]["data"] = {
+                pluginName,
+                currentStep,
+                maxSteps,
+                stepMessage
+            };
+
+            socketPush(wss, command, data);
+
+        }).on("updating", (pluginName: string, currentStep: number, maxSteps: number, stepMessage: string): void => {
+
+            const command: components["schemas"]["PushEventPluginUpdateStep"]["command"] = "plugin-update-step";
+            const data: components["schemas"]["PushEventPluginUpdateStep"]["data"] = {
+                pluginName,
+                currentStep,
+                maxSteps,
+                stepMessage
+            };
+
+            socketPush(wss, command, data);
 
         });
 

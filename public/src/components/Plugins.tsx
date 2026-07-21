@@ -4,13 +4,12 @@
     import React from "react";
     import {
         Alert,
-        Card, CardHeader, CardBody, CardList,
-        ListItem,
-        Icon
+        Card, CardHeader, CardBody
     } from "react-bootstrap-fontawesome";
 
     // locals
     import getSDK from "../SDK";
+    import Plugin from "./Plugin";
 
 // types & interfaces
 
@@ -74,20 +73,22 @@ export default class Plugins extends React.Component<iProps, iState> {
         });
 
         this._sdk
-            .on("plugin-install-success", this._onPluginInstallSuccess);
+            .on("plugin-install-success", this._onPluginsChange)
+            .on("plugin-uninstall-success", this._onPluginsChange);
 
     }
 
     public componentWillUnmount (): void {
 
         this._sdk
-            .off("plugin-install-success", this._onPluginInstallSuccess);
+            .off("plugin-install-success", this._onPluginsChange)
+            .off("plugin-uninstall-success", this._onPluginsChange);
 
     }
 
     // sdk events
 
-    private readonly _onPluginInstallSuccess = (data: components["schemas"]["PushEventPluginInstallSuccess"]["data"]): void => {
+    private readonly _onPluginsChange = (): void => {
 
         this._sdk.getPlugins().then((plugins: operations["getPlugins"]["responses"]["200"]["content"]["application/json"]): void => {
 
@@ -128,60 +129,7 @@ export default class Plugins extends React.Component<iProps, iState> {
 
                             return <div key={ plugin.name } className="col">
 
-                                <Card>
-
-                                    <CardHeader justify>
-
-                                        <a href={ "/" + plugin.name + "/public/index.html" }>
-                                            { plugin.name }
-                                        </a>
-
-                                        { plugin.enabled
-                                            ? <Icon type="check" variant="success" title="Enabled" />
-                                            : <Icon type="times" variant="danger" title="Disabled" />
-                                        }
-
-                                    </CardHeader>
-
-                                    <CardList>
-
-                                        <ListItem justify>
-                                            Version <span>{ plugin.version }</span>
-                                        </ListItem>
-
-                                        <ListItem justify>
-                                            Description <span className="text-muted">{ plugin.description }</span>
-                                        </ListItem>
-
-                                        <ListItem>
-
-                                            <span className="text-decoration-underline">Dependencies :</span>
-
-                                            <ul className="m-0">
-
-                                                { Object.keys(plugin.dependencies).map((dependency: string): React.JSX.Element => {
-                                                    return <li key={ dependency }>{ dependency }</li>;
-                                                }) }
-
-                                            </ul>
-
-                                        </ListItem>
-
-                                        <ListItem justify>
-                                            Engines <span className="text-muted">{ plugin.engines.node }</span>
-                                        </ListItem>
-
-                                        <ListItem justify>
-                                            Authors <span className="text-muted">{ plugin.authors.join(", ") }</span>
-                                        </ListItem>
-
-                                        <ListItem justify>
-                                            License <span className="text-muted">{ plugin.license }</span>
-                                        </ListItem>
-
-                                    </CardList>
-
-                                </Card>
+                                <Plugin plugin={ plugin } onError={ this.props.onError } />
 
                             </div>;
 
