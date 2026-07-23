@@ -59,22 +59,23 @@ export default function authorization (container: ContainerPattern, req: Request
     jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): void => {
 
         if (err) {
+
             console.log("authorization error", err);
-            next(err);
+
+            const error = formateError(new UnauthorizedError("Invalid token provided"));
+
+            res.status(error.httpCode).json({
+                "code": error.code,
+                "message": error.message
+            });
+
             return;
+
         }
 
         console.log("authorization decoded", decoded);
 
-        // @TODO: check authorization
-        // ex : verify { origin: 'anonymous', iat: 1784825473, exp: 1785430273 }
-
-        const error = formateError(new UnauthorizedError("Not authorized"));
-
-        res.status(error.httpCode).json({
-            "code": error.code,
-            "message": error.message
-        });
+        next();
 
     });
 
