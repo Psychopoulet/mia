@@ -192,7 +192,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             app.put("/api/auth", (req: Request, res: Response, next: NextFunction): void => {
 
                 login(container, req.body as operations["login"]["requestBody"]["content"]["application/json"]).then((data: operations["login"]["responses"]["201"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(201).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
@@ -200,7 +200,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             }).delete("/api/auth", (req: Request, res: Response, next: NextFunction): void => {
 
                 logout().then((data: operations["logout"]["responses"]["204"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(204).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
@@ -212,17 +212,23 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             app.get("/api/descriptor", (req: Request, res: Response, next: NextFunction): void => {
 
                 getDescriptor().then((data: operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(200).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
 
-            }).get("/api/plugins", (req: Request, res: Response): void => {
-                res.json(getPlugins(container));
+            }).get("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
+
+                getPlugins(container).then((data: operations["getPlugins"]["responses"]["200"]["content"]["application/json"]): void => {
+                    res.status(200).json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
             }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
 
                 installPluginFromGithub(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(201).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
@@ -230,7 +236,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             }).post("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
 
                 updatePluginFromGithub(container, req.params as unknown as operations["updatePluginFromGithub"]["parameters"]["path"]).then((data: operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(204).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
@@ -238,7 +244,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             }).delete("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
 
                 deletePlugin(container, req.params as unknown as operations["deletePlugin"]["parameters"]["path"]).then((data: operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(204).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
@@ -246,7 +252,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             }).get("/api/plugins/:name/latest-tag", (req: Request, res: Response, next: NextFunction): void => {
 
                 getPluginLatestTag(container, req.params as unknown as operations["getPluginLatestTag"]["parameters"]["path"]).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
-                    res.json(data);
+                    res.status(200).json(data);
                 }).catch((err: Error): void => {
                     next(err);
                 });
