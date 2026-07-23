@@ -6,13 +6,13 @@
     import type { Orchestrator } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { components } from "./Descriptor";
+    import type { components, operations } from "./Descriptor";
 
 // module
 
 export default function getPlugins (
     container: ContainerPattern
-): Array<components["schemas"]["Plugin"]> {
+): operations["getPlugins"]["responses"]["200"]["content"]["application/json"] {
 
     return container.get<Pluginsmanager>("plugins-manager").plugins.map((plugin: Orchestrator): components["schemas"]["Plugin"] => {
 

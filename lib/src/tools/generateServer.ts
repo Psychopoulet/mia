@@ -21,6 +21,7 @@
 
     import authorization from "../api/authorization";
 
+    import getDescriptor from "../api/getDescriptor";
     import getPlugins from "../api/getPlugins";
     import installPluginFromGithub from "../api/installPluginFromGithub";
     import updatePluginFromGithub from "../api/updatePluginFromGithub";
@@ -184,7 +185,15 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // api
 
-            // @TODO : /api/descriptor
+            app.get("/api/descriptor", (req: Request, res: Response, next: NextFunction): void => {
+
+                getDescriptor().then((data: operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
+            });
 
             app.get("/api/plugins", (req: Request, res: Response): void => {
                 res.json(getPlugins(container));
