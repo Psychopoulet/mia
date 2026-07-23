@@ -19,7 +19,7 @@
     import getRequestPath from "./getRequestPath";
     import socketPush from "./socketPush";
 
-    import authentication from "../api/authentication";
+    import authorization from "../api/authorization";
 
     import getPlugins from "../api/getPlugins";
     import installPluginFromGithub from "../api/installPluginFromGithub";
@@ -82,10 +82,10 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             .use(compression())
             .use(express.json());
 
-        // authentication
+        // authorization
 
         app.use((req: Request, res: Response, next: NextFunction): void => {
-            authentication(container, req, res, next);
+            authorization(container, req, res, next);
         });
 
         // public paths

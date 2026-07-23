@@ -23,10 +23,10 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "Authentication",
+						"name": "Authorization",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/Authentication"
+							"$ref": "#/components/schemas/Authorization"
 						}
 					}
 				],
@@ -227,10 +227,10 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "Authentication",
+						"name": "Authorization",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/Authentication"
+							"$ref": "#/components/schemas/Authorization"
 						}
 					}
 				],
@@ -268,10 +268,10 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "Authentication",
+						"name": "Authorization",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/Authentication"
+							"$ref": "#/components/schemas/Authorization"
 						}
 					}
 				],
@@ -321,10 +321,10 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "Authentication",
+						"name": "Authorization",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/Authentication"
+							"$ref": "#/components/schemas/Authorization"
 						}
 					},
 					{
@@ -362,10 +362,10 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "Authentication",
+						"name": "Authorization",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/Authentication"
+							"$ref": "#/components/schemas/Authorization"
 						}
 					},
 					{
@@ -405,10 +405,10 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "Authentication",
+						"name": "Authorization",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/Authentication"
+							"$ref": "#/components/schemas/Authorization"
 						}
 					},
 					{
@@ -447,7 +447,7 @@
 	},
 	"components": {
 		"schemas": {
-			"Authentication": {
+			"Authorization": {
 				"type": "string",
 				"minLength": 1,
 				"maxLength": 128
