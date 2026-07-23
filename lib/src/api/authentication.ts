@@ -14,11 +14,13 @@ export default function authentication (req: Request, res: Response, next: NextF
 
     // api paths need authentication
 
-    if (req.path.includes("/api/")) {
+    if (req.path.includes("/api/") && !req.path.startsWith("/api/auth/")) {
 
         console.log("api requested");
 
         if ("string" !== typeof req.headers.Authentication || "" === req.headers.Authentication) {
+
+            console.log("authentication not found");
 
             const error = formateError(new UnauthorizedError("Not authorized"));
 
@@ -46,21 +48,7 @@ export default function authentication (req: Request, res: Response, next: NextF
 
     }
 
-    // public paths don't need authentication, but html pages need to be redirected to the login page
-
-    else if ("/" === req.path || (req.path.includes("/public/") && req.path.endsWith(".html"))) {
-
-        // @TODO: check session
-
-        console.log("html page requested, redirecting to login");
-
-        res.redirect(301, "/auth/login");
-
-        return;
-
-    }
-
-    // other paths (libs, css, js, etc.) don't need authentication
+    // public paths don't need authentication
 
     next();
 
