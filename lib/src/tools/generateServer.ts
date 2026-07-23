@@ -1,7 +1,8 @@
 // deps
 
     // natives
-    import { readFile } from "node:fs";
+    import { randomBytes } from "node:crypto";
+    import { readFile, writeFile } from "node:fs/promises";
     import { createServer } from "node:http";
     import { join } from "node:path";
 
@@ -10,7 +11,7 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
-    import { formateError, NotFoundError } from "node-pluginsmanager-plugin";
+    import { isFile, formateError, NotFoundError } from "node-pluginsmanager-plugin";
     import { WebSocketServer } from "ws";
 
     // locals
@@ -47,6 +48,28 @@
 
 export default function generateServer (container: ContainerPattern): Promise<void> {
 
+    return Promise.resolve().then(async (): Promise<void> => {
+
+        // generate server key
+
+        // if server key is already set, return
+        if (container.has("server-key")) {
+            return Promise.resolve();
+        }
+
+        const file: string = join(container.get<string>("data-directory"), ".server-key");
+
+        // if server key file does not exist, create it
+        if (!await isFile(file)) {
+            await writeFile(file, randomBytes(64).toString("hex"), "utf-8");
+        }
+
+        return readFile(file, "utf-8").then((key: string): void => {
+            container.set("server-key", key);
+        });
+
+    }).then(() => {
+
     return new Promise((resolve: () => void): void => {
 
         // create app
@@ -61,7 +84,9 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // authentication
 
-        app.use(authentication);
+        app.use((req: Request, res: Response, next: NextFunction): void => {
+            authentication(container, req, res, next);
+        });
 
         // public paths
 
@@ -71,12 +96,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
                     const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
 
-                    readFile(file, "utf-8", (err: Error | null, content: string): void => {
-
-                        if (err) {
-                            next(err);
-                            return;
-                        }
+                    readFile(file, "utf-8").then((content: string): void => {
 
                         res.status(200).send(content
                             .replace(/{{app.name}}/g, container.get<string>("app.name"))
@@ -84,6 +104,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                             .replace(/{{app.description}}/g, container.get<string>("app.description"))
                         );
 
+                    }).catch((err: Error): void => {
+                        next(err);
                     });
 
                 }).get("/public/menu.min.js", (req: Request, res: Response): void => {
@@ -161,6 +183,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 });
 
         // api
+
+            // @TODO : /api/descriptor
 
             app.get("/api/plugins", (req: Request, res: Response): void => {
                 res.json(getPlugins(container));
@@ -336,5 +360,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         });
 
     });
+
+});
 
 }

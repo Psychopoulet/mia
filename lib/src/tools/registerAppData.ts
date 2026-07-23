@@ -76,6 +76,8 @@ export default function registerAppData (container: ContainerPattern): Promise<v
 
         // server socket
         container
+            .skeleton("server-key", "string")
+            .document("server-key", "The application's server key for authentication")
             .document("server-socket", "The application's server websocket");
 
     });
