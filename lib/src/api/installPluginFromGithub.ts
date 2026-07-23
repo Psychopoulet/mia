@@ -68,15 +68,15 @@ export default function installPluginFromGithub (
     else if (null === body as unknown) { // had to force type to avoid lint error
         return Promise.reject(new ReferenceError("Body is null"));
     }
-    else if ("undefined" === typeof body.path) {
-        return Promise.reject(new ReferenceError("Missing \"path\" in body"));
-    }
-    else if ("string" !== typeof body.path) {
-        return Promise.reject(new TypeError("\"path\" in body is not a string"));
-    }
-    else if (0 >= body.path.trim().length) {
-        return Promise.reject(new RangeError("\"path\" in body is empty"));
-    }
+        else if ("undefined" === typeof body.path) {
+            return Promise.reject(new ReferenceError("Missing \"path\" in body"));
+        }
+        else if ("string" !== typeof body.path) {
+            return Promise.reject(new TypeError("\"path\" in body is not a string"));
+        }
+        else if (0 >= body.path.trim().length) {
+            return Promise.reject(new RangeError("\"path\" in body is empty"));
+        }
 
     return Promise.resolve().then((): iGithubRepository => {
 
