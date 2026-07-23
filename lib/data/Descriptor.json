@@ -60,7 +60,7 @@
 				"description": "",
 				"summary": "Front page",
 				"responses": {
-					"301": {
+					"302": {
 						"description": "Redirection to /public/index.html"
 					},
 					"default": {
