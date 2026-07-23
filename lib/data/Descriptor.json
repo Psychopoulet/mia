@@ -20,15 +20,8 @@
 				"description": "",
 				"summary": "API Swagger",
 				"operationId": "getDescriptor",
-				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					}
+				"security": [
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -247,7 +240,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Authorization"
+									"$ref": "#/components/schemas/Token"
 								}
 							}
 						}
@@ -268,15 +261,8 @@
 				"description": "",
 				"summary": "Logout",
 				"operationId": "logout",
-				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					}
+				"security": [
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"204": {
@@ -303,15 +289,8 @@
 				"description": "",
 				"summary": "Get all plugins",
 				"operationId": "getPlugins",
-				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					}
+				"security": [
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -344,15 +323,8 @@
 				"description": "",
 				"summary": "Add a plugin from a GitHub repository",
 				"operationId": "installPluginFromGithub",
-				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					}
+				"security": [
+					{ "bearerAuth": [] }
 				],
 				"requestBody": {
 					"required": true,
@@ -397,15 +369,10 @@
 				"description": "",
 				"summary": "Update a plugin from its GitHub repository",
 				"operationId": "updatePluginFromGithub",
+				"security": [
+					{ "bearerAuth": [] }
+				],
 				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					},
 					{
 						"name": "name",
 						"in": "path",
@@ -438,15 +405,10 @@
 				"description": "",
 				"summary": "Delete a plugin",
 				"operationId": "deletePlugin",
+				"security": [
+					{ "bearerAuth": [] }
+				],
 				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					},
 					{
 						"name": "name",
 						"in": "path",
@@ -481,15 +443,10 @@
 				"description": "",
 				"summary": "Get the latest tag of a plugin",
 				"operationId": "getPluginLatestTag",
+				"security": [
+					{ "bearerAuth": [] }
+				],
 				"parameters": [
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Authorization"
-						}
-					},
 					{
 						"name": "name",
 						"in": "path",
@@ -525,12 +482,14 @@
 		}
 	},
 	"components": {
+		"securitySchemes": {
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		},
 		"schemas": {
-			"Authorization": {
-				"type": "string",
-				"minLength": 1,
-				"maxLength": 128
-			},
 			"Error": {
 				"type": "object",
 				"properties": {
@@ -550,6 +509,11 @@
 			"Version": {
 				"type": "string",
 				"minLength": 1
+			},
+			"Token": {
+				"type": "string",
+				"minLength": 1,
+				"maxLength": 128
 			},
 			"Plugin": {
 				"type": "object",

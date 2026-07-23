@@ -24,22 +24,37 @@ export default function authorization (container: ContainerPattern, req: Request
 
     // api paths need authorization
 
-    console.log("api requested");
+    console.log("api requested", req.headers);
 
     let headerAuthorization: string = "";
-    if ("undefined" === typeof req.headers.Authorization) {
-        headerAuthorization = "";
-    }
-    else if ("string" === typeof req.headers.Authorization) {
-        headerAuthorization = req.headers.Authorization;
-    }
-    else if (Array.isArray(req.headers.Authorization)) {
-        headerAuthorization = req.headers.Authorization[0];
+
+    const header: string | undefined = Object.keys(req.headers).find((key: string): boolean => {
+        return "authorization" === key.toLowerCase();
+    });
+
+    console.log("header", header);
+
+    if ("string" === typeof header) {
+
+        if ("undefined" === typeof req.headers[header]) {
+            headerAuthorization = "";
+        }
+        else if ("string" === typeof req.headers[header]) {
+            headerAuthorization = req.headers[header];
+        }
+        else if (Array.isArray(req.headers[header]) && 0 < req.headers[header].length) {
+            headerAuthorization = req.headers[header][0];
+        }
+
     }
 
-    const token: string | undefined = headerAuthorization.split(" ")[1] ?? undefined;
+    console.log("headerAuthorization", headerAuthorization);
 
-    if ("undefined" === typeof token) {
+    const token: string = headerAuthorization.replace("Bearer ", "").trim();
+
+    console.log("token", token);
+
+    if (0 >= token.length) {
 
         console.log("authorization not found");
 
