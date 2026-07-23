@@ -20,6 +20,16 @@
 				"description": "",
 				"summary": "API Swagger",
 				"operationId": "getDescriptor",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Authentication",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authentication"
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Everything is fine",
@@ -214,6 +224,16 @@
 				"description": "",
 				"summary": "Get all plugins",
 				"operationId": "getPlugins",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Authentication",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authentication"
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Plugins list",
@@ -245,6 +265,16 @@
 				"description": "",
 				"summary": "Add a plugin from a GitHub repository",
 				"operationId": "installPluginFromGithub",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Authentication",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authentication"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -290,6 +320,14 @@
 				"operationId": "updatePluginFromGithub",
 				"parameters": [
 					{
+						"in": "header",
+						"name": "Authentication",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authentication"
+						}
+					},
+					{
 						"name": "name",
 						"in": "path",
 						"required": true,
@@ -322,6 +360,14 @@
 				"summary": "Delete a plugin",
 				"operationId": "deletePlugin",
 				"parameters": [
+					{
+						"in": "header",
+						"name": "Authentication",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authentication"
+						}
+					},
 					{
 						"name": "name",
 						"in": "path",
@@ -358,6 +404,14 @@
 				"operationId": "getPluginLatestTag",
 				"parameters": [
 					{
+						"in": "header",
+						"name": "Authentication",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authentication"
+						}
+					},
+					{
 						"name": "name",
 						"in": "path",
 						"required": true,
@@ -393,6 +447,11 @@
 	},
 	"components": {
 		"schemas": {
+			"Authentication": {
+				"type": "string",
+				"minLength": 1,
+				"maxLength": 128
+			},
 			"Error": {
 				"type": "object",
 				"properties": {

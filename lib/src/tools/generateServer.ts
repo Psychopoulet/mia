@@ -10,12 +10,16 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
-    import { formateError } from "node-pluginsmanager-plugin";
+    import { formateError, NotFoundError } from "node-pluginsmanager-plugin";
     import { WebSocketServer } from "ws";
 
     // locals
+
     import getRequestPath from "./getRequestPath";
     import socketPush from "./socketPush";
+
+    import authentication from "../api/authentication";
+
     import getPlugins from "../api/getPlugins";
     import installPluginFromGithub from "../api/installPluginFromGithub";
     import updatePluginFromGithub from "../api/updatePluginFromGithub";
@@ -55,138 +59,144 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             .use(compression())
             .use(express.json());
 
-        // basic roots
+        // authentication
 
-        app.get([ "/", "/public/index.html" ], (req: Request, res: Response, next: NextFunction): void => {
+        app.use(authentication);
 
-            const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
+        // public paths
 
-            readFile(file, "utf-8", (err: Error | null, content: string): void => {
+            // main page
 
-                if (err) {
-                    next(err);
-                    return;
-                }
+                app.get([ "/", "/public/index.html" ], (req: Request, res: Response, next: NextFunction): void => {
 
-                res.status(200).send(content
-                    .replace(/{{app.name}}/g, container.get<string>("app.name"))
-                    .replace(/{{app.version}}/g, container.get<string>("app.version"))
-                    .replace(/{{app.description}}/g, container.get<string>("app.description"))
-                );
+                    const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
 
-            });
+                    readFile(file, "utf-8", (err: Error | null, content: string): void => {
 
-        }).get("/public/menu.min.js", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js"));
-        }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js.map"));
-        }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
-        }).get("/public/bundle.min.js.map", (req: Request, res: Response): void => {
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js.map"));
-        });
+                        if (err) {
+                            next(err);
+                            return;
+                        }
 
-        // libs
+                        res.status(200).send(content
+                            .replace(/{{app.name}}/g, container.get<string>("app.name"))
+                            .replace(/{{app.version}}/g, container.get<string>("app.version"))
+                            .replace(/{{app.description}}/g, container.get<string>("app.description"))
+                        );
 
-            // bootstrap
+                    });
 
-                // css
-
-                app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
-                }).get("/public/libs/bootstrap.min.css.map", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css.map"));
-                })
-
-                // js
-
-                .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js"));
-                }).get("/public/libs/bootstrap.min.js.map", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js.map"));
-                })
-
-            // fontawesome
-
-                // css
-
-                .get("/public/libs/fontawesome.min.css", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "css", "all.min.css"));
-                })
-
-                // webfonts
-
-                .get("/public/webfonts/fa-brands-400.ttf", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.ttf"));
-                }).get("/public/webfonts/fa-brands-400.woff2", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.woff2"));
-                }).get("/public/webfonts/fa-regular-400.ttf", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.ttf"));
-                }).get("/public/webfonts/fa-regular-400.woff2", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.woff2"));
-                }).get("/public/webfonts/fa-solid-900.ttf", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.ttf"));
-                }).get("/public/webfonts/fa-solid-900.woff2", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.woff2"));
+                }).get("/public/menu.min.js", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js"));
+                }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js.map"));
+                }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
+                }).get("/public/bundle.min.js.map", (req: Request, res: Response): void => {
+                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js.map"));
                 });
 
-        // pictures
+            // libs
 
-        app.get([
-            "favicon.ico",
-            "/favicon.ico",
-            "/public/pictures/favicon.ico"
-        ], (req: Request, res: Response): void => {
+                // bootstrap
 
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
+                    // css
 
-        }).get([
-            "favicon.png",
-            "/favicon.png",
-            "/public/pictures/favicon.png"
-        ], (req: Request, res: Response): void => {
+                    app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
+                    }).get("/public/libs/bootstrap.min.css.map", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css.map"));
+                    })
 
-            return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
+                    // js
 
-        });
+                    .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js"));
+                    }).get("/public/libs/bootstrap.min.js.map", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js.map"));
+                    })
+
+                // fontawesome
+
+                    // css
+
+                    .get("/public/libs/fontawesome.min.css", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "css", "all.min.css"));
+                    })
+
+                    // webfonts
+
+                    .get("/public/webfonts/fa-brands-400.ttf", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.ttf"));
+                    }).get("/public/webfonts/fa-brands-400.woff2", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.woff2"));
+                    }).get("/public/webfonts/fa-regular-400.ttf", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.ttf"));
+                    }).get("/public/webfonts/fa-regular-400.woff2", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.woff2"));
+                    }).get("/public/webfonts/fa-solid-900.ttf", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.ttf"));
+                    }).get("/public/webfonts/fa-solid-900.woff2", (req: Request, res: Response): void => {
+                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.woff2"));
+                    });
+
+            // pictures
+
+                app.get([
+                    "favicon.ico",
+                    "/favicon.ico",
+                    "/public/pictures/favicon.ico"
+                ], (req: Request, res: Response): void => {
+
+                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
+
+                }).get([
+                    "favicon.png",
+                    "/favicon.png",
+                    "/public/pictures/favicon.png"
+                ], (req: Request, res: Response): void => {
+
+                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
+
+                });
 
         // api
 
-        app.get("/api/plugins", (req: Request, res: Response): void => {
-            res.json(getPlugins(container));
-        }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
+            app.get("/api/plugins", (req: Request, res: Response): void => {
+                res.json(getPlugins(container));
+            }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
 
-            installPluginFromGithub(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
-                res.json(data);
-            }).catch((err: Error): void => {
-                next(err);
+                installPluginFromGithub(container, req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"]).then((data: operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
+            }).post("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
+
+                updatePluginFromGithub(container, req.params as unknown as operations["updatePluginFromGithub"]["parameters"]["path"]).then((data: operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
+            }).delete("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
+
+                deletePlugin(container, req.params as unknown as operations["deletePlugin"]["parameters"]["path"]).then((data: operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
+            }).get("/api/plugins/:name/latest-tag", (req: Request, res: Response, next: NextFunction): void => {
+
+                getPluginLatestTag(container, req.params as unknown as operations["getPluginLatestTag"]["parameters"]["path"]).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
             });
-
-        }).post("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
-
-            updatePluginFromGithub(container, req.params as unknown as operations["updatePluginFromGithub"]["parameters"]["path"]).then((data: operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]): void => {
-                res.json(data);
-            }).catch((err: Error): void => {
-                next(err);
-            });
-
-        }).delete("/api/plugins/:name", (req: Request, res: Response, next: NextFunction): void => {
-
-            deletePlugin(container, req.params as unknown as operations["deletePlugin"]["parameters"]["path"]).then((data: operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]): void => {
-                res.json(data);
-            }).catch((err: Error): void => {
-                next(err);
-            });
-
-        }).get("/api/plugins/:name/latest-tag", (req: Request, res: Response, next: NextFunction): void => {
-
-            getPluginLatestTag(container, req.params as unknown as operations["getPluginLatestTag"]["parameters"]["path"]).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
-                res.json(data);
-            }).catch((err: Error): void => {
-                next(err);
-            });
-
-        });
 
         // link request to plugins
 
@@ -205,9 +215,11 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 return;
             }
 
-            res.status(404).json({
-                "code": 404,
-                "message": getRequestPath(container, req) + " not found"
+            const error = formateError(new NotFoundError(getRequestPath(container, req) + " not found"));
+
+            res.status(error.httpCode).json({
+                "code": error.code,
+                "message": error.message
             });
 
         });
