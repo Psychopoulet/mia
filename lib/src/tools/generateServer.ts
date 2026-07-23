@@ -21,6 +21,8 @@
 
     import authorization from "../api/authorization";
 
+    import login from "../api/login";
+    import logout from "../api/logout";
     import getDescriptor from "../api/getDescriptor";
     import getPlugins from "../api/getPlugins";
     import installPluginFromGithub from "../api/installPluginFromGithub";
@@ -185,6 +187,28 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
         // api
 
+            // no authorization required
+
+            app.put("/api/auth", (req: Request, res: Response, next: NextFunction): void => {
+
+                login(container, req.body as operations["login"]["requestBody"]["content"]["application/json"]).then((data: operations["login"]["responses"]["201"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
+            }).delete("/api/auth", (req: Request, res: Response, next: NextFunction): void => {
+
+                logout().then((data: operations["logout"]["responses"]["204"]["content"]["application/json"]): void => {
+                    res.json(data);
+                }).catch((err: Error): void => {
+                    next(err);
+                });
+
+            });
+
+            // authorization required
+
             app.get("/api/descriptor", (req: Request, res: Response, next: NextFunction): void => {
 
                 getDescriptor().then((data: operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]): void => {
@@ -193,9 +217,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     next(err);
                 });
 
-            });
-
-            app.get("/api/plugins", (req: Request, res: Response): void => {
+            }).get("/api/plugins", (req: Request, res: Response): void => {
                 res.json(getPlugins(container));
             }).put("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
 

@@ -219,6 +219,85 @@
 			}
 		},
 
+		"/api/auth": {
+			"put": {
+				"description": "",
+				"summary": "Login",
+				"operationId": "login",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"origin": {
+										"type": "string",
+										"minLength": 1
+									}
+								},
+								"required": [ "origin" ]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Authorization token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Authorization"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Logout",
+				"operationId": "logout",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Authorization",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Authorization"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Everything is fine",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occured",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/plugins": {
 			"get": {
 				"description": "",

@@ -17,7 +17,7 @@ export default function authorization (container: ContainerPattern, req: Request
     // public paths don't need authorization
     // auth paths must be usable without authorization
 
-    if (!req.path.includes("/api/") || req.path.startsWith("/api/auth/")) {
+    if (!req.path.includes("/api/") || req.path.startsWith("/api/auth")) {
         next();
         return;
     }
