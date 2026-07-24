@@ -1,3 +1,6 @@
+/* eslint-disable consistent-return */
+// - consistent-return is disabled because valid return values are not always explicitly returned
+
 // deps
 
     // locals
@@ -55,7 +58,7 @@
 
 // module
 
-export default function installPluginFromGithub (container: ContainerPattern, req: Request, res: Response, next: NextFunction): Response | void {
+export default function installPluginFromGithub (container: ContainerPattern, req: Request, res: Response, next: NextFunction): void {
 
     const body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"] = req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"];
 

@@ -1,3 +1,6 @@
+/* eslint-disable consistent-return */
+// - consistent-return is disabled because valid return values are not always explicitly returned
+
 // deps
 
     // externals
@@ -41,7 +44,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
         "origin": body.origin
     }, container.get<string>("server-key"), {
         "expiresIn": "7d"
-    }, (err: Error | null, token: string | undefined): Response | void => {
+    }, (err: Error | null, token: string | undefined): void => {
 
         if (err) {
             return next(err);
@@ -50,7 +53,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
             return next(new Error("No token generated"));
         }
 
-        return res.status(201).json(token);
+        res.status(201).json(token);
 
     });
 

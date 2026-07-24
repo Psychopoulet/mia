@@ -1,3 +1,6 @@
+/* eslint-disable consistent-return */
+// - consistent-return is disabled because valid return values are not always explicitly returned
+
 // types & interfaces
 
     // externals
@@ -11,7 +14,7 @@
 
 // module
 
-export default function getPlugins (container: ContainerPattern, req: Request, res: Response, next: NextFunction): Response | void {
+export default function getPlugins (container: ContainerPattern, req: Request, res: Response, next: NextFunction): void {
 
     try {
 
@@ -31,7 +34,7 @@ export default function getPlugins (container: ContainerPattern, req: Request, r
 
         });
 
-        return res.status(200).json(data);
+        res.status(200).json(data);
 
     }
     catch (err: unknown) {

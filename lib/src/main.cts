@@ -1,6 +1,5 @@
-/*
-    eslint-disable n/no-process-exit
-*/
+/* eslint-disable n/no-process-exit */
+// - n/no-process-exit is disabled because we need to exit the process manually
 
 // deps
 

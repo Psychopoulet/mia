@@ -1,8 +1,11 @@
+/* eslint-disable consistent-return */
+// - consistent-return is disabled because valid return values are not always explicitly returned
+
 // deps
 
     // externals
     import jwt from "jsonwebtoken";
-    import { formateError, UnauthorizedError } from "node-pluginsmanager-plugin";
+    import { UnauthorizedError } from "node-pluginsmanager-plugin";
 
 // types & interfaces
 
@@ -12,7 +15,7 @@
 
 // module
 
-export default function authorization (container: ContainerPattern, req: Request, res: Response, next: NextFunction): Response | void {
+export default function authorization (container: ContainerPattern, req: Request, res: Response, next: NextFunction): void {
 
     // public paths don't need authorization
     // auth paths must be usable without authorization
@@ -57,29 +60,19 @@ export default function authorization (container: ContainerPattern, req: Request
 
         console.log("authorization not found");
 
-        const error = formateError(new UnauthorizedError("No valid token provided"));
-
-        return res.status(error.httpCode).json({
-            "code": error.code,
-            "message": error.message
-        });
+        return next(new UnauthorizedError("No valid token provided"));
 
     }
 
     console.log("authorization found, checking...");
 
-    jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): Response | void => {
+    jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): void => {
 
         if (err) {
 
             console.log("authorization error", err);
 
-            const error = formateError(new UnauthorizedError("Invalid token provided"));
-
-            return res.status(error.httpCode).json({
-                "code": error.code,
-                "message": error.message
-            });
+            return next(new UnauthorizedError("Invalid token provided"));
 
         }
 

@@ -1,3 +1,6 @@
+/* eslint-disable consistent-return */
+// - consistent-return is disabled because valid return values are not always explicitly returned
+
 // deps
 
     // externals
