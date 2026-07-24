@@ -191,7 +191,9 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
             app.put("/api/auth", (req: Request, res: Response, next: NextFunction): void => {
                 login(container, req, res, next);
-            }).delete("/api/auth", logout);
+            }).delete("/api/auth", (req: Request, res: Response, next: NextFunction): void => {
+                logout(container, req, res, next);
+            });
 
             // authorization required
 

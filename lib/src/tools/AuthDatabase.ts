@@ -116,6 +116,20 @@ export default class AuthDatabase {
 
     }
 
+    public removeToken (token: string): Promise<void> {
+
+        return new Promise((resolve:() => void): void => {
+
+            this._database
+                .prepare("DELETE FROM tokens WHERE token = ?")
+                .run(token);
+
+            resolve();
+
+        });
+
+    }
+
     /*
     public addUser (name: string, password: string): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -132,15 +146,6 @@ export default class AuthDatabase {
                 SELECT * FROM tokens WHERE token = ?;
             `);
             resolve(result);
-        });
-    }
-
-    public removeToken (token: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this._database.exec(`
-                DELETE FROM tokens WHERE token = ?;
-            `);
-            resolve();
         });
     }
     */

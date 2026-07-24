@@ -8,6 +8,7 @@
 
     // locals
     import { verify } from "../tools/AuthJWT";
+    import extractToken from "../tools/extractToken";
 
 // types & interfaces
 
@@ -33,28 +34,7 @@ export default function authorization (container: ContainerPattern, req: Request
 
     // api paths need authorization
 
-    let headerAuthorization: string = "";
-
-    const header: string | undefined = Object.keys(req.headers).find((key: string): boolean => {
-        return "authorization" === key.toLowerCase();
-    });
-
-    if ("string" === typeof header) {
-
-        if ("undefined" === typeof req.headers[header]) {
-            headerAuthorization = "";
-        }
-        else if ("string" === typeof req.headers[header]) {
-            headerAuthorization = req.headers[header];
-        }
-        else if (Array.isArray(req.headers[header]) && 0 < req.headers[header].length) {
-            headerAuthorization = req.headers[header][0];
-        }
-
-    }
-
-    const token: string = headerAuthorization.replace("Bearer ", "").trim();
-
+    const token: string = extractToken(req);
     if (0 >= token.length) {
         return next(new UnauthorizedError("No valid token provided"));
     }
