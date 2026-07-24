@@ -8,20 +8,20 @@
 
 // types & interfaces
 
-    // locals
-    import type { operations } from "./Descriptor";
+    // externals
+    import type { Request, Response, NextFunction } from "express";
 
 // module
 
-export default function getDescriptor (): Promise<operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]> {
+export default function getDescriptor (req: Request, res: Response, next: NextFunction): void {
 
     const descriptorFile: string = join(__dirname, "..", "..", "data", "Descriptor.json");
 
     // generate descriptor (bundle + validate, same pattern as node-pluginsmanager-plugin Orchestrator)
-    return SwaggerParser.bundle(descriptorFile).then((bundledDescriptor) => {
+    SwaggerParser.bundle(descriptorFile).then((bundledDescriptor): Promise<Response> => {
 
         // force validate because of stupid malformatted references
-        return SwaggerParser.validate(bundledDescriptor).then((validatedDescriptor) => {
+        return SwaggerParser.validate(bundledDescriptor).then((validatedDescriptor): Response => {
 
             const descriptor = validatedDescriptor as {
                 "servers"?: unknown[];
@@ -29,10 +29,12 @@ export default function getDescriptor (): Promise<operations["getDescriptor"]["r
 
             descriptor.servers ??= [];
 
-            return descriptor as operations["getDescriptor"]["responses"]["200"]["content"]["application/json"];
+            return res.status(200).json(descriptor);
 
         });
 
+    }).catch((err: Error): void => {
+        return next(err);
     });
 
 }

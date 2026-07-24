@@ -1,6 +1,7 @@
 // types & interfaces
 
     // externals
+    import type { Request, Response, NextFunction } from "express";
     import type ContainerPattern from "node-containerpattern";
     import type Pluginsmanager from "node-pluginsmanager";
     import type { Orchestrator } from "node-pluginsmanager-plugin";
@@ -10,13 +11,11 @@
 
 // module
 
-export default function getPlugins (
-    container: ContainerPattern
-): Promise<operations["getPlugins"]["responses"]["200"]["content"]["application/json"]> {
+export default function getPlugins (container: ContainerPattern, req: Request, res: Response, next: NextFunction): Response | void {
 
-    return Promise.resolve().then((): operations["getPlugins"]["responses"]["200"]["content"]["application/json"] => {
+    try {
 
-        return container.get<Pluginsmanager>("plugins-manager").plugins.map((plugin: Orchestrator): components["schemas"]["Plugin"] => {
+        const data: operations["getPlugins"]["responses"]["200"]["content"]["application/json"] = container.get<Pluginsmanager>("plugins-manager").plugins.map((plugin: Orchestrator): components["schemas"]["Plugin"] => {
 
             return {
                 "name": plugin.name,
@@ -32,6 +31,11 @@ export default function getPlugins (
 
         });
 
-    });
+        return res.status(200).json(data);
+
+    }
+    catch (err: unknown) {
+        return next(err);
+    }
 
 }

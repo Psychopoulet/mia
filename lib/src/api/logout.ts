@@ -1,12 +1,12 @@
 // types & interfaces
 
-    // locals
-    import type { operations } from "./Descriptor";
+    // externals
+    import type { Request, Response } from "express";
 
 // module
 
-export default function logout (): Promise<operations["logout"]["responses"]["204"]["content"]["application/json"]> {
+export default function logout (req: Request, res: Response): void {
 
-    return Promise.resolve();
+    res.status(204).json();
 
 }

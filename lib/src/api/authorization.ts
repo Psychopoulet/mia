@@ -12,14 +12,13 @@
 
 // module
 
-export default function authorization (container: ContainerPattern, req: Request, res: Response, next: NextFunction): void {
+export default function authorization (container: ContainerPattern, req: Request, res: Response, next: NextFunction): Response | void {
 
     // public paths don't need authorization
     // auth paths must be usable without authorization
 
     if (!req.path.includes("/api/") || req.path.startsWith("/api/auth")) {
-        next();
-        return;
+        return next();
     }
 
     // api paths need authorization
@@ -60,18 +59,16 @@ export default function authorization (container: ContainerPattern, req: Request
 
         const error = formateError(new UnauthorizedError("No valid token provided"));
 
-        res.status(error.httpCode).json({
+        return res.status(error.httpCode).json({
             "code": error.code,
             "message": error.message
         });
-
-        return;
 
     }
 
     console.log("authorization found, checking...");
 
-    jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): void => {
+    jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): Response | void => {
 
         if (err) {
 
@@ -79,18 +76,16 @@ export default function authorization (container: ContainerPattern, req: Request
 
             const error = formateError(new UnauthorizedError("Invalid token provided"));
 
-            res.status(error.httpCode).json({
+            return res.status(error.httpCode).json({
                 "code": error.code,
                 "message": error.message
             });
-
-            return;
 
         }
 
         console.log("authorization decoded", decoded);
 
-        next();
+        return next();
 
     });
 
