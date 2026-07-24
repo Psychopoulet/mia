@@ -7,13 +7,14 @@
     import ContainerPattern from "node-containerpattern";
 
     // locals
-    import registerAppData from "./tools/registerAppData";
-    import ensureAppDirectories from "./tools/ensureAppDirectories";
-    import generateConf from "./tools/generateConf";
-    import generateLogger from "./tools/generateLogger";
-    import checkDescriptor from "./tools/checkDescriptor";
-    import managePlugins from "./tools/managePlugins";
-    import generateServer from "./tools/generateServer";
+    import registerAppData from "./tools/init/registerAppData";
+    import ensureAppDirectories from "./tools/init/ensureAppDirectories";
+    import generateConf from "./tools/init/generateConf";
+    import generateLogger from "./tools/init/generateLogger";
+    import generateAuthDatabase from "./tools/init/generateAuthDatabase";
+    import checkDescriptor from "./tools/init/checkDescriptor";
+    import managePlugins from "./tools/init/managePlugins";
+    import generateServer from "./tools/init/generateServer";
 
 // types & interfaces
 
@@ -21,7 +22,8 @@
     import type Pluginsmanager from "node-pluginsmanager";
 
     // locals
-    import type { iLogger } from "./tools/generateLogger";
+    import type { iLogger } from "./tools/init/generateLogger";
+    import type Auth from "./tools/Auth";
 
 // consts
 
@@ -73,6 +75,12 @@
 
         return generateLogger(container);
 
+    // generate auth database
+
+    }).then((): Promise<void> => {
+
+        return generateAuthDatabase(container);
+
     // log basic data
 
     }).then((): void => {
@@ -82,6 +90,7 @@
         log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
         log.debug("conf file : " + container.get<string>("conf-file"));
         log.debug("logs file : " + container.get<string>("logs-file"));
+        log.debug("auth file : " + container.get<string>("auth-file"));
 
     // load plugins
 
@@ -107,6 +116,10 @@
                 return pluginsManager.destroyAll();
 
             }).then((): void => {
+
+                if (container.has("auth-db")) {
+                    container.get<Auth>("auth-db").close();
+                }
 
                 process.exit(0);
 

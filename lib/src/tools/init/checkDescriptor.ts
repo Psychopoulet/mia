@@ -22,7 +22,7 @@
 
 export default function checkDescriptor (container: ContainerPattern): Promise<void> {
 
-    return readFile(join(__dirname, "..", "..", "data", "Descriptor.json"), "utf-8").then((content: string): iDescriptor => {
+    return readFile(join(__dirname, "..", "..", "..", "data", "Descriptor.json"), "utf-8").then((content: string): iDescriptor => {
         return JSON.parse(content) as iDescriptor;
     }).then(({ info }: iDescriptor): void => {
 

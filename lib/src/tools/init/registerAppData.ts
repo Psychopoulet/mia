@@ -23,7 +23,7 @@ export default function registerAppData (container: ContainerPattern): Promise<v
 
     return new Promise((resolve: (content: iPackageData) => void, reject: (err: Error) => void): void => {
 
-        const packageFile: string = join(__dirname, "..", "..", "..", "package.json");
+        const packageFile: string = join(__dirname, "..", "..", "..", "..", "package.json");
 
         return readFile(packageFile, "utf-8", (err: Error | null, content: string): void => {
             return err ? reject(err) : resolve(JSON.parse(content) as iPackageData);
@@ -72,12 +72,21 @@ export default function registerAppData (container: ContainerPattern): Promise<v
         container
             .skeleton("logs-file", "string")
             .set("logs-file", join(container.get<string>("data-directory"), "logs.txt"))
-            .document("logs-file", "The application's file where the logs are registered");
+            .document("logs-file", "The application's file where the logs are registered")
+
+            .document("auth-db", "The application's authentication database (instance of 'node:sqlite' DatabaseSync)");
+
+        // auth file
+        container
+            .skeleton("auth-file", "string")
+            .set("auth-file", join(container.get<string>("data-directory"), "auth.sql"))
+            .document("auth-file", "The application's file where the authentication database is registered");
 
         // server socket
         container
             .skeleton("server-key", "string")
             .document("server-key", "The application's server key for authentication")
+
             .document("server-socket", "The application's server websocket");
 
     });

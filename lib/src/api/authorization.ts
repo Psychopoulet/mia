@@ -13,6 +13,10 @@
     import type { Request, Response, NextFunction } from "express";
     import type ContainerPattern from "node-containerpattern";
 
+    // locals
+    import type Auth from "../tools/Auth";
+    import type { AuthUser, FullAuth } from "../tools/Auth";
+
 // module
 
 export default function authorization (container: ContainerPattern, req: Request, res: Response, next: NextFunction): void {
@@ -66,20 +70,73 @@ export default function authorization (container: ContainerPattern, req: Request
 
     console.log("authorization found, checking...");
 
-    jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): void => {
+    new Promise((resolve: (user: AuthUser) => void, reject: (err: Error) => void): void => {
 
-        if (err) {
+        jwt.verify(token, container.get<string>("server-key"), (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined): void => {
 
-            console.log("authorization error", err);
+            if (err) {
+                console.log("authorization error", err);
+                return reject(err);
+            }
 
-            return next(new UnauthorizedError("Invalid token provided"));
+            console.log("authorization decoded", decoded);
 
-        }
+            if ("undefined" === typeof decoded) {
+                return reject(new UnauthorizedError("Invalid token provided"));
+            }
+            else if ("object" !== typeof decoded) {
+                return reject(new UnauthorizedError("Invalid token provided"));
+            }
+            else if (null === decoded as unknown) { // had to force type to avoid lint error
+                return reject(new UnauthorizedError("Invalid token provided"));
+            }
+                else if ("string" !== typeof decoded.name) {
+                    return reject(new UnauthorizedError("Invalid token provided"));
+                }
+                else if (0 >= decoded.name.trim().length) {
+                    return reject(new UnauthorizedError("Invalid token provided"));
+                }
+                else if ("string" !== typeof decoded.password) {
+                    return reject(new UnauthorizedError("Invalid token provided"));
+                }
+                else if (0 >= decoded.password.trim().length) {
+                    return reject(new UnauthorizedError("Invalid token provided"));
+                }
 
-        console.log("authorization decoded", decoded);
+            return resolve(decoded as AuthUser);
 
+        });
+
+    }).then((tokenUserData: AuthUser): Promise<void> => {
+
+        return container.get<Auth>("auth-db").getUserByToken(token).then((authUser: FullAuth | undefined): void => {
+
+            if (!authUser) {
+                console.log("authorization user not found in database for this token");
+                return next(new UnauthorizedError("This token is not valid anymore"));
+            }
+
+            if (!container.get<Auth>("auth-db").comparePassword(tokenUserData.password, authUser.password)) {
+                console.log("authorization user password does not match");
+                return next(new UnauthorizedError("This token is not valid anymore"));
+            }
+
+            console.log("authorization user", {
+                "name": authUser.name,
+                "password": authUser.password
+            });
+
+            console.log("database user", {
+                "name": tokenUserData.name,
+                "password": tokenUserData.password
+            });
+
+        });
+
+    }).then((): void => {
         return next();
-
+    }).catch((err: Error): void => {
+        return next(err);
     });
 
 }

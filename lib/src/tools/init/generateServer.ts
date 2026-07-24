@@ -17,18 +17,18 @@
     // locals
 
     import getRequestPath from "./getRequestPath";
-    import socketPush from "./socketPush";
+    import socketPush from "../socketPush";
 
-    import authorization from "../api/authorization";
+    import authorization from "../../api/authorization";
 
-    import login from "../api/login";
-    import logout from "../api/logout";
-    import getDescriptor from "../api/getDescriptor";
-    import getPlugins from "../api/getPlugins";
-    import installPluginFromGithub from "../api/installPluginFromGithub";
-    import updatePluginFromGithub from "../api/updatePluginFromGithub";
-    import deletePlugin from "../api/deletePlugin";
-    import getPluginLatestTag from "../api/getPluginLatestTag";
+    import login from "../../api/login";
+    import logout from "../../api/logout";
+    import getDescriptor from "../../api/getDescriptor";
+    import getPlugins from "../../api/getPlugins";
+    import installPluginFromGithub from "../../api/installPluginFromGithub";
+    import updatePluginFromGithub from "../../api/updatePluginFromGithub";
+    import deletePlugin from "../../api/deletePlugin";
+    import getPluginLatestTag from "../../api/getPluginLatestTag";
 
 // types & interfaces
 
@@ -45,7 +45,7 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-    import type { components } from "../api/Descriptor";
+    import type { components } from "../../api/Descriptor";
 
 // module
 
