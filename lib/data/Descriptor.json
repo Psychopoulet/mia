@@ -604,5 +604,11 @@
 	"externalDocs": {
 		"description": "Find out more about this API",
 		"url": "https://github.com/Psychopoulet/mia#readme"
-	}
+	},
+	"servers": [
+		{
+			"description": "Local testing server",
+			"url": "http://localhost:8000"
+		}
+	]
 }
