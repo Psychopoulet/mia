@@ -222,14 +222,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"type": "object",
-								"properties": {
-									"origin": {
-										"type": "string",
-										"minLength": 1
-									}
-								},
-								"required": [ "origin" ]
+								"$ref": "#/components/schemas/User"
 							}
 						}
 					}
@@ -509,6 +502,20 @@
 			"Version": {
 				"type": "string",
 				"minLength": 1
+			},
+			"User": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1
+					},
+					"password": {
+						"type": "string",
+						"minLength": 1
+					}
+				},
+				"required": [ "name", "password" ]
 			},
 			"Token": {
 				"type": "string",

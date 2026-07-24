@@ -30,18 +30,28 @@ export default function login (container: ContainerPattern, req: Request, res: R
     else if (null === body as unknown) { // had to force type to avoid lint error
         return next(new ReferenceError("Body is null"));
     }
-        else if ("undefined" === typeof body.origin) {
-            return next(new ReferenceError("Missing \"origin\" in body"));
+        else if ("undefined" === typeof body.name) {
+            return next(new ReferenceError("Missing \"name\" in body"));
         }
-        else if ("string" !== typeof body.origin) {
-            return next(new TypeError("\"origin\" in body is not a string"));
+        else if ("string" !== typeof body.name) {
+            return next(new TypeError("\"name\" in body is not a string"));
         }
-        else if (0 >= body.origin.trim().length) {
-            return next(new RangeError("\"origin\" in body is empty"));
+        else if (0 >= body.name.trim().length) {
+            return next(new RangeError("\"name\" in body is empty"));
+        }
+        else if ("undefined" === typeof body.password) {
+            return next(new ReferenceError("Missing \"password\" in body"));
+        }
+        else if ("string" !== typeof body.password) {
+            return next(new TypeError("\"password\" in body is not a string"));
+        }
+        else if (0 >= body.password.trim().length) {
+            return next(new RangeError("\"password\" in body is empty"));
         }
 
     jwt.sign({
-        "origin": body.origin
+        "name": body.name,
+        "password": body.password
     }, container.get<string>("server-key"), {
         "expiresIn": "7d"
     }, (err: Error | null, token: string | undefined): void => {
