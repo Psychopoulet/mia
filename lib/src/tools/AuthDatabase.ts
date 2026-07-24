@@ -1,10 +1,10 @@
 // deps
 
-    // natives
-    import { createHash } from "node:crypto";
-
     // externals
     import SQLite3 from "better-sqlite3";
+
+    // locals
+    import authCryptPassword from "./authCryptPassword";
 
 // types & interfaces
 
@@ -14,6 +14,7 @@
     // locals
 
     export interface AuthUser {
+        "id": number;
         "name": string;
         "password": string;
     }
@@ -30,7 +31,7 @@
 
 // module
 
-export default class Auth {
+export default class AuthDatabase {
 
     private readonly _database: Database;
 
@@ -43,6 +44,7 @@ export default class Auth {
         return new Promise((resolve): void => {
 
             this._database.exec(`
+
                 CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
@@ -55,17 +57,16 @@ export default class Auth {
                     FOREIGN KEY (id_user) REFERENCES users(id)
                 );
 
-                INSERT INTO users (name, password) VALUES ('admin', 'admin');
             `);
+
+            this._database
+                .prepare("INSERT INTO users (name, password) VALUES (?, ?);")
+                .run("admin", authCryptPassword("admin"));
 
             resolve();
 
         });
 
-    }
-
-    public comparePassword (password: string, storedCryptedPassword: string): boolean {
-        return createHash("sha256").update(password).digest("hex") === storedCryptedPassword;
     }
 
     public close (): void {
@@ -74,21 +75,49 @@ export default class Auth {
 
     public getUserByToken (token: string): Promise<FullAuth | undefined> {
 
-        return new Promise((resolve): void => {
+        return new Promise((resolve:(result: FullAuth | undefined) => void): void => {
 
             resolve(this._database.prepare(`
-                SELECT u.name, u.password, t.token
-                FROM tokens t
-                INNER JOIN users u ON u.id = t.id_user
-                WHERE t.token = ?
+                SELECT users.name, users.password, tokens.token
+                FROM tokens
+                INNER JOIN users ON users.id = tokens.id_user
+                WHERE tokens.token = ?
             `).get(token) as FullAuth | undefined);
 
         });
 
     }
 
+    public getUserByNameAndPassword (name: string, password: string): Promise<AuthUser | undefined> {
+
+        return new Promise((resolve:(result: AuthUser | undefined) => void): void => {
+
+            resolve(this._database.prepare(`
+                SELECT users.id, users.name, users.password
+                FROM users
+                WHERE users.name = ? AND users.password = ?
+            `).get(name, authCryptPassword(password)) as AuthUser | undefined);
+
+        });
+
+    }
+
+    public addToken (idUser: number, token: string): Promise<void> {
+
+        return new Promise((resolve:() => void): void => {
+
+            this._database
+                .prepare("INSERT INTO tokens (id_user, token) VALUES (?, ?)")
+                .run(idUser, token);
+
+            resolve();
+
+        });
+
+    }
+
     /*
-    public addUser(name: string, password: string): Promise<void> {
+    public addUser (name: string, password: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this._database.exec(`
                 INSERT INTO users (name, password) VALUES (?, ?);
@@ -97,16 +126,7 @@ export default class Auth {
         });
     }
 
-    public getUser(name: string): Promise<AuthUser | undefined> {
-        return new Promise((resolve, reject) => {
-            this._database.get(`
-                SELECT * FROM users WHERE name = ?;
-            `);
-            resolve(result);
-        });
-    }
-
-    public getToken(token: string): Promise<AuthToken | undefined> {
+    public getToken (token: string): Promise<AuthToken | undefined> {
         return new Promise((resolve, reject) => {
             this._database.get(`
                 SELECT * FROM tokens WHERE token = ?;
@@ -115,30 +135,12 @@ export default class Auth {
         });
     }
 
-    public addToken(id_user: number, token: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this._database.exec(`
-                INSERT INTO tokens (id_user, token) VALUES (?, ?);
-            `);
-            resolve();
-        });
-    }
-
-    public removeToken(token: string): Promise<void> {
+    public removeToken (token: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this._database.exec(`
                 DELETE FROM tokens WHERE token = ?;
             `);
             resolve();
-        });
-    }
-
-    public getUser(name: string): Promise<AuthUser | undefined> {
-        return new Promise((resolve, reject) => {
-            this._database.get(`
-                SELECT * FROM users WHERE name = ?;
-            `);
-            resolve(result);
         });
     }
     */

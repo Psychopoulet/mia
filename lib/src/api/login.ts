@@ -3,8 +3,8 @@
 
 // deps
 
-    // externals
-    import jwt from "jsonwebtoken";
+    // locals
+    import { sign } from "../tools/AuthJWT";
 
 // types & interfaces
 
@@ -14,6 +14,8 @@
 
     // locals
     import type { operations } from "./Descriptor";
+    import type AuthDatabase from "../tools/AuthDatabase";
+    import type { AuthUser } from "../tools/AuthDatabase";
 
 // module
 
@@ -49,22 +51,26 @@ export default function login (container: ContainerPattern, req: Request, res: R
             return next(new RangeError("\"password\" in body is empty"));
         }
 
-    jwt.sign({
-        "name": body.name,
-        "password": body.password
-    }, container.get<string>("server-key"), {
-        "expiresIn": "7d"
-    }, (err: Error | null, token: string | undefined): void => {
+    const authDb = container.get<AuthDatabase>("auth-db");
 
-        if (err) {
-            return next(err);
-        }
-        else if ("undefined" === typeof token) {
-            return next(new Error("No token generated"));
+    authDb.getUserByNameAndPassword(body.name, body.password).then((user: AuthUser | undefined): Promise<string> => {
+
+        if (!user) {
+            throw new ReferenceError("User not found");
         }
 
+        return sign(body.name, body.password, container.get<string>("server-key")).then((token: string): Promise<string> => {
+
+            return authDb.addToken(user.id, token).then((): string => {
+                return token;
+            });
+
+        });
+
+    }).then((token: string): void => {
         res.status(201).json(token);
-
+    }).catch((error: Error): void => {
+        return next(error);
     });
 
 }

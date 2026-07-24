@@ -23,7 +23,7 @@
 
     // locals
     import type { iLogger } from "./tools/init/generateLogger";
-    import type Auth from "./tools/Auth";
+    import type AuthDatabase from "./tools/AuthDatabase";
 
 // consts
 
@@ -118,7 +118,7 @@
             }).then((): void => {
 
                 if (container.has("auth-db")) {
-                    container.get<Auth>("auth-db").close();
+                    container.get<AuthDatabase>("auth-db").close();
                 }
 
                 process.exit(0);

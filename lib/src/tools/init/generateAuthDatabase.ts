@@ -10,7 +10,7 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-    import Auth from "../Auth";
+    import AuthDatabase from "../AuthDatabase";
 
 // module
 
@@ -20,7 +20,7 @@ export default function generateAuthDatabase (container: ContainerPattern): Prom
 
     return isFile(authFile).then((exists: boolean): Promise<void> => {
 
-        const database: Auth = new Auth(authFile);
+        const database: AuthDatabase = new AuthDatabase(authFile);
         container.set("auth-db", database);
 
         if (exists) {

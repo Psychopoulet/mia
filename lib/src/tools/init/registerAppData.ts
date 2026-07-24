@@ -79,7 +79,7 @@ export default function registerAppData (container: ContainerPattern): Promise<v
         // auth file
         container
             .skeleton("auth-file", "string")
-            .set("auth-file", join(container.get<string>("data-directory"), "auth.sql"))
+            .set("auth-file", join(container.get<string>("data-directory"), "auth.db"))
             .document("auth-file", "The application's file where the authentication database is registered");
 
         // server socket
