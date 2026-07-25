@@ -56,7 +56,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
     authDb.getUserByNameAndPassword(body.name, body.password).then((user: AuthUser | undefined): Promise<string> => {
 
         if (!user) {
-            throw new ReferenceError("User not found");
+            throw new ReferenceError("Invalid credentials");
         }
 
         return sign(body.name, body.password, container.get<string>("server-key")).then((token: string): Promise<string> => {
