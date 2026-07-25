@@ -28,7 +28,10 @@ export default function authorization (container: ContainerPattern, req: Request
     // public paths don't need authorization
     // auth paths must be usable without authorization
 
-    if (!req.path.includes("/api/") || req.path.startsWith("/api/auth")) {
+    if (!req.path.includes("/api/")) {
+        return next();
+    }
+    else if (req.path.includes("/api/auth") && "PUT" === req.method) { // login path doesn't need authorization
         return next();
     }
 
@@ -46,11 +49,11 @@ export default function authorization (container: ContainerPattern, req: Request
         return authDb.getUserByToken(token).then((authUser: FullAuth | undefined): void => {
 
             if (!authUser) {
-                return next(new UnauthorizedError("This token is not valid anymore"));
+                throw new UnauthorizedError("This token is not valid anymore");
             }
 
             if (tokenUserData.password !== authUser.password) {
-                return next(new UnauthorizedError("This token is not valid anymore"));
+                throw new UnauthorizedError("This token is not valid anymore");
             }
 
         });
