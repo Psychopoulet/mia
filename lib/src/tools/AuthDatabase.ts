@@ -36,7 +36,10 @@ export default class AuthDatabase {
     private readonly _database: Database;
 
     public constructor (filename: string) {
+
         this._database = new SQLite3(filename);
+        this._database.pragma("foreign_keys = ON");
+
     }
 
     public init (): Promise<void> {
@@ -47,15 +50,17 @@ export default class AuthDatabase {
 
                 CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
+                    name TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL
                 );
 
                 CREATE TABLE tokens (
                     id_user INTEGER NOT NULL,
-                    token TEXT NOT NULL,
-                    FOREIGN KEY (id_user) REFERENCES users(id)
+                    token TEXT NOT NULL UNIQUE,
+                    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE
                 );
+
+                CREATE INDEX idx_tokens_id_user ON tokens(id_user);
 
             `);
 
@@ -129,25 +134,5 @@ export default class AuthDatabase {
         });
 
     }
-
-    /*
-    public addUser (name: string, password: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this._database.exec(`
-                INSERT INTO users (name, password) VALUES (?, ?);
-            `);
-            resolve();
-        });
-    }
-
-    public getToken (token: string): Promise<AuthToken | undefined> {
-        return new Promise((resolve, reject) => {
-            this._database.get(`
-                SELECT * FROM tokens WHERE token = ?;
-            `);
-            resolve(result);
-        });
-    }
-    */
 
 }
