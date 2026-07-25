@@ -47,6 +47,11 @@
     import type { iLogger } from "./generateLogger";
     import type { components } from "../../api/Descriptor";
 
+// consts
+
+    const PUBLIC_DIRECTORY: string = join(__dirname, "..", "..", "..", "..", "public");
+    const LIBS_DIRECTORY: string = join(__dirname, "..", "..", "..", "..", "node_modules");
+
 // module
 
 export default function generateServer (container: ContainerPattern): Promise<void> {
@@ -97,7 +102,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
                 app.get([ "/", "/public/index.html" ], (req: Request, res: Response, next: NextFunction): void => {
 
-                    const file: string = join(__dirname, "..", "..", "..", "public", "index.html");
+                    const file: string = join(PUBLIC_DIRECTORY, "index.html");
 
                     readFile(file, "utf-8").then((content: string): void => {
 
@@ -112,13 +117,13 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     });
 
                 }).get("/public/menu.min.js", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js"));
+                    return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js"));
                 }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "menu.min.js.map"));
+                    return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js.map"));
                 }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js"));
+                    return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "bundle.min.js"));
                 }).get("/public/bundle.min.js.map", (req: Request, res: Response): void => {
-                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "dist", "bundle.min.js.map"));
+                    return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "bundle.min.js.map"));
                 });
 
             // libs
@@ -128,17 +133,17 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     // css
 
                     app.get("/public/libs/bootstrap.min.css", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "bootstrap", "dist", "css", "bootstrap.min.css"));
                     }).get("/public/libs/bootstrap.min.css.map", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "css", "bootstrap.min.css.map"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "bootstrap", "dist", "css", "bootstrap.min.css.map"));
                     })
 
                     // js
 
                     .get("/public/libs/bootstrap.min.js", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "bootstrap", "dist", "js", "bootstrap.min.js"));
                     }).get("/public/libs/bootstrap.min.js.map", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "bootstrap", "dist", "js", "bootstrap.min.js.map"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "bootstrap", "dist", "js", "bootstrap.min.js.map"));
                     })
 
                 // fontawesome
@@ -146,23 +151,23 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     // css
 
                     .get("/public/libs/fontawesome.min.css", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "css", "all.min.css"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "css", "all.min.css"));
                     })
 
                     // webfonts
 
                     .get("/public/webfonts/fa-brands-400.ttf", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.ttf"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.ttf"));
                     }).get("/public/webfonts/fa-brands-400.woff2", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.woff2"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.woff2"));
                     }).get("/public/webfonts/fa-regular-400.ttf", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.ttf"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.ttf"));
                     }).get("/public/webfonts/fa-regular-400.woff2", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.woff2"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.woff2"));
                     }).get("/public/webfonts/fa-solid-900.ttf", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.ttf"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.ttf"));
                     }).get("/public/webfonts/fa-solid-900.woff2", (req: Request, res: Response): void => {
-                        return res.sendFile(join(__dirname, "..", "..", "..", "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.woff2"));
+                        return res.sendFile(join(LIBS_DIRECTORY, "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.woff2"));
                     });
 
             // pictures
@@ -173,7 +178,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     "/public/pictures/favicon.ico"
                 ], (req: Request, res: Response): void => {
 
-                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.ico"));
+                    return res.sendFile(join(PUBLIC_DIRECTORY, "pictures", "favicon.ico"));
 
                 }).get([
                     "favicon.png",
@@ -181,7 +186,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     "/public/pictures/favicon.png"
                 ], (req: Request, res: Response): void => {
 
-                    return res.sendFile(join(__dirname, "..", "..", "..", "public", "pictures", "favicon.png"));
+                    return res.sendFile(join(PUBLIC_DIRECTORY, "pictures", "favicon.png"));
 
                 });
 
