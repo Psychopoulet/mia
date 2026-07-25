@@ -18,7 +18,7 @@
     import type { components } from "./Descriptor";
 
     interface iState {
-        "status": "CONNECTED" | "DISCONNECTED";
+        "status": "DISCONNECTED" | "CONNECTED" | "LOGGED";
         "error": components["schemas"]["Error"] | null;
     }
 
@@ -76,7 +76,7 @@ export default class App extends React.Component<iPropsNode, iState> {
     private readonly _onConnected = (): void => {
 
         this.setState({
-            "status": "CONNECTED"
+            "status": this._sdk.isLoggedIn() ? "LOGGED" : "CONNECTED"
         });
 
     };
@@ -132,7 +132,7 @@ export default class App extends React.Component<iPropsNode, iState> {
             </div>;
 
         }
-        else if ("CONNECTED" !== this.state.status) {
+        else if (![ "CONNECTED", "LOGGED" ].includes(this.state.status)) {
 
             return <div className="container">
                 <Alert variant="warning">Unknown status: { this.state.status }</Alert>
@@ -149,7 +149,8 @@ export default class App extends React.Component<iPropsNode, iState> {
                     </ModalBody>
                 </Modal> }
 
-                <Plugins onError={ this._handleError } />
+                { "CONNECTED" === this.state.status && <Alert variant="warning">Need to be logged in</Alert> }
+                { "LOGGED" === this.state.status && <Plugins onError={ this._handleError } /> }
 
             </div>;
 
