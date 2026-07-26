@@ -3,6 +3,9 @@
 
 // deps
 
+    // externals
+    import { NotFoundError } from "node-pluginsmanager-plugin";
+
     // locals
     import { sign } from "../tools/AuthJWT";
 
@@ -56,7 +59,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
     authDb.getUserByNameAndPassword(body.name, body.password).then((user: AuthUser | undefined): Promise<string> => {
 
         if (!user) {
-            throw new ReferenceError("Invalid credentials");
+            throw new NotFoundError("Invalid credentials");
         }
 
         return sign(body.name, body.password, new Date(user.createdAt), container.get<string>("server-key")).then((token: string): Promise<string> => {
