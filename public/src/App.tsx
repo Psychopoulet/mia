@@ -6,6 +6,7 @@
 
     // locals
     import getSDK from "./SDK";
+    import Login from "./Login";
     import Plugins from "./components/Plugins";
 
 // types & interfaces
@@ -149,7 +150,7 @@ export default class App extends React.Component<iPropsNode, iState> {
                     </ModalBody>
                 </Modal> }
 
-                { "CONNECTED" === this.state.status && <Alert variant="warning">Need to be logged in</Alert> }
+                { "CONNECTED" === this.state.status && <Login onError={ this._handleError } /> }
                 { "LOGGED" === this.state.status && <Plugins onError={ this._handleError } /> }
 
             </div>;
