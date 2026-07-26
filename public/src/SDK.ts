@@ -38,6 +38,10 @@ export class SDK extends EventEmitter<{
     "plugin-uninstall-fail": [ components["schemas"]["PushEventPluginUninstallFail"]["data"] ];
 }> {
 
+    // static
+
+        private static readonly _tokenKey: string = "MIAApp-token-auth";
+
     // protected
 
         protected _socket: WebSocket | null;
@@ -53,7 +57,7 @@ export class SDK extends EventEmitter<{
         this._socket = null;
         this._reconnectTimeout = null;
 
-        this._token = localStorage.getItem("MIAApp");
+        this._token = localStorage.getItem(SDK._tokenKey);
 
     }
 
@@ -236,7 +240,7 @@ export class SDK extends EventEmitter<{
         }).then((response: operations["login"]["responses"]["201"]["content"]["application/json"]): operations["login"]["responses"]["201"]["content"]["application/json"] => {
 
             this._token = response;
-            localStorage.setItem("MIAApp", this._token);
+            localStorage.setItem(SDK._tokenKey, this._token);
 
             return response;
 
@@ -257,7 +261,7 @@ export class SDK extends EventEmitter<{
             }
         }).then((res: Response): Promise<operations["logout"]["responses"]["204"]["content"]["application/json"]> => {
 
-            localStorage.removeItem("mia_token");
+            localStorage.removeItem(SDK._tokenKey);
             this._token = null;
 
             return this._parseResponse(res) as Promise<operations["logout"]["responses"]["204"]["content"]["application/json"]>;

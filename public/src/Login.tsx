@@ -134,7 +134,7 @@ export default class Login extends React.Component<iProps, iState> {
 
                 <ModalFooter>
 
-                    <Button type="submit"
+                    <Button type="submit" title="Login"
                         icon="unlock" variant="success" block
                         disabled={ this.state.loading }
                     >

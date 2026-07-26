@@ -225,6 +225,28 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     };
 
+    private readonly _handleLogout = (e: React.MouseEvent<HTMLButtonElement>): void => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        this._sdk.logout().then(() => {
+
+            window.location.reload();
+
+        }).catch((err) => {
+
+            this.setState({
+                "error": {
+                    "code": "unknown",
+                    "message": err.message
+                }
+            });
+
+        });
+
+    };
+
     // render
 
     private readonly _renderContent = (): React.JSX.Element[] | React.JSX.Element => {
@@ -285,6 +307,14 @@ export default class Menu extends React.Component<iPropsNode, iState> {
                         onClick={ this._handleAddPluginFromGitHub }
                     >
                         Add plugin from GitHub
+                    </Button>
+
+                    <Button title="Logout"
+                        icon="power" variant="danger" outline className="ms-2"
+                        disabled={ this.state.addPluginModalOpened || this.state.installingPlugin }
+                        onClick={ this._handleLogout }
+                    >
+                        Logout
                     </Button>
 
                 </div>
