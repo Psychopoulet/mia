@@ -19,7 +19,6 @@
     // locals
     import type AuthDatabase from "../tools/AuthDatabase";
     import type { FullAuth } from "../tools/AuthDatabase";
-    import type { AuthJWTDecoded } from "../tools/AuthJWT";
 
 // module
 
@@ -42,17 +41,13 @@ export default function authorization (container: ContainerPattern, req: Request
         return next(new UnauthorizedError("No valid token provided"));
     }
 
-    verify(token, container.get<string>("server-key")).then((tokenUserData: AuthJWTDecoded): Promise<void> => {
+    verify(token, container.get<string>("server-key")).then((): Promise<void> => {
 
         const authDb = container.get<AuthDatabase>("auth-db");
 
         return authDb.getUserByToken(token).then((authUser: FullAuth | undefined): void => {
 
             if (!authUser) {
-                throw new UnauthorizedError("This token is not valid anymore");
-            }
-
-            if (tokenUserData.password !== authUser.password) {
                 throw new UnauthorizedError("This token is not valid anymore");
             }
 

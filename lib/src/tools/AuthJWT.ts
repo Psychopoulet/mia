@@ -3,9 +3,6 @@
     // externals
     import jwt from "jsonwebtoken";
 
-    // locals
-    import authCryptPassword from "./authCryptPassword";
-
 // types & interfaces
 
     // locals
@@ -16,13 +13,12 @@
 
 // module
 
-export function sign (name: string, password: string, createdAt: Date, key: string): Promise<string> {
+export function sign (name: string, key: string): Promise<string> {
 
     return new Promise((resolve:(result: string) => void, reject:(error: Error) => void): void => {
 
         jwt.sign({
-            "name": name,
-            "password": authCryptPassword(name, password, createdAt)
+            "name": name
         }, key, {
             "expiresIn": "7d"
         }, (err: Error | null, token: string | undefined): void => {
@@ -66,13 +62,6 @@ export function verify (token: string, key: string): Promise<AuthJWTDecoded> {
                     return reject(new Error("Invalid token"));
                 }
                 else if (0 >= decoded.name.trim().length) {
-                    return reject(new Error("Invalid token"));
-                }
-
-                else if ("string" !== typeof decoded.password) {
-                    return reject(new Error("Invalid token"));
-                }
-                else if (0 >= decoded.password.trim().length) {
                     return reject(new Error("Invalid token"));
                 }
 
