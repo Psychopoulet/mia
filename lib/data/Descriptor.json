@@ -497,11 +497,13 @@
 			},
 			"PluginName": {
 				"type": "string",
-				"minLength": 1
+				"minLength": 5,
+				"pattern": "^mia-[a-zA-Z0-9_-]+$"
 			},
 			"Version": {
 				"type": "string",
-				"minLength": 1
+				"minLength": 5,
+				"pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
 			},
 			"User": {
 				"type": "object",

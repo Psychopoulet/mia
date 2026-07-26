@@ -27,22 +27,6 @@ export default function deletePlugin (container: ContainerPattern, req: Request,
 
     const urlParamsPath: operations["deletePlugin"]["parameters"]["path"] = req.params as unknown as operations["deletePlugin"]["parameters"]["path"];
 
-    if ("undefined" === typeof urlParamsPath) {
-        return next(new ReferenceError("Missing urlParamsPath"));
-    }
-    else if ("object" !== typeof urlParamsPath) {
-        return next(new TypeError("urlParamsPath is not an object"));
-    }
-    else if (null === urlParamsPath as unknown) { // had to force type to avoid lint error
-        return next(new ReferenceError("urlParamsPath is null"));
-    }
-        else if ("string" !== typeof urlParamsPath.name) {
-            return next(new TypeError("\"name\" in urlParamsPath is not a string"));
-        }
-        else if (0 >= urlParamsPath.name.trim().length) {
-            return next(new RangeError("\"name\" in urlParamsPath is empty"));
-        }
-
     Promise.resolve().then((): Promise<string> => {
 
         const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");

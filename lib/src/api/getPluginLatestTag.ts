@@ -23,22 +23,6 @@ export default function getPluginLatestTag (container: ContainerPattern, req: Re
 
     const urlParamsPath: operations["getPluginLatestTag"]["parameters"]["path"] = req.params as operations["getPluginLatestTag"]["parameters"]["path"];
 
-    if ("undefined" === typeof urlParamsPath) {
-        return next(new ReferenceError("Missing urlParamsPath"));
-    }
-    else if ("object" !== typeof urlParamsPath) {
-        return next(new TypeError("urlParamsPath is not an object"));
-    }
-    else if (null === urlParamsPath as unknown) { // had to force type to avoid lint error
-        return next(new ReferenceError("urlParamsPath is null"));
-    }
-        else if ("string" !== typeof urlParamsPath.name) {
-            return next(new TypeError("\"name\" in urlParamsPath is not a string"));
-        }
-        else if (0 >= urlParamsPath.name.trim().length) {
-            return next(new RangeError("\"name\" in urlParamsPath is empty"));
-        }
-
     try {
 
         const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");

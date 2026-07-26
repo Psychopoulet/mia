@@ -62,25 +62,6 @@ export default function installPluginFromGithub (container: ContainerPattern, re
 
     const body: operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"] = req.body as operations["installPluginFromGithub"]["requestBody"]["content"]["application/json"];
 
-    if ("undefined" === typeof body) {
-        return next(new ReferenceError("Missing body"));
-    }
-    else if ("object" !== typeof body) {
-        return next(new TypeError("Body is not an object"));
-    }
-    else if (null === body as unknown) { // had to force type to avoid lint error
-        return next(new ReferenceError("Body is null"));
-    }
-        else if ("undefined" === typeof body.path) {
-            return next(new ReferenceError("Missing \"path\" in body"));
-        }
-        else if ("string" !== typeof body.path) {
-            return next(new TypeError("\"path\" in body is not a string"));
-        }
-        else if (0 >= body.path.trim().length) {
-            return next(new RangeError("\"path\" in body is empty"));
-        }
-
     Promise.resolve().then((): iGithubRepository => {
 
         return _parseGithubPath(body.path);
