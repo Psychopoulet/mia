@@ -64,7 +64,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
 
         return sign(body.name, container.get<string>("server-key")).then((token: string): Promise<string> => {
 
-            return authDb.addToken(user.id, token).then((): string => {
+            return authDb.addToken(user.id, token, req.headers["user-agent"] ?? "No user agent").then((): string => {
                 return token;
             });
 

@@ -64,6 +64,7 @@ export default class AuthDatabase {
                 CREATE TABLE tokens (
                     idUser INTEGER NOT NULL,
                     token TEXT NOT NULL,
+                    fingerprint TEXT NOT NULL,
                     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE CASCADE
                 );
@@ -142,13 +143,13 @@ export default class AuthDatabase {
 
     }
 
-    public addToken (idUser: number, token: string): Promise<void> {
+    public addToken (idUser: number, token: string, fingerprint: string): Promise<void> {
 
         return new Promise((resolve:() => void): void => {
 
             this._database
-                .prepare("INSERT INTO tokens (idUser, token) VALUES (?, ?)")
-                .run(idUser, token);
+                .prepare("INSERT INTO tokens (idUser, token, fingerprint) VALUES (?, ?, ?)")
+                .run(idUser, token, fingerprint);
 
             resolve();
 
