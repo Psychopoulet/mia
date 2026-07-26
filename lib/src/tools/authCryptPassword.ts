@@ -5,6 +5,6 @@
 
 // module
 
-export default function authCryptPassword (password: string): string {
-    return createHash("sha256").update(password).digest("hex");
+export default function authCryptPassword (name: string, password: string, createdAt: Date): string {
+    return createHash("sha256").update(name + password + createdAt.toISOString()).digest("hex");
 }

@@ -17,10 +17,12 @@
         "id": number;
         "name": string;
         "password": string;
+        "createdAt": Date;
     }
 
     export interface AuthToken {
         "token": string;
+        "createdAt": Date;
     }
 
     export interface FullAuth {
@@ -44,19 +46,21 @@ export default class AuthDatabase {
 
     public init (): Promise<void> {
 
-        return new Promise((resolve): void => {
+        return new Promise((resolve:(result?: unknown) => void): void => {
 
             this._database.exec(`
 
                 CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL
+                    password TEXT NOT NULL,
+                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );
 
                 CREATE TABLE tokens (
                     id_user INTEGER NOT NULL,
                     token TEXT NOT NULL UNIQUE,
+                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE
                 );
 
@@ -64,18 +68,32 @@ export default class AuthDatabase {
 
             `);
 
-            this._database
-                .prepare("INSERT INTO users (name, password) VALUES (?, ?);")
-                .run("admin", authCryptPassword("admin"));
-
             resolve();
 
+        }).then(() => {
+            return this.addUser("admin", "admin");
         });
 
     }
 
     public close (): void {
         this._database.close();
+    }
+
+    public addUser (name: string, password: string): Promise<void> {
+
+        return new Promise((resolve:() => void): void => {
+
+            const createdAt = new Date();
+
+            this._database
+                .prepare("INSERT INTO users (name, password, createdAt) VALUES (?, ?, ?);")
+                .run(name, authCryptPassword(name, password, createdAt), createdAt.toISOString());
+
+            resolve();
+
+        });
+
     }
 
     public getUserByToken (token: string): Promise<FullAuth | undefined> {
@@ -98,10 +116,25 @@ export default class AuthDatabase {
         return new Promise((resolve:(result: AuthUser | undefined) => void): void => {
 
             resolve(this._database.prepare(`
-                SELECT users.id, users.name, users.password
+                SELECT users.id, users.name, users.password, users.createdAt
                 FROM users
-                WHERE users.name = ? AND users.password = ?
-            `).get(name, authCryptPassword(password)) as AuthUser | undefined);
+                WHERE users.name = ?
+            `).get(name) as AuthUser | undefined);
+
+        }).then((user: AuthUser | undefined): AuthUser | undefined => {
+
+            if (!user) {
+                return undefined;
+            }
+            else {
+
+                if (user.password !== authCryptPassword(name, password, new Date(user.createdAt))) {
+                    return undefined;
+                }
+
+                return user;
+
+            }
 
         });
 

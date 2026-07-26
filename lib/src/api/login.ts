@@ -59,7 +59,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
             throw new ReferenceError("Invalid credentials");
         }
 
-        return sign(body.name, body.password, container.get<string>("server-key")).then((token: string): Promise<string> => {
+        return sign(body.name, body.password, new Date(user.createdAt), container.get<string>("server-key")).then((token: string): Promise<string> => {
 
             return authDb.addToken(user.id, token).then((): string => {
                 return token;

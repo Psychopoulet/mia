@@ -16,13 +16,13 @@
 
 // module
 
-export function sign (name: string, password: string, key: string): Promise<string> {
+export function sign (name: string, password: string, createdAt: Date, key: string): Promise<string> {
 
     return new Promise((resolve:(result: string) => void, reject:(error: Error) => void): void => {
 
         jwt.sign({
             "name": name,
-            "password": authCryptPassword(password)
+            "password": authCryptPassword(name, password, createdAt)
         }, key, {
             "expiresIn": "7d"
         }, (err: Error | null, token: string | undefined): void => {
