@@ -10,7 +10,7 @@
     } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "./SDK";
+    import getSDK from "../SDK";
 
 // types & interfaces
 
@@ -18,7 +18,7 @@
     import type { iPropsNode, iGenerateFocusCallback } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "./SDK";
+    import type { SDK } from "../SDK";
 
     interface iProps extends iPropsNode {
         "onError": (err: Error) => void;
@@ -63,7 +63,9 @@ export default class Login extends React.Component<iProps, iState> {
 
         // focus
 
-        this._generateFocus.setFocus();
+        setTimeout(() => {
+            this._generateFocus.setFocus();
+        }, 200);
 
     }
 

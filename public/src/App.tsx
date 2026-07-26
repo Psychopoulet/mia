@@ -6,7 +6,7 @@
 
     // locals
     import getSDK from "./SDK";
-    import Login from "./Login";
+    import Login from "./components/Login";
     import Plugins from "./components/Plugins";
 
 // types & interfaces
