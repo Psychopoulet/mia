@@ -54,18 +54,21 @@ export default class AuthDatabase {
 
                 CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
                     password TEXT NOT NULL,
                     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );
 
+                CREATE UNIQUE INDEX idx_users_name ON users(name);
+
                 CREATE TABLE tokens (
                     idUser INTEGER NOT NULL,
-                    token TEXT NOT NULL UNIQUE,
+                    token TEXT NOT NULL,
                     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE CASCADE
                 );
 
+                CREATE UNIQUE INDEX idx_tokens_token ON tokens(token);
                 CREATE INDEX idx_tokens_idUser ON tokens(idUser);
 
             `);
