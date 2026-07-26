@@ -27,6 +27,6 @@ export default function extractToken (req: Request): string {
 
     }
 
-    return headerAuthorization.replace("Bearer ", "").trim();
+    return headerAuthorization.replace(/^Bearer\s+/i, "").trim();
 
 }
