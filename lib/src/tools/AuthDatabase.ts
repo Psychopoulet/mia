@@ -2,9 +2,7 @@
 
     // externals
     import SQLite3 from "better-sqlite3";
-
-    // locals
-    import authCryptPassword from "./authCryptPassword";
+    import bcrypt from "bcrypt";
 
 // types & interfaces
 
@@ -30,6 +28,10 @@
         "password": string;
         "token": string;
     }
+
+// consts
+
+    const BCRYPT_ROUNDS: number = 10;
 
 // module
 
@@ -58,13 +60,13 @@ export default class AuthDatabase {
                 );
 
                 CREATE TABLE tokens (
-                    id_user INTEGER NOT NULL,
+                    idUser INTEGER NOT NULL,
                     token TEXT NOT NULL UNIQUE,
                     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE
+                    FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE CASCADE
                 );
 
-                CREATE INDEX idx_tokens_id_user ON tokens(id_user);
+                CREATE INDEX idx_tokens_idUser ON tokens(idUser);
 
             `);
 
@@ -82,15 +84,13 @@ export default class AuthDatabase {
 
     public addUser (name: string, password: string): Promise<void> {
 
-        return new Promise((resolve:() => void): void => {
+        const createdAt = new Date();
 
-            const createdAt = new Date();
+        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
 
             this._database
                 .prepare("INSERT INTO users (name, password, createdAt) VALUES (?, ?, ?);")
-                .run(name, authCryptPassword(name, password, createdAt), createdAt.toISOString());
-
-            resolve();
+                .run(name, hash, createdAt.toISOString());
 
         });
 
@@ -103,7 +103,7 @@ export default class AuthDatabase {
             resolve(this._database.prepare(`
                 SELECT users.name, users.password, tokens.token
                 FROM tokens
-                INNER JOIN users ON users.id = tokens.id_user
+                INNER JOIN users ON users.id = tokens.idUser
                 WHERE tokens.token = ?
             `).get(token) as FullAuth | undefined);
 
@@ -121,20 +121,19 @@ export default class AuthDatabase {
                 WHERE users.name = ?
             `).get(name) as AuthUser | undefined);
 
-        }).then((user: AuthUser | undefined): AuthUser | undefined => {
+        }).then((user: AuthUser | undefined): Promise<AuthUser | undefined> => {
 
             if (!user) {
-                return undefined;
+                return Promise.resolve(undefined);
             }
-            else {
 
-                if (user.password !== authCryptPassword(name, password, new Date(user.createdAt))) {
-                    return undefined;
-                }
+            return bcrypt.compare(password, user.password).then((isValid: boolean): AuthUser | undefined => {
 
-                return user;
+                return isValid
+                    ? user
+                    : undefined;
 
-            }
+            });
 
         });
 
@@ -145,7 +144,7 @@ export default class AuthDatabase {
         return new Promise((resolve:() => void): void => {
 
             this._database
-                .prepare("INSERT INTO tokens (id_user, token) VALUES (?, ?)")
+                .prepare("INSERT INTO tokens (idUser, token) VALUES (?, ?)")
                 .run(idUser, token);
 
             resolve();
