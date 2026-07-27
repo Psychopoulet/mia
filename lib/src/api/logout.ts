@@ -14,6 +14,7 @@
 
     // locals
     import type AuthDatabase from "../tools/AuthDatabase";
+    import type { operations } from "./Descriptor";
 
 // module
 
@@ -24,7 +25,11 @@ export default function logout (container: ContainerPattern, req: Request, res: 
 
     const authDb = container.get<AuthDatabase>("auth-db");
     authDb.removeToken(token).then((): void => {
-        res.status(204).json();
+
+        const httpCode: keyof operations["logout"]["responses"] = 204;
+
+        res.status(httpCode).json();
+
     }).catch((error: Error): void => {
         return next(error);
     });

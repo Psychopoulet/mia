@@ -34,7 +34,9 @@ export default function getPlugins (container: ContainerPattern, req: Request, r
 
         });
 
-        res.status(200).json(data);
+        const httpCode: keyof operations["getPlugins"]["responses"] = 200;
+
+        res.status(httpCode).json(data);
 
     }
     catch (err: unknown) {

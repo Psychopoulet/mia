@@ -52,7 +52,9 @@ export default function deletePlugin (container: ContainerPattern, req: Request,
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 
-        return res.status(204).json();
+        const httpCode: keyof operations["deletePlugin"]["responses"] = 204;
+
+        return res.status(httpCode).json();
 
     }).catch((err: Error): void => {
 

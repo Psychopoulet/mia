@@ -47,7 +47,9 @@ export default function updatePluginFromGithub (container: ContainerPattern, req
 
     }).then((): Response => {
 
-        return res.status(204).json();
+        const httpCode: keyof operations["updatePluginFromGithub"]["responses"] = 204;
+
+        return res.status(httpCode).json();
 
     }).catch((err: Error): void => {
 

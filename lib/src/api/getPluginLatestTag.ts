@@ -23,26 +23,23 @@ export default function getPluginLatestTag (container: ContainerPattern, req: Re
 
     const urlParamsPath: operations["getPluginLatestTag"]["parameters"]["path"] = req.params as operations["getPluginLatestTag"]["parameters"]["path"];
 
-    try {
+    const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
+    const plugin: Orchestrator | undefined = pluginsManager.plugins.find((p: Orchestrator): boolean => {
+        return p.name === urlParamsPath.name;
+    });
 
-        const pluginsManager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
-        const plugin: Orchestrator | undefined = pluginsManager.plugins.find((p: Orchestrator): boolean => {
-            return p.name === urlParamsPath.name;
-        });
-
-        if (!plugin) {
-            return next(new NotFoundError("Plugin \"" + urlParamsPath.name + "\" not found"));
-        }
-
-        pluginsManager.getLatestGithubTag(plugin).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): Response => {
-            return res.status(200).json(data);
-        }).catch((err: Error): void => {
-            return next(err);
-        });
-
+    if (!plugin) {
+        return next(new NotFoundError("Plugin \"" + urlParamsPath.name + "\" not found"));
     }
-    catch (err: unknown) {
+
+    pluginsManager.getLatestGithubTag(plugin).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): Response => {
+
+        const httpCode: keyof operations["getPluginLatestTag"]["responses"] = 200;
+
+        return res.status(httpCode).json(data);
+
+    }).catch((err: Error): void => {
         return next(err);
-    }
+    });
 
 }

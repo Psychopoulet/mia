@@ -82,7 +82,9 @@ export default function installPluginFromGithub (container: ContainerPattern, re
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 
-        return res.status(201).json();
+        const httpCode: keyof operations["installPluginFromGithub"]["responses"] = 201;
+
+        return res.status(httpCode).json();
 
     }).catch((err: Error): void => {
 

@@ -11,6 +11,9 @@
     // externals
     import type { Request, Response, NextFunction } from "express";
 
+    // locals
+    import type { operations } from "./Descriptor";
+
 // module
 
 export default function getDescriptor (req: Request, res: Response, next: NextFunction): void {
@@ -32,6 +35,12 @@ export default function getDescriptor (req: Request, res: Response, next: NextFu
             return res.status(200).json(descriptor);
 
         });
+
+    }).then((data): Response => {
+
+        const httpCode: keyof operations["getDescriptor"]["responses"] = 200;
+
+        return res.status(httpCode).json(data);
 
     }).catch((err: Error): void => {
         return next(err);
