@@ -14,6 +14,7 @@
     // externals
     import type { Request, Response, NextFunction } from "express";
     import type ContainerPattern from "node-containerpattern";
+    import type ConfManager from "node-confmanager";
 
     // locals
     import type { operations } from "./Descriptor";
@@ -34,7 +35,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
             throw new NotFoundError("Invalid credentials");
         }
 
-        return sign(body.name, container.get<string>("server-key")).then((token: string): Promise<string> => {
+        return sign(body.name, container.get<ConfManager>("conf").get("auth-access-token")).then((token: string): Promise<string> => {
 
             return authDb.addToken(user.id, token, req.headers["user-agent"] ?? "No user agent").then((): string => {
                 return token;

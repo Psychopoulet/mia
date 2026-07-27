@@ -3,6 +3,9 @@
 
 // deps
 
+    // natives
+    import { join } from "node:path";
+
     // externals
     import ContainerPattern from "node-containerpattern";
 
@@ -63,7 +66,7 @@
 
         return ensureAppDirectories(container);
 
-    // generate and load conf file
+    // generate and load conf
 
     }).then((): Promise<void> => {
 
@@ -88,7 +91,7 @@
         const log: iLogger = container.get<iLogger>("log");
 
         log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
-        log.debug("conf file : " + container.get<string>("conf-file"));
+        log.debug("env file : " + join(container.get<string>("data-directory"), ".env"));
         log.debug("logs file : " + container.get<string>("logs-file"));
         log.debug("auth file : " + container.get<string>("auth-file"));
 

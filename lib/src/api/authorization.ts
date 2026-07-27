@@ -15,6 +15,7 @@
     // externals
     import type { Request, Response, NextFunction } from "express";
     import type ContainerPattern from "node-containerpattern";
+    import type ConfManager from "node-confmanager";
 
     // locals
     import type AuthDatabase from "../tools/AuthDatabase";
@@ -41,7 +42,7 @@ export default function authorization (container: ContainerPattern, req: Request
         return next(new UnauthorizedError("No valid token provided"));
     }
 
-    verify(token, container.get<string>("server-key")).then((): Promise<void> => {
+    verify(token, container.get<ConfManager>("conf").get("auth-access-token")).then((): Promise<void> => {
 
         const authDb = container.get<AuthDatabase>("auth-db");
 

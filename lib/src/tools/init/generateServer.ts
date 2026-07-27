@@ -1,8 +1,7 @@
 // deps
 
     // natives
-    import { randomBytes } from "node:crypto";
-    import { readFile, writeFile } from "node:fs/promises";
+    import { readFile } from "node:fs/promises";
     import { createServer } from "node:http";
     import { join } from "node:path";
 
@@ -12,7 +11,7 @@
     import express from "express";
     import helmet from "helmet";
     import { middleware as openApiValidatorMiddleware } from "express-openapi-validator";
-    import { isFile, formateError, NotFoundError } from "node-pluginsmanager-plugin";
+    import { formateError, NotFoundError } from "node-pluginsmanager-plugin";
     import { WebSocketServer } from "ws";
 
     // locals
@@ -64,27 +63,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
         "validateResponses": false
     });
 
-    return Promise.resolve().then(async (): Promise<void> => {
-
-        // generate server key
-
-        // if server key is already set, return
-        if (container.has("server-key")) {
-            return Promise.resolve();
-        }
-
-        const file: string = join(container.get<string>("data-directory"), ".server-key");
-
-        // if server key file does not exist, create it
-        if (!await isFile(file)) {
-            await writeFile(file, randomBytes(64).toString("hex"), "utf-8");
-        }
-
-        return readFile(file, "utf-8").then((key: string): void => {
-            container.set("server-key", key);
-        });
-
-    }).then((): Promise<void> => {
+    return Promise.resolve().then((): Promise<void> => {
 
         return new Promise((resolve: () => void): void => {
 
