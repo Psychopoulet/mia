@@ -43,11 +43,11 @@ export default function login (container: ContainerPattern, req: Request, res: R
 
         });
 
-    }).then((token: operations["login"]["responses"]["201"]["content"]["application/json"]): void => {
+    }).then((data: operations["login"]["responses"]["201"]["content"]["application/json"]): void => {
 
         const httpCode: keyof operations["login"]["responses"] = 201;
 
-        res.status(httpCode).json(token);
+        res.status(httpCode).json(data);
 
     }).catch((error: Error): void => {
         return next(error);
