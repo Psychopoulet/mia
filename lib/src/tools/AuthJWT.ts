@@ -8,7 +8,6 @@
     // locals
     export interface AuthJWTDecoded {
         "name": string;
-        "password": string;
     }
 
 // module
