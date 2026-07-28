@@ -128,7 +128,7 @@ export default class Login extends React.Component<iProps, iState> {
                         value={ this.state.name } onChange={ this._handleChangeName }
                     />
 
-                    <InputTextLabel label="password" disabled={ this.state.loading }
+                    <InputTextLabel type="password" label="password" disabled={ this.state.loading }
                         value={ this.state.password } onChange={ this._handleChangePassword }
                     />
 
