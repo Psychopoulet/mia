@@ -43,7 +43,7 @@ export default function updatePluginFromGithub (container: ContainerPattern, req
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 
-        return pluginsManager.updateViaGithub(plugin);
+        return pluginsManager.updateViaGithub(plugin, container);
 
     }).then((): Response => {
 
