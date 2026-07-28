@@ -43,7 +43,7 @@ export default function deletePlugin (container: ContainerPattern, req: Request,
 
         socketPush(container.get<WebSocketServer>("server-socket"), command, data);
 
-        return pluginsManager.uninstall(plugin);
+        return pluginsManager.uninstall(plugin, container);
 
     }).then((pluginName: string): Response => {
 
