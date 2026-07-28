@@ -57,7 +57,23 @@ export default function authorization (container: ContainerPattern, req: Request
     }).then((): void => {
         return next();
     }).catch((err: Error): void => {
+
+        // if the token is expired, remove it from the database then return the initial error
+        if (err.name && "TokenExpiredError" === err.name) {
+
+            const authDb = container.get<AuthDatabase>("auth-db");
+            authDb.removeToken(token).then((): void => {
+                return next(err);
+            }).catch((): void => {
+                return next(err);
+            });
+
+            return;
+
+        }
+
         return next(err);
+
     });
 
 }
