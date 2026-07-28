@@ -1,20 +1,23 @@
-/*
-    eslint-disable n/no-process-exit
-*/
+/* eslint-disable n/no-process-exit */
+// - n/no-process-exit is disabled because we need to exit the process manually
 
 // deps
+
+    // natives
+    import { join } from "node:path";
 
     // externals
     import ContainerPattern from "node-containerpattern";
 
     // locals
-    import registerAppData from "./tools/registerAppData";
-    import ensureAppDirectories from "./tools/ensureAppDirectories";
-    import generateConf from "./tools/generateConf";
-    import generateLogger from "./tools/generateLogger";
-    import checkDescriptor from "./tools/checkDescriptor";
-    import managePlugins from "./tools/managePlugins";
-    import generateServer from "./tools/generateServer";
+    import registerAppData from "./tools/init/registerAppData";
+    import ensureAppDirectories from "./tools/init/ensureAppDirectories";
+    import generateConf from "./tools/init/generateConf";
+    import generateLogger from "./tools/init/generateLogger";
+    import generateAuthDatabase from "./tools/init/generateAuthDatabase";
+    import checkDescriptor from "./tools/init/checkDescriptor";
+    import managePlugins from "./tools/init/managePlugins";
+    import generateServer from "./tools/init/generateServer";
 
 // types & interfaces
 
@@ -22,7 +25,8 @@
     import type Pluginsmanager from "node-pluginsmanager";
 
     // locals
-    import type { iLogger } from "./tools/generateLogger";
+    import type { iLogger } from "./tools/init/generateLogger";
+    import type AuthDatabase from "./tools/AuthDatabase";
 
 // consts
 
@@ -62,7 +66,7 @@
 
         return ensureAppDirectories(container);
 
-    // generate and load conf file
+    // generate and load conf
 
     }).then((): Promise<void> => {
 
@@ -74,6 +78,12 @@
 
         return generateLogger(container);
 
+    // generate auth database
+
+    }).then((): Promise<void> => {
+
+        return generateAuthDatabase(container);
+
     // log basic data
 
     }).then((): void => {
@@ -81,8 +91,9 @@
         const log: iLogger = container.get<iLogger>("log");
 
         log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
-        log.debug("conf file : " + container.get<string>("conf-file"));
+        log.debug("env file : " + join(container.get<string>("data-directory"), ".env"));
         log.debug("logs file : " + container.get<string>("logs-file"));
+        log.debug("auth file : " + container.get<string>("auth-file"));
 
     // load plugins
 
@@ -108,6 +119,10 @@
                 return pluginsManager.destroyAll();
 
             }).then((): void => {
+
+                if (container.has("auth-db")) {
+                    container.get<AuthDatabase>("auth-db").close();
+                }
 
                 process.exit(0);
 

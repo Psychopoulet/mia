@@ -20,7 +20,8 @@
     import type { components, operations } from "../src/Descriptor";
 
     interface iState {
-        "status": "DISCONNECTED" | "CONNECTED" | "LOADING" | "LOADED";
+        "status": "DISCONNECTED" | "CONNECTED" | "LOGGED";
+        "loading": boolean;
         "plugins": components["schemas"]["Plugin"][];
         "error": components["schemas"]["Error"] | null;
         "addPluginModalOpened": boolean;
@@ -49,6 +50,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
         this.state = {
             "status": "DISCONNECTED",
+            "loading": false,
             "plugins": [],
             "error": null,
             "addPluginModalOpened": false,
@@ -60,7 +62,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
     public componentDidMount (): void {
 
         this.setState({
-            "status": "LOADING",
+            "status": this._sdk.isLoggedIn() ? "LOGGED" : "CONNECTED",
             "plugins": [],
             "error": null
         });
@@ -81,8 +83,6 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     public componentWillUnmount (): void {
 
-        this._sdk.disconnect();
-
         this._sdk
             .off("connected", this._onConnected)
             .off("disconnected", this._onDisconnected)
@@ -92,6 +92,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
             .off("plugin-install-success", this._onPluginInstallSuccess)
             .off("plugin-install-fail", this._onPluginInstallFail)
             .off("plugin-uninstall-success", this._onPluginUninstallSuccess);
+
+        this._sdk.disconnect();
 
         this.setState({
             "plugins": [],
@@ -105,7 +107,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
     private _loadPlugins = (): void => {
 
         this.setState({
-            "status": "LOADING",
+            "loading": true,
             "plugins": [],
             "error": null
         });
@@ -113,14 +115,14 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         this._sdk.getPlugins().then((plugins: operations["getPlugins"]["responses"]["200"]["content"]["application/json"]): void => {
 
             this.setState({
-                "status": "LOADED",
+                "loading": false,
                 "plugins": plugins
             });
 
         }).catch((err: Error): void => {
 
             this.setState({
-                "status": "CONNECTED",
+                "loading": false,
                 "error": {
                     "code": "unknown",
                     "message": err.message
@@ -134,7 +136,17 @@ export default class Menu extends React.Component<iPropsNode, iState> {
     // sdk events
 
     private readonly _onConnected = (): void => {
-        return this._loadPlugins();
+
+        const isLoggedIn: boolean = this._sdk.isLoggedIn();
+
+        this.setState({
+            "status": isLoggedIn ? "LOGGED" : "CONNECTED"
+        });
+
+        if (isLoggedIn) {
+            this._loadPlugins();
+        }
+
     };
 
     private readonly _onDisconnected = (): void => {
@@ -150,7 +162,6 @@ export default class Menu extends React.Component<iPropsNode, iState> {
     private readonly _onError = (data: components["schemas"]["Error"]): void => {
 
         this.setState({
-            "status": "CONNECTED",
             "error": data
         });
 
@@ -214,18 +225,33 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     };
 
+    private readonly _handleLogout = (e: React.MouseEvent<HTMLButtonElement>): void => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        this._sdk.logout().then(() => {
+
+            window.location.reload();
+
+        }).catch((err) => {
+
+            this.setState({
+                "error": {
+                    "code": "unknown",
+                    "message": err.message
+                }
+            });
+
+        });
+
+    };
+
     // render
 
     private readonly _renderContent = (): React.JSX.Element[] | React.JSX.Element => {
 
-        if ("LOADED" !== this.state.status && !this.state.installingPlugin) {
-
-            return <li className="nav-item">
-                <span className="nav-link disabled text-info">Unknown status: { this.state.status }</span>
-            </li>;
-
-        }
-        else if (0 >= this.state.plugins.length) {
+        if (0 >= this.state.plugins.length) {
 
             return <li className="nav-item">
                 <span className="nav-link disabled text-warning">No plugins found</span>
@@ -241,11 +267,11 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
         });
 
-    };
+    }
 
     public render (): React.JSX.Element | undefined {
 
-        if ("DISCONNECTED" === this.state.status) {
+        if ("LOGGED" !== this.state.status) {
             return;
         }
 
@@ -281,6 +307,14 @@ export default class Menu extends React.Component<iPropsNode, iState> {
                         onClick={ this._handleAddPluginFromGitHub }
                     >
                         Add plugin from GitHub
+                    </Button>
+
+                    <Button title="Logout"
+                        icon="power" variant="danger" outline className="ms-2"
+                        disabled={ this.state.addPluginModalOpened || this.state.installingPlugin }
+                        onClick={ this._handleLogout }
+                    >
+                        Logout
                     </Button>
 
                 </div>
