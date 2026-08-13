@@ -19,7 +19,7 @@
     // locals
     import type { operations } from "./Descriptor";
     import type AuthDatabase from "../tools/AuthDatabase";
-    import type { AuthUser } from "../tools/AuthDatabase";
+    import type { AuthUserPublic } from "../tools/AuthDatabase";
 
 // module
 
@@ -29,7 +29,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
 
     const authDb = container.get<AuthDatabase>("auth-db");
 
-    authDb.getUserByNameAndPassword(body.name, body.password).then((user: AuthUser | undefined): Promise<string> => {
+    authDb.getUserByNameAndPassword(body.name, body.password).then((user: AuthUserPublic | undefined): Promise<string> => {
 
         if (!user) {
             throw new NotFoundError("Invalid credentials");

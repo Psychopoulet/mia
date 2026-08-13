@@ -19,7 +19,7 @@
 
     // locals
     import type AuthDatabase from "../tools/AuthDatabase";
-    import type { FullAuth } from "../tools/AuthDatabase";
+    import type { FullAuthPublic } from "../tools/AuthDatabase";
 
 // module
 
@@ -46,7 +46,7 @@ export default function authorization (container: ContainerPattern, req: Request
 
         const authDb = container.get<AuthDatabase>("auth-db");
 
-        return authDb.getUserByToken(token).then((authUser: FullAuth | undefined): void => {
+        return authDb.getUserByToken(token).then((authUser: FullAuthPublic | undefined): void => {
 
             if (!authUser) {
                 throw new UnauthorizedError("This token is not valid anymore");
