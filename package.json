@@ -62,7 +62,7 @@
     "pm2.json"
   ],
   "engines": {
-    "node": ">=22.23.1"
+    "node": ">=22.23.2"
   },
 
   "dependencies": {
