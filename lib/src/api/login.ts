@@ -37,7 +37,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
 
         return sign(body.name, container.get<ConfManager>("conf").get("auth-access-token")).then((token: string): Promise<string> => {
 
-            return authDb.addToken(user.id, token, req.headers["user-agent"] ?? "No user agent").then((): string => {
+            return authDb.addToken(user.name, token, req.headers["user-agent"] ?? "No user agent").then((): string => {
                 return token;
             });
 
