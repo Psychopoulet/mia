@@ -15,17 +15,20 @@
         "id": number;
         "name": string;
         "password": string;
+        "isAdmin": boolean;
         "createdAt": Date;
     }
 
     export interface AuthToken {
         "token": string;
+        "fingerprint": string;
         "createdAt": Date;
     }
 
     export interface FullAuth {
         "name": string;
         "password": string;
+        "isAdmin": boolean;
         "token": string;
     }
 
@@ -56,6 +59,7 @@ export default class AuthDatabase {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     password TEXT NOT NULL,
+                    isAdmin INTEGER NOT NULL CHECK(isAdmin IN (0,1)) DEFAULT 0,
                     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );
 
@@ -77,7 +81,7 @@ export default class AuthDatabase {
             resolve();
 
         }).then(() => {
-            return this.addUser("admin", "admin");
+            return this.addUser("admin", "admin", true);
         });
 
     }
@@ -86,15 +90,41 @@ export default class AuthDatabase {
         this._database.close();
     }
 
-    public addUser (name: string, password: string): Promise<void> {
+    public addUser (name: string, password: string, isAdmin: boolean = false): Promise<void> {
 
         const createdAt = new Date();
 
         return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
 
             this._database
-                .prepare("INSERT INTO users (name, password, createdAt) VALUES (?, ?, ?);")
-                .run(name, hash, createdAt.toISOString());
+                .prepare("INSERT INTO users (name, password, isAdmin, createdAt) VALUES (?, ?, ?, ?);")
+                .run(name, hash, isAdmin ? 1 : 0, createdAt.toISOString());
+
+        });
+
+    }
+
+    public editUserPassword (name: string, password: string): Promise<void> {
+
+        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
+
+            this._database
+                .prepare("UPDATE users SET password = ? WHERE name = ?;")
+                .run(name, hash);
+
+        });
+
+    }
+
+    public editUserIsAdmin (name: string, isAdmin: boolean): Promise<void> {
+
+        return new Promise((resolve:() => void): void => {
+
+            this._database
+                .prepare("UPDATE users SET isAdmin = ? WHERE name = ?;")
+                .run(isAdmin ? 1 : 0, name);
+
+            resolve();
 
         });
 
@@ -104,12 +134,20 @@ export default class AuthDatabase {
 
         return new Promise((resolve:(result: FullAuth | undefined) => void): void => {
 
-            resolve(this._database.prepare(`
+            const user: Record<string, unknown> | undefined = this._database.prepare(`
                 SELECT users.name, users.password, tokens.token
                 FROM tokens
                 INNER JOIN users ON users.id = tokens.idUser
                 WHERE tokens.token = ?
-            `).get(token) as FullAuth | undefined);
+            `).get(token) as Record<string, unknown> | undefined;
+
+            if (!user) {
+                return resolve(user);
+            }
+
+            user.isAdmin = 1 === user.isAdmin;
+
+            return resolve(user as unknown as FullAuth);
 
         });
 
@@ -117,27 +155,45 @@ export default class AuthDatabase {
 
     public getUserByNameAndPassword (name: string, password: string): Promise<AuthUser | undefined> {
 
-        return new Promise((resolve:(result: AuthUser | undefined) => void): void => {
+        return new Promise((resolve:(result: Record<string, unknown> | undefined) => void): void => {
 
             resolve(this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.createdAt
+                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
                 FROM users
                 WHERE users.name = ?
-            `).get(name) as AuthUser | undefined);
+            `).get(name) as Record<string, unknown> | undefined);
 
-        }).then((user: AuthUser | undefined): Promise<AuthUser | undefined> => {
+        }).then((user: Record<string, unknown> | undefined): Promise<AuthUser | undefined> => {
 
             if (!user) {
-                return Promise.resolve(undefined);
+                return Promise.resolve(user);
             }
 
-            return bcrypt.compare(password, user.password).then((isValid: boolean): AuthUser | undefined => {
+            return bcrypt.compare(password, user.password as string).then((isValid: boolean): AuthUser | undefined => {
 
                 return isValid
-                    ? user
+                    ? {
+                        ...user,
+                        "isAdmin": 1 === user.isAdmin
+                    } as unknown as AuthUser
                     : undefined;
 
             });
+
+        });
+
+    }
+
+    public getTokensByUserName (name: string): Promise<AuthToken[]> {
+
+        return new Promise((resolve:(result: AuthToken[]) => void): void => {
+
+            resolve(this._database.prepare(`
+                SELECT tokens.token, tokens.fingerprint, tokens.createdAt
+                FROM tokens
+                INNER JOIN users ON users.id = tokens.idUser
+                WHERE users.name = ?
+            `).all(name) as AuthToken[]);
 
         });
 
