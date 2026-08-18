@@ -24,11 +24,13 @@
 
 export default function generateLogger (container: ContainerPattern): void {
 
+    const conf: ConfManager = container.get<ConfManager>("conf");
+
     const logger = winston.createLogger({
 
         "transports": [
             new winston.transports.File({
-                "level": container.get<ConfManager>("conf").get<boolean>("debug") ? "debug" : "info",
+                "level": conf.get<boolean>("debug") ? "debug" : "info",
                 "filename": container.get<string>("logs-file"),
                 "format": winston.format.combine(
                     winston.format.timestamp({
@@ -59,7 +61,7 @@ export default function generateLogger (container: ContainerPattern): void {
         "debug": "grey"
     });
 
-    if (container.get<ConfManager>("conf").get<boolean>("debug")) {
+    if (conf.get<boolean>("debug")) {
 
         logger.add(new winston.transports.Console({
             "level": "debug",
