@@ -62,12 +62,6 @@ export default function registerAppData (container: ContainerPattern): Promise<v
             .set("plugins-directory", join(homedir(), container.get<string>("app.name"), "plugins"))
             .document("plugins-directory", "Where the application's plugins are stored and executed");
 
-        // conf
-        container
-            .skeleton("conf-file", "string")
-            .set("conf-file", join(container.get<string>("data-directory"), "conf.json"))
-            .document("conf-file", "The application's file where the configuration is registered");
-
         // logs
         container
             .skeleton("logs-file", "string")
