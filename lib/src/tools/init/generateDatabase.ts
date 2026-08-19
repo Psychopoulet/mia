@@ -3,7 +3,9 @@
     // externals
     import { isFile } from "node-pluginsmanager-plugin";
     import { Sequelize } from "sequelize";
-    import SQLite3 from "better-sqlite3";
+
+    // locals
+    import sqlite3SequelizeAdapter from "../sqlite3SequelizeAdapter";
 
 // types & interfaces
 
@@ -60,7 +62,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
         return initDatabase(container, new Sequelize({
             "dialect": "sqlite",
             "storage": databaseFile,
-            "dialectModule": SQLite3, // already in the project, do not pull sqlite3
+            "dialectModule": sqlite3SequelizeAdapter, // sequelize 6 expects sqlite3's API, not better-sqlite3
             "logging": false
         }));
 
