@@ -141,7 +141,7 @@ Use `container.get<iLogger>("log")` (bootstrap console).
 
 ---
 
-## Step 5 — Shutdown + startup logs
+## Step 5 — Shutdown + startup logs ✓
 
 **Goal:** Close Sequelize like auth; print the database path/URI after Winston exists.
 

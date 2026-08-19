@@ -24,6 +24,8 @@
 
     // externals
     import type Pluginsmanager from "node-pluginsmanager";
+    import type ConfManager from "node-confmanager";
+    import type { Sequelize } from "sequelize";
 
     // locals
     import type { iLogger } from "./tools/init/generateLogger";
@@ -100,6 +102,16 @@
         log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
         log.debug("env file : " + join(container.get<string>("data-directory"), ".env"));
         log.debug("logs file : " + container.get<string>("logs-file"));
+
+        const conf: ConfManager = container.get<ConfManager>("conf");
+
+        if (conf.has("database-uri")) {
+            log.debug("database uri : " + conf.get<string>("database-uri"));
+        }
+        else {
+            log.debug("database file : " + container.get<string>("database-file"));
+        }
+
         log.debug("auth file : " + container.get<string>("auth-file"));
 
     // load plugins
@@ -124,6 +136,14 @@
             pluginsManager.releaseAll().then((): Promise<void> => {
 
                 return pluginsManager.destroyAll();
+
+            }).then((): Promise<void> => {
+
+                if (container.has("database")) {
+                    return container.get<Sequelize>("database").close();
+                }
+
+                return Promise.resolve();
 
             }).then((): void => {
 
