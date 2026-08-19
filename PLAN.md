@@ -2,6 +2,8 @@
 
 Step-by-step plan. Finish one step fully before starting the next. Do not skip ahead (the Winston transport needs a live Sequelize instance and a Log model).
 
+Mark a step title with ✓ when it is done.
+
 ## Context
 
 Application database managed **entirely with Sequelize**. No Mongoose, no native MongoDB driver, no second ORM.
@@ -37,7 +39,7 @@ generateConf
 
 ---
 
-## Step 1 — Dependencies
+## Step 1 — Dependencies ✓
 
 **Goal:** Install the libraries. No application code yet.
 
@@ -53,7 +55,7 @@ generateConf
 
 ---
 
-## Step 2 — Container keys
+## Step 2 — Container keys ✓
 
 **Goal:** Document paths and the future Sequelize instance on the container.
 
@@ -70,7 +72,7 @@ generateConf
 
 ---
 
-## Step 3 — ConfManager URI
+## Step 3 — ConfManager URI ✓
 
 **Goal:** Optional `database-uri` in conf (console / env / `.env`).
 
