@@ -83,6 +83,7 @@
     "node-pluginsmanager": "3.7.2",
     "node-pluginsmanager-plugin": "7.4.4",
     "sequelize": "6.37.8",
+    "sqlite3": "5.1.7",
     "uniqid": "5.4.0",
     "winston": "3.19.0",
     "winston-transport": "4.9.0",

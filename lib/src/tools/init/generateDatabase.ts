@@ -3,9 +3,7 @@
     // externals
     import { isFile } from "node-pluginsmanager-plugin";
     import { Sequelize } from "sequelize";
-
-    // locals
-    import sqlite3SequelizeAdapter from "../sqlite3SequelizeAdapter";
+    import sqlite3 from "sqlite3";
 
 // types & interfaces
 
@@ -45,6 +43,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
     if (conf.has("database-uri")) {
 
         return initDatabase(container, new Sequelize(conf.get<string>("database-uri"), {
+            "dialectModule": sqlite3,
             "logging": false // SQL echo would recurse once Winston writes to this database
         }));
 
@@ -62,7 +61,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
         return initDatabase(container, new Sequelize({
             "dialect": "sqlite",
             "storage": databaseFile,
-            "dialectModule": sqlite3SequelizeAdapter, // sequelize 6 expects sqlite3's API, not better-sqlite3
+            "dialectModule": sqlite3,
             "logging": false
         }));
 
