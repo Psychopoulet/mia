@@ -1,9 +1,12 @@
 // deps
 
     // externals
-    import { DataTypes, Model, type Optional, type Sequelize } from "sequelize";
+    import { DataTypes, Model } from "sequelize";
 
 // types & interfaces
+
+    // externals
+    import type { Optional, Sequelize } from "sequelize";
 
     // locals
 
