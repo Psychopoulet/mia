@@ -164,7 +164,7 @@ Use `container.get<iLogger>("log")` (bootstrap console).
 
 ---
 
-## Step 6 — Winston Sequelize transport
+## Step 6 — Winston Sequelize transport ✓
 
 **Goal:** Custom transport only. Do not wire it into `generateLogger` yet.
 
