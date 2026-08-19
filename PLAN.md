@@ -89,7 +89,7 @@ Do **not** write a default into `.env`. Treat as unset when `!conf.has("database
 
 ---
 
-## Step 4 — Log model + `generateDatabase` + boot wiring
+## Step 4 — Log model + `generateDatabase` + boot wiring ✓
 
 **Goal:** Open Sequelize, create/sync the `logs` table, store the instance, call this **before** `generateLogger`.
 

@@ -13,6 +13,7 @@
     import registerAppData from "./tools/init/registerAppData";
     import ensureAppDirectories from "./tools/init/ensureAppDirectories";
     import generateConf from "./tools/init/generateConf";
+    import generateDatabase from "./tools/init/generateDatabase";
     import generateLogger from "./tools/init/generateLogger";
     import generateAuthDatabase from "./tools/init/generateAuthDatabase";
     import checkDescriptor from "./tools/init/checkDescriptor";
@@ -71,6 +72,12 @@
     }).then((): Promise<void> => {
 
         return generateConf(container);
+
+    // generate database
+
+    }).then((): Promise<void> => {
+
+        return generateDatabase(container);
 
     // generate advanced logger
 
