@@ -168,7 +168,7 @@ Use `container.get<iLogger>("log")` (bootstrap console).
 
 **Goal:** Custom transport only. Do not wire it into `generateLogger` yet.
 
-**Files (new):** `lib/src/tools/WinstonSequelizeTransport.ts`
+**Files:** `lib/src/tools/init/generateLogger.ts` (Sequelize transport class lives next to File / Console)
 
 **Work:**
 
@@ -183,7 +183,7 @@ Use `container.get<iLogger>("log")` (bootstrap console).
 
 ---
 
-## Step 7 — Attach transport in `generateLogger`
+## Step 7 — Attach transport in `generateLogger` ✓
 
 **Goal:** Persist logs to SQL as well as file (and console in debug).
 
@@ -192,9 +192,8 @@ Use `container.get<iLogger>("log")` (bootstrap console).
 **Work:** `generateDatabase` has already run. Add the transport to the initial `transports` array:
 
 ```ts
-new WinstonSequelizeTransport({
-    "level": conf.get<boolean>("debug") ? "debug" : "info",
-    "model": Log
+new SequelizeTransport({
+    "level": conf.get<boolean>("debug") ? "debug" : "info"
 })
 ```
 
