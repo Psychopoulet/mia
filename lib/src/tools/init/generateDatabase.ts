@@ -1,8 +1,11 @@
 // deps
 
+    // natives
+    import { URL } from "node:url";
+
     // externals
     import { isFile } from "node-pluginsmanager-plugin";
-    import { Sequelize } from "sequelize";
+    import { Sequelize, type Options } from "sequelize";
     import sqlite3 from "sqlite3";
 
 // types & interfaces
@@ -16,6 +19,27 @@
     import { registerLog } from "../models/Log";
 
 // module
+
+function getUriDialect (databaseUri: string): string {
+
+    return new URL(databaseUri).protocol.replace(/:$/, "");
+
+}
+
+function getSequelizeUriOptions (databaseUri: string): Options {
+
+    const options: Options = {
+        "logging": false // SQL echo would recurse once Winston writes to this database
+    };
+
+    // dialectModule is dialect-specific; never force sqlite3 on a postgres/mysql/mongodb URI
+    if ("sqlite" === getUriDialect(databaseUri)) {
+        options.dialectModule = sqlite3;
+    }
+
+    return options;
+
+}
 
 function initDatabase (container: ContainerPattern, sequelize: Sequelize): Promise<void> {
 
@@ -42,10 +66,9 @@ export default function generateDatabase (container: ContainerPattern): Promise<
     // explicit URI: reject on connection failure, never fall back to SQLite
     if (conf.has("database-uri")) {
 
-        return initDatabase(container, new Sequelize(conf.get<string>("database-uri"), {
-            "dialectModule": sqlite3,
-            "logging": false // SQL echo would recurse once Winston writes to this database
-        }));
+        const databaseUri: string = conf.get<string>("database-uri");
+
+        return initDatabase(container, new Sequelize(databaseUri, getSequelizeUriOptions(databaseUri)));
 
     }
 
