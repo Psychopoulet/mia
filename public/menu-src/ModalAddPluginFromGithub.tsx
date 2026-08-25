@@ -4,7 +4,7 @@
     import React from "react";
     import {
         Modal, ModalBody, ModalFooter,
-        InputText,
+        InputReadOnly, InputText,
         InvalidFeedBack,
         Button,
         generateFocus
@@ -171,7 +171,8 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
     public render (): React.JSX.Element {
 
-        return <Modal appId="MIAMenu" title="Repository URL" centered
+        return <Modal appId="MIAMenu" title="Repository URL"
+            centered size="lg"
             onClose={ this.props.onClose }
             onSubmit={ this._handleSubmit }
         >
@@ -180,7 +181,9 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
                 <div className={ "input-group" + (this.state.error ? " mb-2" : "") }>
 
-                    <span className="input-group-text">https://github.com/</span>
+                    <InputReadOnly value="https://github.com" disabled={ this.state.running } />
+
+                    <span className="input-group-text">/</span>
 
                     <InputText disabled={ this.state.running }
                         value={ this.state.user } onChange={ this._handleChangeUser }
