@@ -251,14 +251,6 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
     private readonly _renderContent = (): React.JSX.Element[] | React.JSX.Element => {
 
-        if (0 >= this.state.plugins.length) {
-
-            return <li className="nav-item">
-                <span className="nav-link disabled text-warning">No plugins found</span>
-            </li>;
-
-        }
-
         return this.state.plugins.map((plugin: components["schemas"]["Plugin"]): React.JSX.Element => {
 
             return <li key={ plugin.name } className="nav-item">
