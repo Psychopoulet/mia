@@ -56,6 +56,7 @@
 
   "files": [
     "lib/cjs",
+    "lib/data",
     "public/dist",
     "public/pictures",
     "public/index.html",
