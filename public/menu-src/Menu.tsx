@@ -232,7 +232,7 @@ export default class Menu extends React.Component<iPropsNode, iState> {
 
         this._sdk.logout().then(() => {
 
-            window.location.reload();
+            window.location.assign("/");
 
         }).catch((err) => {
 
