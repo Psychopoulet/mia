@@ -2,6 +2,7 @@ FROM node:24-alpine
 
 WORKDIR /app
 
+# copy basic files
 COPY --chown=node:node package.json ./
 COPY --chown=node:node pm2.json ./
 COPY --chown=node:node lib/cjs/ ./lib/cjs/
@@ -11,15 +12,22 @@ COPY --chown=node:node public/pictures/ ./public/pictures/
 COPY --chown=node:node public/index.html ./public/index.html
 COPY --chown=node:node build/checkInstalls.js ./build/checkInstalls.js
 
+# install binaries
 RUN apk add --no-cache git
 RUN apk add --no-cache curl
 # mia-inputs / robotjs: native linux-x64 addon needs X11 (and gcompat on musl)
 RUN apk add --no-cache libx11 libxtst libxinerama libxi libpng gcompat
 # mia-vlc-read-sound looks up `cvlc` / `vlc` on PATH at plugin init
 RUN apk add --no-cache vlc
+# Alpine VLC refuses to run as root (container default)
+RUN sed -i 's/geteuid/getppid/' /usr/bin/vlc
+
+# install node packages
 RUN npm install --omit=dev --omit=optional
 RUN npm install -g pm2
 RUN npm audit fix || echo 0
+
+# force plugins compilation for this platform
 RUN node ./build/checkInstalls.js
 
 EXPOSE 8000
