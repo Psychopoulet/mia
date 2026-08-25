@@ -1,29 +1,13 @@
 // deps
 
     // externals
-    import SQLite3 from "better-sqlite3";
     import bcrypt from "bcrypt";
 
 // types & interfaces
 
-    // externals
-    import type { Database } from "better-sqlite3";
-
     // locals
-
-    interface AuthUserSQL {
-        "id": number;
-        "name": string;
-        "password": string;
-        "isAdmin": 1 | 0;
-        "createdAt": Date;
-    }
-
-    interface AuthUserTokenSQL extends AuthUserSQL {
-        "idUser": number;
-        "token": string;
-        "fingerprint": string;
-    }
+    import User from "./models/User";
+    import Token from "./models/Token";
 
     export interface AuthUserPublic {
         "name": string;
@@ -49,69 +33,36 @@
 
 // module
 
+function toDate (value: Date | string): Date {
+
+    return "string" === typeof value
+        ? new Date(value)
+        : value;
+
+}
+
+function toAuthUserPublic (user: User): AuthUserPublic {
+
+    return {
+        "name": user.name,
+        "isAdmin": Boolean(user.isAdmin),
+        "createdAt": toDate(user.createdAt)
+    };
+
+}
+
 export default class AuthDatabase {
-
-    private readonly _database: Database;
-
-    public constructor (filename: string) {
-
-        this._database = new SQLite3(filename);
-        this._database.pragma("foreign_keys = ON");
-
-    }
-
-    public init (): Promise<void> {
-
-        return new Promise((resolve:(result?: unknown) => void): void => {
-
-            this._database.exec(`
-
-                CREATE TABLE users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    password TEXT NOT NULL,
-                    isAdmin INTEGER NOT NULL CHECK(isAdmin IN (0,1)) DEFAULT 0,
-                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-
-                CREATE UNIQUE INDEX idx_users_name ON users(name);
-
-                CREATE TABLE tokens (
-                    idUser INTEGER NOT NULL,
-                    token TEXT NOT NULL,
-                    fingerprint TEXT NOT NULL,
-                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE CASCADE
-                );
-
-                CREATE UNIQUE INDEX idx_tokens_token ON tokens(token);
-                CREATE INDEX idx_tokens_idUser ON tokens(idUser);
-
-            `);
-
-            return resolve();
-
-        }).then(() => {
-            return this.addUser("admin", "admin", true);
-        });
-
-    }
-
-    public close (): void {
-        this._database.close();
-    }
 
     private _getUserIdByName (name: string): Promise<number | undefined> {
 
-        return new Promise((resolve:(result: number | undefined) => void): void => {
+        return User.findOne({
+            "where": {
+                "name": name
+            },
+            "attributes": [ "id" ]
+        }).then((user: User | null): number | undefined => {
 
-            const data: Record<string, number> | undefined = this._database.prepare("SELECT id FROM users WHERE name = ?").get(name) as Record<string, number> | undefined;
-
-            if (!data) {
-                return resolve(data);
-            }
-
-            return resolve(data.id);
+            return user ? user.id : undefined;
 
         });
 
@@ -119,13 +70,17 @@ export default class AuthDatabase {
 
     public addUser (name: string, password: string, isAdmin: boolean = false): Promise<void> {
 
-        const createdAt = new Date();
+        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): Promise<User> => {
 
-        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
+            return User.create({
+                "name": name,
+                "password": hash,
+                "isAdmin": isAdmin
+            });
 
-            this._database
-                .prepare("INSERT INTO users (name, password, isAdmin, createdAt) VALUES (?, ?, ?, ?);")
-                .run(name, hash, isAdmin ? 1 : 0, createdAt.toISOString());
+        }).then((): void => {
+
+            return undefined;
 
         });
 
@@ -133,11 +88,19 @@ export default class AuthDatabase {
 
     public editUserPassword (name: string, password: string): Promise<void> {
 
-        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
+        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): Promise<[affectedCount: number]> => {
 
-            this._database
-                .prepare("UPDATE users SET password = ? WHERE name = ?;")
-                .run(name, hash);
+            return User.update({
+                "password": hash
+            }, {
+                "where": {
+                    "name": name
+                }
+            });
+
+        }).then((): void => {
+
+            return undefined;
 
         });
 
@@ -145,13 +108,15 @@ export default class AuthDatabase {
 
     public editUserIsAdmin (name: string, isAdmin: boolean): Promise<void> {
 
-        return new Promise((resolve:() => void): void => {
+        return User.update({
+            "isAdmin": isAdmin
+        }, {
+            "where": {
+                "name": name
+            }
+        }).then((): void => {
 
-            this._database
-                .prepare("UPDATE users SET isAdmin = ? WHERE name = ?;")
-                .run(isAdmin ? 1 : 0, name);
-
-            return resolve();
+            return undefined;
 
         });
 
@@ -159,26 +124,33 @@ export default class AuthDatabase {
 
     public getUserByToken (token: string): Promise<FullAuthPublic | undefined> {
 
-        return new Promise((resolve:(result: FullAuthPublic | undefined) => void): void => {
+        return Token.findOne({
+            "where": {
+                "token": token
+            },
+            "include": [
+                {
+                    "model": User,
+                    "required": true
+                }
+            ]
+        }).then((row: Token | null): FullAuthPublic | undefined => {
 
-            const user: AuthUserTokenSQL | undefined = this._database.prepare(`
-                SELECT
-                    users.name, users.password, users.isAdmin,
-                    tokens.token
-                FROM tokens
-                INNER JOIN users ON users.id = tokens.idUser
-                WHERE tokens.token = ?
-            `).get(token) as AuthUserTokenSQL | undefined;
-
-            if (!user) {
-                return resolve(user);
+            if (!row) {
+                return undefined;
             }
 
-            return resolve({
+            const user: User | undefined = row.get("User") as User | undefined;
+
+            if (!user) {
+                return undefined;
+            }
+
+            return {
                 "name": user.name,
-                "isAdmin": 1 === user.isAdmin,
-                "token": user.token
-            });
+                "isAdmin": Boolean(user.isAdmin),
+                "token": row.token
+            };
 
         });
 
@@ -186,30 +158,20 @@ export default class AuthDatabase {
 
     public getUserByNameAndPassword (name: string, password: string): Promise<AuthUserPublic | undefined> {
 
-        return new Promise((resolve:(result: AuthUserSQL | undefined) => void): void => {
-
-            resolve(this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
-                FROM users
-                WHERE users.name = ?
-            `).get(name) as AuthUserSQL | undefined);
-
-        }).then((user: AuthUserSQL | undefined): Promise<AuthUserPublic | undefined> => {
+        return User.findOne({
+            "where": {
+                "name": name
+            }
+        }).then((user: User | null): Promise<AuthUserPublic | undefined> => {
 
             if (!user) {
-                return Promise.resolve(user);
+                return Promise.resolve(undefined);
             }
 
             return bcrypt.compare(password, user.password).then((isValid: boolean): AuthUserPublic | undefined => {
 
                 return isValid
-                    ? {
-                        "name": user.name,
-                        "isAdmin": 1 === user.isAdmin,
-                        "createdAt": "string" === typeof user.createdAt
-                            ? new Date(user.createdAt)
-                            : user.createdAt
-                    }
+                    ? toAuthUserPublic(user)
                     : undefined;
 
             });
@@ -220,25 +182,15 @@ export default class AuthDatabase {
 
     public getUserByName (name: string): Promise<AuthUserPublic | undefined> {
 
-        return new Promise((resolve:(result: AuthUserPublic | undefined) => void): void => {
-
-            const user: AuthUserSQL | undefined = this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
-                FROM users
-                WHERE users.name = ?
-            `).get(name) as AuthUserSQL | undefined;
-
-            if (!user) {
-                return resolve(undefined);
+        return User.findOne({
+            "where": {
+                "name": name
             }
+        }).then((user: User | null): AuthUserPublic | undefined => {
 
-            return resolve({
-                "name": user.name,
-                "isAdmin": 1 === user.isAdmin,
-                "createdAt": "string" === typeof user.createdAt
-                    ? new Date(user.createdAt)
-                    : user.createdAt
-            });
+            return user
+                ? toAuthUserPublic(user)
+                : undefined;
 
         });
 
@@ -246,25 +198,11 @@ export default class AuthDatabase {
 
     public getUsers (): Promise<AuthUserPublic[]> {
 
-        return new Promise((resolve:(result: AuthUserPublic[]) => void): void => {
+        return User.findAll({
+            "order": [ [ "name", "ASC" ] ]
+        }).then((users: User[]): AuthUserPublic[] => {
 
-            const users: AuthUserSQL[] = this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
-                FROM users
-                ORDER BY users.name ASC
-            `).all() as AuthUserSQL[];
-
-            return resolve(users.map((user: AuthUserSQL): AuthUserPublic => {
-
-                return {
-                    "name": user.name,
-                    "isAdmin": 1 === user.isAdmin,
-                    "createdAt": "string" === typeof user.createdAt
-                        ? new Date(user.createdAt)
-                        : user.createdAt
-                };
-
-            }));
+            return users.map(toAuthUserPublic);
 
         });
 
@@ -272,34 +210,27 @@ export default class AuthDatabase {
 
     public getTokensByUserName (name: string): Promise<AuthTokenPublic[]> {
 
-        return new Promise((resolve:(result: AuthTokenPublic[]) => void): void => {
-
-            return resolve(this._database.prepare(`
-                SELECT tokens.token, tokens.fingerprint, tokens.createdAt
-                FROM tokens
-                INNER JOIN users ON users.id = tokens.idUser
-                WHERE users.name = ?
-            `).all(name) as AuthTokenPublic[]);
-
-        });
-
-    }
-
-    public addToken (name: string, token: string, fingerprint: string): Promise<void> {
-
-        return this._getUserIdByName(name).then((idUser: number | undefined): Promise<void> => {
+        return this._getUserIdByName(name).then((idUser: number | undefined): Promise<Token[]> => {
 
             if ("undefined" === typeof idUser) {
-                return Promise.reject(new Error("User not found"));
+                return Promise.resolve([]);
             }
 
-            return new Promise((resolve:() => void): void => {
+            return Token.findAll({
+                "where": {
+                    "idUser": idUser
+                }
+            });
 
-                this._database
-                    .prepare("INSERT INTO tokens (idUser, token, fingerprint) VALUES (?, ?, ?)")
-                    .run(idUser, token, fingerprint);
+        }).then((tokens: Token[]): AuthTokenPublic[] => {
 
-                return resolve();
+            return tokens.map((token: Token): AuthTokenPublic => {
+
+                return {
+                    "token": token.token,
+                    "fingerprint": token.fingerprint,
+                    "createdAt": toDate(token.createdAt)
+                };
 
             });
 
@@ -307,15 +238,37 @@ export default class AuthDatabase {
 
     }
 
+    public addToken (name: string, token: string, fingerprint: string): Promise<void> {
+
+        return this._getUserIdByName(name).then((idUser: number | undefined): Promise<Token> => {
+
+            if ("undefined" === typeof idUser) {
+                return Promise.reject(new Error("User not found"));
+            }
+
+            return Token.create({
+                "idUser": idUser,
+                "token": token,
+                "fingerprint": fingerprint
+            });
+
+        }).then((): void => {
+
+            return undefined;
+
+        });
+
+    }
+
     public removeToken (token: string): Promise<void> {
 
-        return new Promise((resolve:() => void): void => {
+        return Token.destroy({
+            "where": {
+                "token": token
+            }
+        }).then((): void => {
 
-            this._database
-                .prepare("DELETE FROM tokens WHERE token = ?")
-                .run(token);
-
-           return resolve();
+            return undefined;
 
         });
 
@@ -323,13 +276,30 @@ export default class AuthDatabase {
 
     public removeUser (name: string): Promise<void> {
 
-        return new Promise((resolve:() => void): void => {
+        return this._getUserIdByName(name).then((idUser: number | undefined): Promise<number> => {
 
-            this._database
-                .prepare("DELETE FROM users WHERE name = ?")
-                .run(name);
+            if ("undefined" === typeof idUser) {
+                return Promise.resolve(0);
+            }
 
-            return resolve();
+            // destroy tokens first: SQLite foreign_keys may be off
+            return Token.destroy({
+                "where": {
+                    "idUser": idUser
+                }
+            }).then((): Promise<number> => {
+
+                return User.destroy({
+                    "where": {
+                        "id": idUser
+                    }
+                });
+
+            });
+
+        }).then((): void => {
+
+            return undefined;
 
         });
 

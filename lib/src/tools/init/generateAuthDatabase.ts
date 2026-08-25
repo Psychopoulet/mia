@@ -1,35 +1,28 @@
 // deps
 
-    // externals
-    import { isFile } from "node-pluginsmanager-plugin";
+    // locals
+    import AuthDatabase from "../AuthDatabase";
+    import User from "../models/User";
 
 // types & interfaces
 
     // externals
     import type ContainerPattern from "node-containerpattern";
 
-    // locals
-    import type { iLogger } from "./generateLogger";
-    import AuthDatabase from "../AuthDatabase";
-
 // module
 
 export default function generateAuthDatabase (container: ContainerPattern): Promise<void> {
 
-    const authFile: string = container.get<string>("auth-file");
+    const database: AuthDatabase = new AuthDatabase();
+    container.set("auth-db", database);
 
-    return isFile(authFile).then((exists: boolean): Promise<void> => {
+    return User.count().then((count: number): Promise<void> => {
 
-        const database: AuthDatabase = new AuthDatabase(authFile);
-        container.set("auth-db", database);
-
-        if (exists) {
+        if (0 !== count) {
             return Promise.resolve();
         }
 
-        container.get<iLogger>("log").info("Auth database not detected, create one at " + authFile);
-
-        return database.init();
+        return database.addUser("admin", "admin", true);
 
     });
 

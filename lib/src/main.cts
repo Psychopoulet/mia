@@ -29,7 +29,6 @@
 
     // locals
     import type { iLogger } from "./tools/init/generateLogger";
-    import type AuthDatabase from "./tools/AuthDatabase";
 
 // consts
 
@@ -112,8 +111,6 @@
             log.debug("database file : " + container.get<string>("database-file"));
         }
 
-        log.debug("auth file : " + container.get<string>("auth-file"));
-
     // load plugins
 
     }).then((): Promise<void> => {
@@ -146,10 +143,6 @@
                 return Promise.resolve();
 
             }).then((): void => {
-
-                if (container.has("auth-db")) {
-                    container.get<AuthDatabase>("auth-db").close();
-                }
 
                 process.exit(0);
 
