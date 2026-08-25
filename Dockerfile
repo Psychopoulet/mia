@@ -15,6 +15,8 @@ RUN apk add --no-cache git
 RUN apk add --no-cache curl
 # mia-inputs / robotjs: native linux-x64 addon needs X11 (and gcompat on musl)
 RUN apk add --no-cache libx11 libxtst libxinerama libxi libpng gcompat
+# mia-vlc-read-sound looks up `cvlc` / `vlc` on PATH at plugin init
+RUN apk add --no-cache vlc
 RUN npm install --omit=dev --omit=optional
 RUN npm install -g pm2
 RUN npm audit fix || echo 0
