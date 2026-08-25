@@ -17,6 +17,8 @@
     // locals
     import type { iLogger } from "./generateLogger";
     import { registerLog } from "../models/Log";
+    import { registerUser } from "../models/User";
+    import { registerToken } from "../models/Token";
 
 // module
 
@@ -45,6 +47,8 @@ function initDatabase (container: ContainerPattern, sequelize: Sequelize): Promi
 
     // models must be registered before sync(), otherwise no table is created
     registerLog(sequelize);
+    registerUser(sequelize);
+    registerToken(sequelize); // after User: FK + associations
 
     return sequelize.authenticate().then((): Promise<Sequelize> => {
 
