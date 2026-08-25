@@ -13,6 +13,8 @@ COPY --chown=node:node build/checkInstalls.js ./build/checkInstalls.js
 
 RUN apk add --no-cache git
 RUN apk add --no-cache curl
+# mia-inputs / robotjs: native linux-x64 addon needs X11 (and gcompat on musl)
+RUN apk add --no-cache libx11 libxtst libxinerama libxi libpng gcompat
 RUN npm install --omit=dev --omit=optional
 RUN npm install -g pm2
 RUN npm audit fix || echo 0
