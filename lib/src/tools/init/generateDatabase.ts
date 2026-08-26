@@ -7,6 +7,9 @@
     import { isFile } from "node-pluginsmanager-plugin";
     import { Sequelize, type Options } from "sequelize";
     import sqlite3 from "sqlite3";
+    import User, { registerUser } from "../models/User";
+    import { registerLog } from "../models/Log";
+    import { registerToken } from "../models/Token";
 
 // types & interfaces
 
@@ -16,52 +19,69 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-    import { registerLog } from "../models/Log";
-    import { registerUser } from "../models/User";
-    import { registerToken } from "../models/Token";
 
-// module
+// private
 
-function getUriDialect (databaseUri: string): string {
+    function _getUriDialect (databaseUri: string): string {
 
-    return new URL(databaseUri).protocol.replace(/:$/, "");
+        return new URL(databaseUri).protocol.replace(/:$/, "");
 
-}
-
-function getSequelizeUriOptions (databaseUri: string): Options {
-
-    const options: Options = {
-        "logging": false // SQL echo would recurse once Winston writes to this database
-    };
-
-    // dialectModule is dialect-specific; never force sqlite3 on a postgres/mysql/mongodb URI
-    if ("sqlite" === getUriDialect(databaseUri)) {
-        options.dialectModule = sqlite3;
     }
 
-    return options;
+    function _getSequelizeUriOptions (databaseUri: string): Options {
 
-}
+        const options: Options = {
+            "logging": false // SQL echo would recurse once Winston writes to this database
+        };
 
-function initDatabase (container: ContainerPattern, sequelize: Sequelize): Promise<void> {
+        // dialectModule is dialect-specific; never force sqlite3 on a postgres/mysql/mongodb URI
+        if ("sqlite" === _getUriDialect(databaseUri)) {
+            options.dialectModule = sqlite3;
+        }
 
-    // models must be registered before sync(), otherwise no table is created
-    registerLog(sequelize);
-    registerUser(sequelize);
-    registerToken(sequelize); // after User: FK + associations
+        return options;
 
-    return sequelize.authenticate().then((): Promise<Sequelize> => {
+    }
 
-        // create missing tables only (no alter / force)
-        return sequelize.sync();
+    function _initDatabase (container: ContainerPattern, sequelize: Sequelize): Promise<void> {
 
-    }).then((): void => {
+        // models must be registered before sync(), otherwise no table is created
+        registerLog(sequelize);
+        registerUser(sequelize);
+        registerToken(sequelize); // after User: FK + associations
 
-        container.set("database", sequelize);
+        return sequelize.authenticate().then((): Promise<Sequelize> => {
 
-    });
+            // create missing tables only (no alter / force)
+            return sequelize.sync();
 
-}
+        }).then((): Promise<void> => {
+
+            container.set("database", sequelize);
+
+            return User.count().then((count: number): Promise<void> => {
+
+                if (0 !== count) {
+                    return Promise.resolve();
+                }
+
+                return User.create({
+                    "name": "admin",
+                    "password": "admin",
+                    "isAdmin": true
+                }).then((): void => {
+
+                    return undefined;
+
+                });
+
+            });
+
+        });
+
+    }
+
+// module
 
 export default function generateDatabase (container: ContainerPattern): Promise<void> {
 
@@ -72,7 +92,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
 
         const databaseUri: string = conf.get<string>("database-uri");
 
-        return initDatabase(container, new Sequelize(databaseUri, getSequelizeUriOptions(databaseUri)));
+        return _initDatabase(container, new Sequelize(databaseUri, _getSequelizeUriOptions(databaseUri)));
 
     }
 
@@ -85,7 +105,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
             container.get<iLogger>("log").info("Database not detected, create one at " + databaseFile);
         }
 
-        return initDatabase(container, new Sequelize({
+        return _initDatabase(container, new Sequelize({
             "dialect": "sqlite",
             "storage": databaseFile,
             "dialectModule": sqlite3,

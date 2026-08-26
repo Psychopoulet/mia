@@ -15,7 +15,6 @@
     import generateConf from "./tools/init/generateConf";
     import generateDatabase from "./tools/init/generateDatabase";
     import generateLogger from "./tools/init/generateLogger";
-    import generateAuthDatabase from "./tools/init/generateAuthDatabase";
     import checkDescriptor from "./tools/init/checkDescriptor";
     import managePlugins from "./tools/init/managePlugins";
     import generateServer from "./tools/init/generateServer";
@@ -85,12 +84,6 @@
     }).then((): void => {
 
         return generateLogger(container);
-
-    // generate auth database
-
-    }).then((): Promise<void> => {
-
-        return generateAuthDatabase(container);
 
     // log basic data
 

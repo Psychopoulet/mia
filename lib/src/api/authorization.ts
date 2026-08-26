@@ -9,6 +9,7 @@
     // locals
     import { verify } from "../tools/AuthJWT";
     import extractToken from "../tools/extractToken";
+    import Token from "../tools/models/Token";
 
 // types & interfaces
 
@@ -18,8 +19,7 @@
     import type ConfManager from "node-confmanager";
 
     // locals
-    import type AuthDatabase from "../tools/AuthDatabase";
-    import type { FullAuthPublic } from "../tools/AuthDatabase";
+    import type { FullAuthPublic } from "../tools/models/Token";
 
 // module
 
@@ -44,9 +44,7 @@ export default function authorization (container: ContainerPattern, req: Request
 
     verify(token, container.get<ConfManager>("conf").get("auth-access-token")).then((): Promise<void> => {
 
-        const authDb = container.get<AuthDatabase>("auth-db");
-
-        return authDb.getUserByToken(token).then((authUser: FullAuthPublic | undefined): void => {
+        return Token.getUserByToken(token).then((authUser: FullAuthPublic | undefined): void => {
 
             if (!authUser) {
                 throw new UnauthorizedError("This token is not valid anymore");
@@ -61,8 +59,11 @@ export default function authorization (container: ContainerPattern, req: Request
         // if the token is expired, remove it from the database then return the initial error
         if (err.name && "TokenExpiredError" === err.name) {
 
-            const authDb = container.get<AuthDatabase>("auth-db");
-            authDb.removeToken(token).then((): void => {
+            Token.destroy({
+                "where": {
+                    "token": token
+                }
+            }).then((): void => {
                 return next(err);
             }).catch((): void => {
                 return next(err);

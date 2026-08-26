@@ -26,12 +26,6 @@
     // id and createdAt are generated; isAdmin defaults to false
     type UserCreationAttributes = Optional<UserAttributes, "id" | "isAdmin" | "createdAt">;
 
-    export interface AuthUserPublic {
-        "name": string;
-        "isAdmin": boolean;
-        "createdAt": Date;
-    }
-
     type UserBulkUpdateOptions = UpdateOptions<UserAttributes> & {
         "attributes"?: Partial<UserAttributes>;
     };
@@ -93,16 +87,6 @@ export default class User extends Model<UserAttributes, UserCreationAttributes> 
     public declare isAdmin: boolean;
     public declare createdAt: Date;
 
-    public toPublic (): AuthUserPublic {
-
-        return {
-            "name": this.name,
-            "isAdmin": Boolean(this.isAdmin),
-            "createdAt": toDate(this.createdAt)
-        };
-
-    }
-
     public toJSON (): object {
 
         return {
@@ -120,22 +104,22 @@ export default class User extends Model<UserAttributes, UserCreationAttributes> 
 
     }
 
-    public static getByNameAndPassword (name: string, password: string): Promise<AuthUserPublic | undefined> {
+    public static getByNameAndPassword (name: string, password: string): Promise<UserAttributes | undefined> {
 
         return User.unscoped().scope("withPassword").findOne({
             "where": {
                 "name": name
             }
-        }).then((user: User | null): Promise<AuthUserPublic | undefined> => {
+        }).then((user: User | null): Promise<UserAttributes | undefined> => {
 
             if (!user) {
                 return Promise.resolve(undefined);
             }
 
-            return user.checkPassword(password).then((isValid: boolean): AuthUserPublic | undefined => {
+            return user.checkPassword(password).then((isValid: boolean): UserAttributes | undefined => {
 
                 return isValid
-                    ? user.toPublic()
+                    ? user
                     : undefined;
 
             });

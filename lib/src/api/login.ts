@@ -1,6 +1,3 @@
-/* eslint-disable consistent-return */
-// - consistent-return is disabled because valid return values are not always explicitly returned
-
 // deps
 
     // externals
@@ -8,6 +5,8 @@
 
     // locals
     import { sign } from "../tools/AuthJWT";
+    import User from "../tools/models/User";
+    import Token from "../tools/models/Token";
 
 // types & interfaces
 
@@ -18,8 +17,7 @@
 
     // locals
     import type { operations } from "./Descriptor";
-    import type AuthDatabase from "../tools/AuthDatabase";
-    import type { AuthUserPublic } from "../tools/AuthDatabase";
+    import type { UserAttributes } from "../tools/models/User";
 
 // module
 
@@ -27,9 +25,7 @@ export default function login (container: ContainerPattern, req: Request, res: R
 
     const body: operations["login"]["requestBody"]["content"]["application/json"] = req.body as operations["login"]["requestBody"]["content"]["application/json"];
 
-    const authDb = container.get<AuthDatabase>("auth-db");
-
-    authDb.getUserByNameAndPassword(body.name, body.password).then((user: AuthUserPublic | undefined): Promise<string> => {
+    User.getByNameAndPassword(body.name, body.password).then((user: UserAttributes | undefined): Promise<string> => {
 
         if (!user) {
             throw new NotFoundError("Invalid credentials");
@@ -37,7 +33,11 @@ export default function login (container: ContainerPattern, req: Request, res: R
 
         return sign(body.name, container.get<ConfManager>("conf").get("auth-access-token")).then((token: string): Promise<string> => {
 
-            return authDb.addToken(user.name, token, req.headers["user-agent"] ?? "No user agent").then((): string => {
+            return Token.create({
+                "idUser": user.id,
+                "token": token,
+                "fingerprint": req.headers["user-agent"] ?? "No user agent"
+            }).then((): string => {
                 return token;
             });
 
