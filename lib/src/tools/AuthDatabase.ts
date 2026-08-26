@@ -1,19 +1,14 @@
 // deps
 
-    // externals
-    import bcrypt from "bcrypt";
-
-// types & interfaces
-
     // locals
     import User from "./models/User";
     import Token from "./models/Token";
 
-    export interface AuthUserPublic {
-        "name": string;
-        "isAdmin": boolean;
-        "createdAt": Date;
-    }
+// types & interfaces
+
+    // locals
+    import type { AuthUserPublic } from "./models/User";
+    export type { AuthUserPublic };
 
     export interface AuthTokenPublic {
         "token": string;
@@ -27,10 +22,6 @@
         "token": string;
     }
 
-// consts
-
-    const BCRYPT_ROUNDS: number = 10;
-
 // module
 
 function toDate (value: Date | string): Date {
@@ -38,16 +29,6 @@ function toDate (value: Date | string): Date {
     return "string" === typeof value
         ? new Date(value)
         : value;
-
-}
-
-function toAuthUserPublic (user: User): AuthUserPublic {
-
-    return {
-        "name": user.name,
-        "isAdmin": Boolean(user.isAdmin),
-        "createdAt": toDate(user.createdAt)
-    };
 
 }
 
@@ -70,14 +51,10 @@ export default class AuthDatabase {
 
     public addUser (name: string, password: string, isAdmin: boolean = false): Promise<void> {
 
-        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): Promise<User> => {
-
-            return User.create({
-                "name": name,
-                "password": hash,
-                "isAdmin": isAdmin
-            });
-
+        return User.create({
+            "name": name,
+            "password": password,
+            "isAdmin": isAdmin
         }).then((): void => {
 
             return undefined;
@@ -88,16 +65,12 @@ export default class AuthDatabase {
 
     public editUserPassword (name: string, password: string): Promise<void> {
 
-        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): Promise<[affectedCount: number]> => {
-
-            return User.update({
-                "password": hash
-            }, {
-                "where": {
-                    "name": name
-                }
-            });
-
+        return User.update({
+            "password": password
+        }, {
+            "where": {
+                "name": name
+            }
         }).then((): void => {
 
             return undefined;
@@ -158,25 +131,7 @@ export default class AuthDatabase {
 
     public getUserByNameAndPassword (name: string, password: string): Promise<AuthUserPublic | undefined> {
 
-        return User.findOne({
-            "where": {
-                "name": name
-            }
-        }).then((user: User | null): Promise<AuthUserPublic | undefined> => {
-
-            if (!user) {
-                return Promise.resolve(undefined);
-            }
-
-            return bcrypt.compare(password, user.password).then((isValid: boolean): AuthUserPublic | undefined => {
-
-                return isValid
-                    ? toAuthUserPublic(user)
-                    : undefined;
-
-            });
-
-        });
+        return User.getByNameAndPassword(name, password);
 
     }
 
@@ -189,7 +144,7 @@ export default class AuthDatabase {
         }).then((user: User | null): AuthUserPublic | undefined => {
 
             return user
-                ? toAuthUserPublic(user)
+                ? user.toPublic()
                 : undefined;
 
         });
@@ -202,7 +157,11 @@ export default class AuthDatabase {
             "order": [ [ "name", "ASC" ] ]
         }).then((users: User[]): AuthUserPublic[] => {
 
-            return users.map(toAuthUserPublic);
+            return users.map((user: User): AuthUserPublic => {
+
+                return user.toPublic();
+
+            });
 
         });
 
@@ -276,27 +235,10 @@ export default class AuthDatabase {
 
     public removeUser (name: string): Promise<void> {
 
-        return this._getUserIdByName(name).then((idUser: number | undefined): Promise<number> => {
-
-            if ("undefined" === typeof idUser) {
-                return Promise.resolve(0);
+        return User.destroy({
+            "where": {
+                "name": name
             }
-
-            // destroy tokens first: SQLite foreign_keys may be off
-            return Token.destroy({
-                "where": {
-                    "idUser": idUser
-                }
-            }).then((): Promise<number> => {
-
-                return User.destroy({
-                    "where": {
-                        "id": idUser
-                    }
-                });
-
-            });
-
         }).then((): void => {
 
             return undefined;
