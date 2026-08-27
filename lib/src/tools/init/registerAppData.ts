@@ -66,15 +66,18 @@ export default function registerAppData (container: ContainerPattern): Promise<v
         container
             .skeleton("logs-file", "string")
             .set("logs-file", join(container.get<string>("data-directory"), "logs.txt"))
-            .document("logs-file", "The application's file where the logs are registered")
+            .document("logs-file", "The application's file where the logs are registered");
 
-            .document("auth-db", "The application's authentication database (instance of 'node:sqlite' DatabaseSync)");
-
-        // auth file
+        // database
         container
-            .skeleton("auth-file", "string")
-            .set("auth-file", join(container.get<string>("data-directory"), "auth.db"))
-            .document("auth-file", "The application's file where the authentication database is registered");
+            .skeleton("database-file", "string")
+            .set("database-file", join(container.get<string>("data-directory"), "mia-database.db"))
+            .document("database-file", "The application's file where the local SQLite database is registered")
+
+            .document("database", "The application's orm (Sequelize)")
+
+            .set("auth-db", {})
+            .document("auth-db", "The application's authentication API (users and tokens) for plugins.");
 
         // server socket
         container

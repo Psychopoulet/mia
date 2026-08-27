@@ -34,7 +34,9 @@ export default function generateConf (container: ContainerPattern): Promise<void
             .skeleton("debug", "boolean")
             .document("debug", "The application's debug mode")
             .skeleton("auth-access-token", "string")
-            .document("auth-access-token", "The application's access token");
+            .document("auth-access-token", "The application's access token")
+            .skeleton("database-uri", "string")
+            .document("database-uri", "URI of the application database (postgres://, postgresql:// or sqlite://). Empty or unset uses local SQLite.");
 
     const envFile: string = join(container.get<string>("data-directory"), ".env");
 

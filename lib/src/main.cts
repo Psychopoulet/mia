@@ -13,8 +13,8 @@
     import registerAppData from "./tools/init/registerAppData";
     import ensureAppDirectories from "./tools/init/ensureAppDirectories";
     import generateConf from "./tools/init/generateConf";
+    import generateDatabase from "./tools/init/generateDatabase";
     import generateLogger from "./tools/init/generateLogger";
-    import generateAuthDatabase from "./tools/init/generateAuthDatabase";
     import checkDescriptor from "./tools/init/checkDescriptor";
     import managePlugins from "./tools/init/managePlugins";
     import generateServer from "./tools/init/generateServer";
@@ -23,10 +23,11 @@
 
     // externals
     import type Pluginsmanager from "node-pluginsmanager";
+    import type ConfManager from "node-confmanager";
+    import type { Sequelize } from "sequelize";
 
     // locals
     import type { iLogger } from "./tools/init/generateLogger";
-    import type AuthDatabase from "./tools/AuthDatabase";
 
 // consts
 
@@ -72,17 +73,17 @@
 
         return generateConf(container);
 
+    // generate database
+
+    }).then((): Promise<void> => {
+
+        return generateDatabase(container);
+
     // generate advanced logger
 
     }).then((): void => {
 
         return generateLogger(container);
-
-    // generate auth database
-
-    }).then((): Promise<void> => {
-
-        return generateAuthDatabase(container);
 
     // log basic data
 
@@ -93,7 +94,15 @@
         log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
         log.debug("env file : " + join(container.get<string>("data-directory"), ".env"));
         log.debug("logs file : " + container.get<string>("logs-file"));
-        log.debug("auth file : " + container.get<string>("auth-file"));
+
+        const conf: ConfManager = container.get<ConfManager>("conf");
+
+        if (conf.has("database-uri") && "" !== conf.get<string>("database-uri").trim()) {
+            log.debug("database uri : " + conf.get<string>("database-uri"));
+        }
+        else {
+            log.debug("database file : " + container.get<string>("database-file"));
+        }
 
     // load plugins
 
@@ -118,11 +127,15 @@
 
                 return pluginsManager.destroyAll();
 
-            }).then((): void => {
+            }).then((): Promise<void> => {
 
-                if (container.has("auth-db")) {
-                    container.get<AuthDatabase>("auth-db").close();
+                if (container.has("database")) {
+                    return container.get<Sequelize>("database").close();
                 }
+
+                return Promise.resolve();
+
+            }).then((): void => {
 
                 process.exit(0);
 

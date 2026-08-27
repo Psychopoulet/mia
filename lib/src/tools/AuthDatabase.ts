@@ -1,29 +1,12 @@
 // deps
 
-    // externals
-    import SQLite3 from "better-sqlite3";
-    import bcrypt from "bcrypt";
+    // locals
+    import User, { type UserAttributes } from "./models/User";
+    import Token, { type AuthTokenPublic, type FullAuthPublic } from "./models/Token";
 
 // types & interfaces
 
-    // externals
-    import type { Database } from "better-sqlite3";
-
-    // locals
-
-    interface AuthUserSQL {
-        "id": number;
-        "name": string;
-        "password": string;
-        "isAdmin": 1 | 0;
-        "createdAt": Date;
-    }
-
-    interface AuthUserTokenSQL extends AuthUserSQL {
-        "idUser": number;
-        "token": string;
-        "fingerprint": string;
-    }
+    export type { AuthTokenPublic, FullAuthPublic };
 
     export interface AuthUserPublic {
         "name": string;
@@ -31,308 +14,201 @@
         "createdAt": Date;
     }
 
-    export interface AuthTokenPublic {
-        "token": string;
-        "fingerprint": string;
-        "createdAt": Date;
+    export interface iAuthDatabase {
+        "addUser": (name: string, password: string, isAdmin?: boolean) => Promise<void>,
+        "editUserPassword": (name: string, password: string) => Promise<void>,
+        "editUserIsAdmin": (name: string, isAdmin: boolean) => Promise<void>,
+        "getUserByToken": (token: string) => Promise<FullAuthPublic | undefined>,
+        "getUserByNameAndPassword": (name: string, password: string) => Promise<AuthUserPublic | undefined>,
+        "getUserByName": (name: string) => Promise<AuthUserPublic | undefined>,
+        "getUsers": () => Promise<AuthUserPublic[]>,
+        "getTokensByUserName": (name: string) => Promise<AuthTokenPublic[]>,
+        "addToken": (name: string, token: string, fingerprint: string) => Promise<void>,
+        "removeToken": (token: string) => Promise<void>,
+        "removeUser": (name: string) => Promise<void>
     }
 
-    export interface FullAuthPublic {
-        "name": string;
-        "isAdmin": boolean;
-        "token": string;
+// private
+
+    function toDate (value: Date | string): Date {
+
+        return "string" === typeof value
+            ? new Date(value)
+            : value;
+
     }
 
-// consts
+    function toAuthUserPublic (user: Pick<UserAttributes, "name" | "isAdmin" | "createdAt">): AuthUserPublic {
 
-    const BCRYPT_ROUNDS: number = 10;
+        return {
+            "name": user.name,
+            "isAdmin": Boolean(user.isAdmin),
+            "createdAt": toDate(user.createdAt)
+        };
+
+    }
 
 // module
 
-export default class AuthDatabase {
+const authDatabase: iAuthDatabase = {
 
-    private readonly _database: Database;
+    addUser (name: string, password: string, isAdmin: boolean = false): Promise<void> {
 
-    public constructor (filename: string) {
+        return User.create({
+            "name": name,
+            "password": password,
+            "isAdmin": isAdmin
+        }).then((): void => {
 
-        this._database = new SQLite3(filename);
-        this._database.pragma("foreign_keys = ON");
+            return undefined;
 
-    }
-
-    public init (): Promise<void> {
-
-        return new Promise((resolve:(result?: unknown) => void): void => {
-
-            this._database.exec(`
-
-                CREATE TABLE users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    password TEXT NOT NULL,
-                    isAdmin INTEGER NOT NULL CHECK(isAdmin IN (0,1)) DEFAULT 0,
-                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-
-                CREATE UNIQUE INDEX idx_users_name ON users(name);
-
-                CREATE TABLE tokens (
-                    idUser INTEGER NOT NULL,
-                    token TEXT NOT NULL,
-                    fingerprint TEXT NOT NULL,
-                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE CASCADE
-                );
-
-                CREATE UNIQUE INDEX idx_tokens_token ON tokens(token);
-                CREATE INDEX idx_tokens_idUser ON tokens(idUser);
-
-            `);
-
-            return resolve();
-
-        }).then(() => {
-            return this.addUser("admin", "admin", true);
         });
 
-    }
+    },
 
-    public close (): void {
-        this._database.close();
-    }
+    editUserPassword (name: string, password: string): Promise<void> {
 
-    private _getUserIdByName (name: string): Promise<number | undefined> {
-
-        return new Promise((resolve:(result: number | undefined) => void): void => {
-
-            const data: Record<string, number> | undefined = this._database.prepare("SELECT id FROM users WHERE name = ?").get(name) as Record<string, number> | undefined;
-
-            if (!data) {
-                return resolve(data);
+        return User.update({
+            "password": password
+        }, {
+            "where": {
+                "name": name
             }
+        }).then((): void => {
 
-            return resolve(data.id);
-
-        });
-
-    }
-
-    public addUser (name: string, password: string, isAdmin: boolean = false): Promise<void> {
-
-        const createdAt = new Date();
-
-        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
-
-            this._database
-                .prepare("INSERT INTO users (name, password, isAdmin, createdAt) VALUES (?, ?, ?, ?);")
-                .run(name, hash, isAdmin ? 1 : 0, createdAt.toISOString());
+            return undefined;
 
         });
 
-    }
+    },
 
-    public editUserPassword (name: string, password: string): Promise<void> {
+    editUserIsAdmin (name: string, isAdmin: boolean): Promise<void> {
 
-        return bcrypt.hash(password, BCRYPT_ROUNDS).then((hash: string): void => {
+        return User.update({
+            "isAdmin": isAdmin
+        }, {
+            "where": {
+                "name": name
+            }
+        }).then((): void => {
 
-            this._database
-                .prepare("UPDATE users SET password = ? WHERE name = ?;")
-                .run(name, hash);
-
-        });
-
-    }
-
-    public editUserIsAdmin (name: string, isAdmin: boolean): Promise<void> {
-
-        return new Promise((resolve:() => void): void => {
-
-            this._database
-                .prepare("UPDATE users SET isAdmin = ? WHERE name = ?;")
-                .run(isAdmin ? 1 : 0, name);
-
-            return resolve();
+            return undefined;
 
         });
 
-    }
+    },
 
-    public getUserByToken (token: string): Promise<FullAuthPublic | undefined> {
+    getUserByToken (token: string): Promise<FullAuthPublic | undefined> {
 
-        return new Promise((resolve:(result: FullAuthPublic | undefined) => void): void => {
+        return Token.getUserByToken(token);
 
-            const user: AuthUserTokenSQL | undefined = this._database.prepare(`
-                SELECT
-                    users.name, users.password, users.isAdmin,
-                    tokens.token
-                FROM tokens
-                INNER JOIN users ON users.id = tokens.idUser
-                WHERE tokens.token = ?
-            `).get(token) as AuthUserTokenSQL | undefined;
+    },
+
+    getUserByNameAndPassword (name: string, password: string): Promise<AuthUserPublic | undefined> {
+
+        return User.getByNameAndPassword(name, password).then((user: UserAttributes | undefined): AuthUserPublic | undefined => {
 
             if (!user) {
-                return resolve(user);
+                return undefined;
             }
 
-            return resolve({
-                "name": user.name,
-                "isAdmin": 1 === user.isAdmin,
-                "token": user.token
-            });
+            return toAuthUserPublic(user);
 
         });
 
-    }
+    },
 
-    public getUserByNameAndPassword (name: string, password: string): Promise<AuthUserPublic | undefined> {
+    getUserByName (name: string): Promise<AuthUserPublic | undefined> {
 
-        return new Promise((resolve:(result: AuthUserSQL | undefined) => void): void => {
-
-            resolve(this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
-                FROM users
-                WHERE users.name = ?
-            `).get(name) as AuthUserSQL | undefined);
-
-        }).then((user: AuthUserSQL | undefined): Promise<AuthUserPublic | undefined> => {
+        return User.findOne({
+            "where": {
+                "name": name
+            }
+        }).then((user: User | null): AuthUserPublic | undefined => {
 
             if (!user) {
-                return Promise.resolve(user);
+                return undefined;
             }
 
-            return bcrypt.compare(password, user.password).then((isValid: boolean): AuthUserPublic | undefined => {
-
-                return isValid
-                    ? {
-                        "name": user.name,
-                        "isAdmin": 1 === user.isAdmin,
-                        "createdAt": "string" === typeof user.createdAt
-                            ? new Date(user.createdAt)
-                            : user.createdAt
-                    }
-                    : undefined;
-
-            });
+            return toAuthUserPublic(user);
 
         });
 
-    }
+    },
 
-    public getUserByName (name: string): Promise<AuthUserPublic | undefined> {
+    getUsers (): Promise<AuthUserPublic[]> {
 
-        return new Promise((resolve:(result: AuthUserPublic | undefined) => void): void => {
+        return User.findAll({
+            "order": [ [ "name", "ASC" ] ]
+        }).then((users: User[]): AuthUserPublic[] => {
 
-            const user: AuthUserSQL | undefined = this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
-                FROM users
-                WHERE users.name = ?
-            `).get(name) as AuthUserSQL | undefined;
+            return users.map(toAuthUserPublic);
+
+        });
+
+    },
+
+    getTokensByUserName (name: string): Promise<AuthTokenPublic[]> {
+
+        return Token.getByUserName(name);
+
+    },
+
+    addToken (name: string, token: string, fingerprint: string): Promise<void> {
+
+        return User.findOne({
+            "where": {
+                "name": name
+            },
+            "attributes": [ "id" ]
+        }).then((user: User | null): Promise<void> => {
 
             if (!user) {
-                return resolve(undefined);
-            }
-
-            return resolve({
-                "name": user.name,
-                "isAdmin": 1 === user.isAdmin,
-                "createdAt": "string" === typeof user.createdAt
-                    ? new Date(user.createdAt)
-                    : user.createdAt
-            });
-
-        });
-
-    }
-
-    public getUsers (): Promise<AuthUserPublic[]> {
-
-        return new Promise((resolve:(result: AuthUserPublic[]) => void): void => {
-
-            const users: AuthUserSQL[] = this._database.prepare(`
-                SELECT users.id, users.name, users.password, users.isAdmin, users.createdAt
-                FROM users
-                ORDER BY users.name ASC
-            `).all() as AuthUserSQL[];
-
-            return resolve(users.map((user: AuthUserSQL): AuthUserPublic => {
-
-                return {
-                    "name": user.name,
-                    "isAdmin": 1 === user.isAdmin,
-                    "createdAt": "string" === typeof user.createdAt
-                        ? new Date(user.createdAt)
-                        : user.createdAt
-                };
-
-            }));
-
-        });
-
-    }
-
-    public getTokensByUserName (name: string): Promise<AuthTokenPublic[]> {
-
-        return new Promise((resolve:(result: AuthTokenPublic[]) => void): void => {
-
-            return resolve(this._database.prepare(`
-                SELECT tokens.token, tokens.fingerprint, tokens.createdAt
-                FROM tokens
-                INNER JOIN users ON users.id = tokens.idUser
-                WHERE users.name = ?
-            `).all(name) as AuthTokenPublic[]);
-
-        });
-
-    }
-
-    public addToken (name: string, token: string, fingerprint: string): Promise<void> {
-
-        return this._getUserIdByName(name).then((idUser: number | undefined): Promise<void> => {
-
-            if ("undefined" === typeof idUser) {
                 return Promise.reject(new Error("User not found"));
             }
 
-            return new Promise((resolve:() => void): void => {
+            return Token.create({
+                "idUser": user.id,
+                "token": token,
+                "fingerprint": fingerprint
+            }).then((): void => {
 
-                this._database
-                    .prepare("INSERT INTO tokens (idUser, token, fingerprint) VALUES (?, ?, ?)")
-                    .run(idUser, token, fingerprint);
-
-                return resolve();
+                return undefined;
 
             });
 
         });
 
-    }
+    },
 
-    public removeToken (token: string): Promise<void> {
+    removeToken (token: string): Promise<void> {
 
-        return new Promise((resolve:() => void): void => {
+        return Token.destroy({
+            "where": {
+                "token": token
+            }
+        }).then((): void => {
 
-            this._database
-                .prepare("DELETE FROM tokens WHERE token = ?")
-                .run(token);
+            return undefined;
 
-           return resolve();
+        });
+
+    },
+
+    removeUser (name: string): Promise<void> {
+
+        return User.destroy({
+            "where": {
+                "name": name
+            }
+        }).then((): void => {
+
+            return undefined;
 
         });
 
     }
 
-    public removeUser (name: string): Promise<void> {
+};
 
-        return new Promise((resolve:() => void): void => {
-
-            this._database
-                .prepare("DELETE FROM users WHERE name = ?")
-                .run(name);
-
-            return resolve();
-
-        });
-
-    }
-
-}
+export default authDatabase;
