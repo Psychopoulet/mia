@@ -97,7 +97,7 @@
 
         const conf: ConfManager = container.get<ConfManager>("conf");
 
-        if (conf.has("database-uri")) {
+        if (conf.has("database-uri") && "" !== conf.get<string>("database-uri").trim()) {
             log.debug("database uri : " + conf.get<string>("database-uri"));
         }
         else {
