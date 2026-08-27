@@ -150,7 +150,7 @@ export default class App extends React.Component<iPropsNode, iState> {
                     </ModalBody>
                 </Modal> }
 
-                { "CONNECTED" === this.state.status && <Login onError={ this._handleError } /> }
+                { "CONNECTED" === this.state.status && <Login /> }
                 { "LOGGED" === this.state.status && <Plugins onError={ this._handleError } /> }
 
             </div>;

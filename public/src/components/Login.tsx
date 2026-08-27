@@ -5,6 +5,7 @@
     import {
         Modal, ModalBody, ModalFooter,
         InputTextLabel,
+        InvalidFeedBack,
         Button,
         generateFocus
     } from "react-bootstrap-fontawesome";
@@ -20,11 +21,8 @@
     // locals
     import type { SDK } from "../SDK";
 
-    interface iProps extends iPropsNode {
-        "onError": (err: Error) => void;
-    }
-
     interface iState {
+        "error": Error | null,
         "loading": boolean;
         "name": string;
         "password": string;
@@ -32,7 +30,7 @@
 
 // component
 
-export default class Login extends React.Component<iProps, iState> {
+export default class Login extends React.Component<iPropsNode, iState> {
 
     // name
 
@@ -45,7 +43,7 @@ export default class Login extends React.Component<iProps, iState> {
 
     // constructor
 
-    public constructor (props: iProps) {
+    public constructor (props: iPropsNode) {
 
         super(props);
 
@@ -53,6 +51,7 @@ export default class Login extends React.Component<iProps, iState> {
 
         this.state = {
             "loading": false,
+            "error": null,
             "name": "",
             "password": ""
         };
@@ -63,7 +62,7 @@ export default class Login extends React.Component<iProps, iState> {
 
         // focus
 
-        setTimeout(() => {
+        setTimeout((): void => {
             this._generateFocus.setFocus();
         }, 200);
 
@@ -78,14 +77,16 @@ export default class Login extends React.Component<iProps, iState> {
 
         this.setState({ "loading": true });
 
-        this._sdk.login(this.state.name, this.state.password).then(() => {
+        this._sdk.login(this.state.name, this.state.password).then((): void => {
 
             window.location.reload();
 
-        }).catch((err) => {
+        }).catch((err: Error): void => {
 
-            this.setState({ "loading": false });
-            this.props.onError(err as Error);
+            this.setState({
+                "loading": false,
+                "error": err
+            });
 
         });
 
@@ -131,6 +132,8 @@ export default class Login extends React.Component<iProps, iState> {
                     <InputTextLabel type="password" label="password" disabled={ this.state.loading }
                         value={ this.state.password } onChange={ this._handleChangePassword }
                     />
+
+                    { this.state.error && <InvalidFeedBack alert={ this.state.error.message } /> }
 
                 </ModalBody>
 
