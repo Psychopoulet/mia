@@ -3,7 +3,11 @@
 	"info": {
 		"title": "mia-core",
 		"version": "1.0.0",
-		"description": "MIA core plugin — authentication, plugin lifecycle, and the main web UI."
+		"description": "MIA core plugin — authentication, plugin lifecycle, and the main web UI.",
+		"license": {
+			"name": "ISC",
+			"url": "https://en.wikipedia.org/wiki/ISC_license"
+		}
 	},
 	"paths": {
 		"/mia-core/public/index.html": {
