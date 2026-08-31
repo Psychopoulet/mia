@@ -1,0 +1,92 @@
+{
+	"openapi": "3.1.2",
+	"info": {
+		"title": "mia-core - events",
+		"version": "1.0.0",
+		"description": "MIA core plugin — authentication, plugin lifecycle, and the main web UI. Events description.",
+		"license": {
+			"name": "ISC",
+			"url": "https://en.wikipedia.org/wiki/ISC_license"
+		}
+	},
+	"components": {
+		"schemas": {
+			"PluginName": {
+				"$ref": "./Descriptor.json#/components/schemas/PluginName"
+			},
+			"Error": {
+				"$ref": "./Descriptor.json#/components/schemas/Error"
+			},
+			"PushEventPluginInitialized": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"$ref": "#/components/schemas/PluginName"
+					},
+					"command": {
+						"type": "string",
+						"enum": [
+							"initialized"
+						]
+					}
+				},
+				"required": [
+					"id",
+					"plugin",
+					"command"
+				]
+			},
+			"PushEventPluginReleased": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"$ref": "#/components/schemas/PluginName"
+					},
+					"command": {
+						"type": "string",
+						"enum": [
+							"released"
+						]
+					}
+				},
+				"required": [
+					"id",
+					"plugin",
+					"command"
+				]
+			},
+			"PushEventPluginError": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"$ref": "#/components/schemas/PluginName"
+					},
+					"command": {
+						"type": "string",
+						"enum": [
+							"error"
+						]
+					},
+					"data": {
+						"$ref": "#/components/schemas/Error"
+					}
+				},
+				"required": [
+					"id",
+					"plugin",
+					"command",
+					"data"
+				]
+			}
+		}
+	}
+}
