@@ -46,4 +46,14 @@ describe("check descriptor", () => {
 
     });
 
+    it("should expose getPluginDescriptor on /mia-core/api/descriptor", async () => {
+
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const route = descriptor.paths["/mia-core/api/descriptor"];
+
+        equal(Boolean(route), true, "Missing path /mia-core/api/descriptor");
+        equal(route.get.operationId, "getPluginDescriptor");
+
+    });
+
 });
