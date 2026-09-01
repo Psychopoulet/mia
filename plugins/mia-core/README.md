@@ -1,4 +1,4 @@
-# mia
+# mia-core
 
 MIA core plugin — authentication, plugin lifecycle, and the main web UI.
 
@@ -19,3 +19,21 @@ MIA core plugin — authentication, plugin lifecycle, and the main web UI.
 ## OpenAPI
 
 [API Descriptor](./lib/data/Descriptor.json)
+
+## Sign in
+
+Open the app. Enter your name and password, then submit **Login**.
+
+If the database is empty, a first user is created automatically so you can sign in.
+
+## Plugins
+
+After login, the board lists every installed plugin. Each card shows the plugin's data
+
+The plugin name opens that plugin’s own screen.
+
+On a card you can:
+
+- view the latest GitHub tag (current tag vs last tag)
+- update the plugin from GitHub
+- delete the plugin
