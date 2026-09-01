@@ -149,15 +149,13 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     public getFrontIndex (): Promise<operations["getFrontIndex"]["responses"]["200"]["content"]["text/html"]> {
 
-        const container: ContainerPattern = this._getContainer();
-
         return this._readPublic("index.html").then((content: string): string => {
 
             return content
 
-                .replace(/{{app.name}}/g, container.get<string>("app.name"))
-                .replace(/{{app.version}}/g, container.get<string>("app.version"))
-                .replace(/{{app.description}}/g, container.get<string>("app.description"));
+                .replace(/{{plugin.name}}/g, this.getPluginName())
+                .replace(/{{plugin.version}}/g, this.getPluginVersion())
+                .replace(/{{plugin.description}}/g, this.getPluginDescription());
 
         });
 
@@ -165,15 +163,13 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     public getFrontMenu (): Promise<operations["getFrontMenu"]["responses"]["200"]["content"]["text/javascript"]> {
 
-        const container: ContainerPattern = this._getContainer();
-
         return this._readPublic(join("dist", "menu.min.js")).then((content: string): string => {
 
             return content
 
-                .replace(/{{app.name}}/g, container.get<string>("app.name"))
-                .replace(/{{app.version}}/g, container.get<string>("app.version"))
-                .replace(/{{app.description}}/g, container.get<string>("app.description"));
+                .replace(/{{plugin.name}}/g, this.getPluginName())
+                .replace(/{{plugin.version}}/g, this.getPluginVersion())
+                .replace(/{{plugin.description}}/g, this.getPluginDescription());
 
         });
 
@@ -185,15 +181,13 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     public getFrontApp (): Promise<operations["getFrontApp"]["responses"]["200"]["content"]["text/javascript"]> {
 
-        const container: ContainerPattern = this._getContainer();
-
         return this._readPublic(join("dist", "bundle.min.js")).then((content: string): string => {
 
             return content
 
-                .replace(/{{app.name}}/g, container.get<string>("app.name"))
-                .replace(/{{app.version}}/g, container.get<string>("app.version"))
-                .replace(/{{app.description}}/g, container.get<string>("app.description"));
+                .replace(/{{plugin.name}}/g, this.getPluginName())
+                .replace(/{{plugin.version}}/g, this.getPluginVersion())
+                .replace(/{{plugin.description}}/g, this.getPluginDescription());
 
         });
 

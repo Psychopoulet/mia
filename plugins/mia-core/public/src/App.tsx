@@ -6,6 +6,8 @@
 
     // locals
     import getSDK from "./SDK";
+    import Login from "./components/Login";
+    import Plugins from "./components/Plugins";
 
 // types & interfaces
 
@@ -17,8 +19,8 @@
     import type { components, operations } from "./Descriptor";
 
     interface iState {
-        "status": "CONNECTED" | "DISCONNECTED" | operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"];
-        "error": components["schemas"]["PushEventPluginError"]["data"] | null;
+        "status": "DISCONNECTED" | "CONNECTED" | "LOGGED" | operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"];
+        "error": components["schemas"]["Error"] | null;
     }
 
 // component
@@ -50,11 +52,6 @@ export default class App extends React.Component<iPropsNode, iState> {
 
     public componentDidMount (): void {
 
-        if (!this._sdk.isLoggedIn()) {
-            window.location.assign("/");
-            return;
-        }
-
         this._sdk
             .on("connected", this._onConnected)
             .on("disconnected", this._onDisconnected)
@@ -84,6 +81,16 @@ export default class App extends React.Component<iPropsNode, iState> {
         });
 
         this._sdk.getPluginStatus().then((status): void => {
+
+            if ("INITIALIZED" === status) {
+
+                this.setState({
+                    "status": this._sdk.isLoggedIn() ? "LOGGED" : "INITIALIZED"
+                });
+
+                return;
+
+            }
 
             this.setState({
                 "status": status
@@ -131,6 +138,17 @@ export default class App extends React.Component<iPropsNode, iState> {
 
     };
 
+    private readonly _handleError = (err: Error): void => {
+
+        this.setState({
+            "error": {
+                "code": "unknown",
+                "message": err.message
+            }
+        });
+
+    };
+
     // render
 
     public render (): React.JSX.Element {
@@ -163,7 +181,14 @@ export default class App extends React.Component<iPropsNode, iState> {
             </div>;
 
         }
-        else {
+        else if (![ "INITIALIZED", "LOGGED" ].includes(this.state.status)) {
+
+            return <div className="container">
+                <Alert variant="warning">Unknown status: { this.state.status }</Alert>
+            </div>;
+
+        }
+        else { // "INITIALIZED" | "LOGGED"
 
             return <div className="container-fluid">
 
@@ -173,7 +198,8 @@ export default class App extends React.Component<iPropsNode, iState> {
                     </ModalBody>
                 </Modal> }
 
-                <span>Hello World !</span>
+                { "INITIALIZED" === this.state.status && <Login /> }
+                { "LOGGED" === this.state.status && <Plugins onError={ this._handleError } /> }
 
             </div>;
 

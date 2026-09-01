@@ -19,7 +19,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const INDEX_FILE = join(__dirname, "..", "public", "index.html");
     const DIST_DIR = join(__dirname, "..", "public", "dist");
     const BUNDLE_FILE = join(DIST_DIR, "bundle.min.js");
     const BUNDLE_MAP_FILE = join(DIST_DIR, "bundle.min.js.map");
@@ -34,7 +33,6 @@ describe("mediator", () => {
     let descriptor = null;
     let resourcesDir = "";
     let mediator = null;
-    let originalIndex = "";
     let container = null;
 
     before(() => {
@@ -42,12 +40,6 @@ describe("mediator", () => {
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
             descriptor = JSON.parse(content);
-
-            return readFile(INDEX_FILE, "utf-8");
-
-        }).then((indexContent) => {
-
-            originalIndex = indexContent;
 
             return mkdtemp(join(tmpdir(), "mia-core-"));
 
@@ -62,10 +54,9 @@ describe("mediator", () => {
         }).then(() => {
 
             return Promise.all([
-                writeFile(INDEX_FILE, "{{app.name}}|{{app.version}}|{{app.description}}", "utf-8"),
-                writeFile(BUNDLE_FILE, "{{app.name}}|{{app.version}}|{{app.description}}", "utf-8"),
+                writeFile(BUNDLE_FILE, "{{plugin.name}}|{{plugin.version}}|{{plugin.description}}", "utf-8"),
                 writeFile(BUNDLE_MAP_FILE, "bundle-sourcemap", "utf-8"),
-                writeFile(MENU_FILE, "{{app.name}}|{{app.version}}|{{app.description}}", "utf-8"),
+                writeFile(MENU_FILE, "{{plugin.name}}|{{plugin.version}}|{{plugin.description}}", "utf-8"),
                 writeFile(MENU_MAP_FILE, "menu-sourcemap", "utf-8")
             ]);
 
@@ -94,7 +85,6 @@ describe("mediator", () => {
     after(() => {
 
         return Promise.all([
-            writeFile(INDEX_FILE, originalIndex, "utf-8"),
             rm(resourcesDir, {
                 "force": true,
                 "recursive": true
@@ -123,32 +113,34 @@ describe("mediator", () => {
 
         }).timeout(MAX_TIMEOUT);
 
-        it("should replace app placeholders in front index", () => {
+        it("should replace plugin placeholders in front index", () => {
 
             return mediator.getFrontIndex().then((content) => {
 
-                strictEqual(content, "mia-core|1.0.0|MIA core plugin — authentication, plugin lifecycle, and the main web UI.");
-                strictEqual(content.includes("{{app.name}}"), false);
+                strictEqual(content.includes(descriptor.info.title), true);
+                strictEqual(content.includes(descriptor.info.version), true);
+                strictEqual(content.includes(descriptor.info.description), true);
+                strictEqual(content.includes("{{plugin.name}}"), false);
 
             });
 
         }).timeout(MAX_TIMEOUT);
 
-        it("should replace app placeholders in front app", () => {
+        it("should replace plugin placeholders in front app", () => {
 
             return mediator.getFrontApp().then((content) => {
 
-                strictEqual(content, "mia-core|1.0.0|MIA core plugin — authentication, plugin lifecycle, and the main web UI.");
+                strictEqual(content, descriptor.info.title + "|" + descriptor.info.version + "|" + descriptor.info.description);
 
             });
 
         }).timeout(MAX_TIMEOUT);
 
-        it("should replace app placeholders in front menu", () => {
+        it("should replace plugin placeholders in front menu", () => {
 
             return mediator.getFrontMenu().then((content) => {
 
-                strictEqual(content, "mia-core|1.0.0|MIA core plugin — authentication, plugin lifecycle, and the main web UI.");
+                strictEqual(content, descriptor.info.title + "|" + descriptor.info.version + "|" + descriptor.info.description);
 
             });
 
