@@ -10,6 +10,7 @@
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
     const DESCRIPTOR_EVENTS_FILE = join(__dirname, "..", "lib", "data", "DescriptorEvents.json");
     const PACKAGE_FILE = join(__dirname, "..", "package.json");
+    const MIA_PACKAGE_FILE = join(__dirname, "..", "..", "..", "package.json");
 
     const POSTFIX_EVENTS_NAME = " - events";
     const POSTFIX_EVENTS_DESCRIPTION = " Events description.";
@@ -43,6 +44,24 @@ describe("check descriptor", () => {
         equal(descriptorEvents.info.version, packageFile.version, "DescriptorEvents version does not match with package.json version");
         equal(descriptorEvents.info.title, packageFile.name + POSTFIX_EVENTS_NAME, "DescriptorEvents title does not match with package.json name");
         equal(descriptorEvents.info.description, packageFile.description + POSTFIX_EVENTS_DESCRIPTION, "DescriptorEvents title does not match with package.json name");
+
+    });
+
+    it("should match version and description with mia package.json", async () => {
+
+        const miaPackage = JSON.parse(await readFile(MIA_PACKAGE_FILE, "utf-8"));
+        const packageFile = JSON.parse(await readFile(PACKAGE_FILE, "utf-8"));
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const descriptorEvents = JSON.parse(await readFile(DESCRIPTOR_EVENTS_FILE, "utf-8"));
+
+        equal(packageFile.version, miaPackage.version, "package.json version does not match with mia package.json version");
+        equal(packageFile.description, miaPackage.description, "package.json description does not match with mia package.json description");
+
+        equal(descriptor.info.version, miaPackage.version, "Descriptor version does not match with mia package.json version");
+        equal(descriptor.info.description, miaPackage.description, "Descriptor description does not match with mia package.json description");
+
+        equal(descriptorEvents.info.version, miaPackage.version, "DescriptorEvents version does not match with mia package.json version");
+        equal(descriptorEvents.info.description, miaPackage.description + POSTFIX_EVENTS_DESCRIPTION, "DescriptorEvents description does not match with mia package.json description");
 
     });
 

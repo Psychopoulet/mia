@@ -2,8 +2,8 @@
 	"openapi": "3.1.2",
 	"info": {
 		"title": "mia-core - events",
-		"version": "1.0.0",
-		"description": "MIA core plugin — authentication, plugin lifecycle, and the main web UI. Events description.",
+		"version": "2.0.3",
+		"description": "MIA - easy IOT. Events description.",
 		"license": {
 			"name": "ISC",
 			"url": "https://en.wikipedia.org/wiki/ISC_license"
