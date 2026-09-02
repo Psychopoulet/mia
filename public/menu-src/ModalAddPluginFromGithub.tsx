@@ -11,7 +11,7 @@
     } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "../src/SDK";
+    import getSDK from "../../plugins/mia-core/public/src/SDK";
 
 // types & interfaces
 
@@ -19,8 +19,8 @@
     import type { iPropsNode, iGenerateFocusCallback } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "../src/SDK";
-    import type { components } from "../src/Descriptor";
+    import type { SDK } from "../../plugins/mia-core/public/src/SDK";
+    import type { components } from "../../plugins/mia-core/public/src/Descriptor";
 
     interface iProps extends iPropsNode {
         "onClose": (e?: React.MouseEvent<HTMLButtonElement>) => void;
@@ -153,7 +153,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
             "error": null
         });
 
-        this._sdk.installPlugin("https://github.com/" + this.state.user + "/" + this.state.repository).then((): void => {
+        this._sdk.installPluginFromGithub("https://github.com/" + this.state.user + "/" + this.state.repository).then((): void => {
 
             this.props.onClose();
 

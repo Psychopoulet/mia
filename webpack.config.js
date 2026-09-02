@@ -16,10 +16,10 @@ module.exports = {
 
     "mode": "development",
 
-    "entry": join(PUBLIC, "src", "index.tsx"),
+    "entry": join(PUBLIC, "menu-src", "index.tsx"),
 
     "output": {
-        "filename": "bundle.min.js",
+        "filename": "menu.min.js",
         "path": join(PUBLIC, "dist")
     },
 

@@ -107,10 +107,6 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                         return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js"));
                     }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
                         return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js.map"));
-                    }).get("/public/bundle.min.js", (req: Request, res: Response): void => {
-                        return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "bundle.min.js"));
-                    }).get("/public/bundle.min.js.map", (req: Request, res: Response): void => {
-                        return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "bundle.min.js.map"));
                     });
 
                 // libs

@@ -23,6 +23,10 @@
 		"jsx": "react"
 
 	},
+	"include": [
+		"./public/menu-src/**/*.ts",
+		"./public/menu-src/**/*.tsx"
+	],
 	"exclude": [
 		"node_modules"
 	],
