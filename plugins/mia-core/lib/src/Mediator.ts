@@ -8,10 +8,10 @@
     import { Mediator, NotFoundError } from "node-pluginsmanager-plugin";
 
     // locals
-    import { sign } from "../../../cjs/tools/AuthJWT";
-    import extractToken from "../../../cjs/tools/extractToken";
-    import Token from "../../../cjs/tools/models/Token";
-    import User from "../../../cjs/tools/models/User";
+    import { sign } from "../../../../lib/src/tools/AuthJWT";
+    import extractToken from "../../../../lib/src/tools/extractToken";
+    import Token from "../../../../lib/src/tools/models/Token";
+    import User from "../../../../lib/src/tools/models/User";
     import findPluginByName from "./utils/findPluginByName";
     import getFingerprint from "./utils/getFingerprint";
     import parseGithubPath from "./utils/parseGithubPath";
@@ -27,7 +27,7 @@
 
     // locals
 
-    import type { UserAttributes } from "../../../cjs/tools/models/User";
+    import type { UserAttributes } from "../../../../lib/src/tools/models/User";
 
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";
