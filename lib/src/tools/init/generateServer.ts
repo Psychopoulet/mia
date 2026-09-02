@@ -1,7 +1,6 @@
 // deps
 
     // natives
-    import { readFile } from "node:fs/promises";
     import { createServer } from "node:http";
     import { join } from "node:path";
 

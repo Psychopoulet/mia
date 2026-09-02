@@ -1,5 +1,8 @@
 // deps
 
+    // natives
+    import { join } from "node:path";
+
     // externals
     import Pluginsmanager from "node-pluginsmanager";
 
@@ -92,6 +95,8 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
         }).on("uninstalled", (pluginName: string): void => {
             logger.warning("Plugin " + pluginName + " uninstalled");
         });
+
+    pluginsManager.addExternalPluginDirectory(join(__dirname, "..", "..", "..", "..", "plugins", "mia-core"));
 
     return pluginsManager.loadAll(container).then((): Promise<void> => {
         return pluginsManager.initAll(container);
