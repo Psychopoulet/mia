@@ -39,65 +39,6 @@
 				}
 			}
 		},
-		"/mia-core/public/menu.min.js": {
-			"get": {
-				"description": "",
-				"summary": "Global app menu",
-				"operationId": "getFrontMenu",
-				"responses": {
-					"200": {
-						"description": "Global app menu",
-						"content": {
-							"text/javascript": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					},
-					"default": {
-						"description": "An error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Error"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/mia-core/public/menu.min.js.map": {
-			"get": {
-				"description": "",
-				"summary": "Global app menu map",
-				"operationId": "getFrontMenuMap",
-				"responses": {
-					"200": {
-						"description": "Global app menu map",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"additionalProperties": true
-								}
-							}
-						}
-					},
-					"default": {
-						"description": "An error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Error"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
 		"/mia-core/public/bundle.min.js": {
 			"get": {
 				"description": "",

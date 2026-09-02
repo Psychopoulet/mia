@@ -13,7 +13,6 @@
     import User, { registerUser } from "../models/User";
     import { registerLog } from "../models/Log";
     import { registerToken } from "../models/Token";
-    import authDatabase from "../AuthDatabase";
 
 // types & interfaces
 
@@ -90,10 +89,6 @@
                     return undefined;
 
                 });
-
-            }).then((): void => {
-
-                container.set("auth-db", authDatabase);
 
             });
 

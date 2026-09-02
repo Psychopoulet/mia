@@ -74,10 +74,7 @@ export default function registerAppData (container: ContainerPattern): Promise<v
             .set("database-file", join(container.get<string>("data-directory"), "mia-database.db"))
             .document("database-file", "The application's file where the local SQLite database is registered")
 
-            .document("database", "The application's orm (Sequelize)")
-
-            .set("auth-db", {})
-            .document("auth-db", "The application's authentication API (users and tokens) for plugins.");
+            .document("database", "The application's orm (Sequelize)");
 
         // server socket
         container
