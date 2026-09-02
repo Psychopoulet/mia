@@ -88,21 +88,7 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                 // main page
 
                     app.get([ "/", "/public/index.html" ], (req: Request, res: Response, next: NextFunction): void => {
-
-                        const file: string = join(PUBLIC_DIRECTORY, "index.html");
-
-                        readFile(file, "utf-8").then((content: string): void => {
-
-                            res.status(200).send(content
-                                .replace(/{{app.name}}/g, container.get<string>("app.name"))
-                                .replace(/{{app.version}}/g, container.get<string>("app.version"))
-                                .replace(/{{app.description}}/g, container.get<string>("app.description"))
-                            );
-
-                        }).catch((err: Error): void => {
-                            next(err);
-                        });
-
+                        res.redirect(301, "/mia-core/public/index.html");
                     }).get("/public/menu.min.js", (req: Request, res: Response): void => {
                         return res.sendFile(join(PUBLIC_DIRECTORY, "dist", "menu.min.js"));
                     }).get("/public/menu.min.js.map", (req: Request, res: Response): void => {
