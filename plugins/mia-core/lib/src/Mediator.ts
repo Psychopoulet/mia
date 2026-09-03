@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
+// - @typescript-eslint/no-require-imports is disabled because we need to import dynamically the MIA module
+// - @typescript-eslint/no-var-requires is disabled for the same reason
+
 // deps
 
     // natives
@@ -7,11 +11,6 @@
     // externals
     import { Mediator, NotFoundError } from "node-pluginsmanager-plugin";
 
-    // locals
-    import { sign } from "../../../../lib/src/tools/AuthJWT";
-    import extractToken from "../../../../lib/src/tools/extractToken";
-    import Token from "../../../../lib/src/tools/models/Token";
-    import User from "../../../../lib/src/tools/models/User";
     import findPluginByName from "./utils/findPluginByName";
     import getFingerprint from "./utils/getFingerprint";
     import parseGithubPath from "./utils/parseGithubPath";
@@ -23,14 +22,24 @@
     import type ContainerPattern from "node-containerpattern";
     import type ConfManager from "node-confmanager";
     import type PluginsManager from "node-pluginsmanager";
-    import type { Orchestrator, iEventsMinimal, iUrlAllowedParameters } from "node-pluginsmanager-plugin";
+    import type { Orchestrator, iEventsMinimal, iUrlAllowedParameters } from "node-pluginsmanager-plugin"; // locals — types from the host mia project (imported via build/importTypes.js)
 
     // locals
-
-    import type { UserAttributes } from "../../../../lib/src/tools/models/User";
+    import type { sign as tSign } from "./types/tools/AuthJWT";
+    import type tExtractToken from "./types/tools/extractToken";
+    import type tToken from "./types/tools/models/Token";
+    import type tUser from "./types/tools/models/User";
+    import type { UserAttributes } from "./types/tools/models/User";
 
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";
+
+// runtime bindings (host mia project, compiled CJS)
+
+    const { sign } = require("../../../../lib/cjs/tools/AuthJWT") as { "sign": typeof tSign };
+    const extractToken = (require("../../../../lib/cjs/tools/extractToken") as { "default": typeof tExtractToken }).default;
+    const Token = (require("../../../../lib/cjs/tools/models/Token") as { "default": typeof tToken }).default;
+    const User = (require("../../../../lib/cjs/tools/models/User") as { "default": typeof tUser }).default;
 
 // module
 

@@ -1,10 +1,13 @@
 {
+
   "name": "mia-core",
   "version": "2.0.3",
   "description": "MIA - easy IOT.",
+
   "type": "commonjs",
   "typings": "./lib/cjs/main.d.cts",
   "main": "./lib/cjs/main.cjs",
+
   "exports": {
     ".": {
       "require": {
@@ -13,26 +16,35 @@
       }
     }
   },
+
   "scripts": {
+
     "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/Descriptor.ts",
     "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
     "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
+
     "lint-back": "npm run transpile-openapi-back && npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
     "lint-front": "npm run transpile-openapi-front && npx eslint --config .eslintrc-front.js --ext .tsx,.ts ./public/src/**/*",
     "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js ./test/**/*",
     "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
+
     "clean-back": "npx rimraf ./lib/cjs",
     "clean-front": "npx rimraf ./public/dist",
     "clean": "npm run clean-back && npm run clean-front",
-    "build-back": "npm run clean-back && npm run transpile-openapi-back && npx tsc --project ./tsconfig.json",
+
+    "import-types": "node ./build/importTypes.js",
+    "build-back": "npm run clean-back && npm run import-types && npm run transpile-openapi-back && npx tsc --project ./tsconfig.json",
     "build-front": "npm run clean-front && npm run transpile-openapi-front && npx webpack --config ./webpack.config.js",
     "build": "npm run build-back && npm run build-front",
+
     "check-node-engine": "npx check-node-engine",
     "check-requires": "npx used-deps-analyzer ./package.json ./lib/src --no-dev",
     "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch",
     "unit-tests": "npx mocha",
     "unit-tests-local": "npx nyc --reporter=html --reporter=text mocha",
+
     "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests-local"
+
   },
   "files": [
     "lib/cjs",
@@ -73,9 +85,11 @@
     "webpack": "5.110.2",
     "webpack-cli": "7.2.3"
   },
+
   "author": "Sébastien VIDAL",
   "contributors": [],
   "license": "ISC",
+
   "homepage": "https://github.com/Psychopoulet/mia#readme",
   "repository": {
     "type": "git",
@@ -84,4 +98,5 @@
   "bugs": {
     "url": "https://github.com/Psychopoulet/mia/issues"
   }
+
 }

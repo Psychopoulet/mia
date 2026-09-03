@@ -4,10 +4,12 @@
         "target": "es2022",
         "module": "commonjs",
 
+        "rootDir": "./lib/src",
         "outDir": "./lib/cjs",
 
         "declaration": true,
         "declarationDir": "./lib/cjs",
+
 
         "alwaysStrict": true,
         "strict": true,
