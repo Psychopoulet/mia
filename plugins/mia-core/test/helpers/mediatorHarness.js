@@ -82,6 +82,7 @@
     function createContainer (options) {
 
         const pluginsManager = options?.pluginsManager ?? createPluginsManager();
+        const authDb = options?.authDb ?? options?.["auth-db"];
 
         const store = {
             "plugins-manager": pluginsManager,
@@ -94,6 +95,10 @@
                 }
             }
         };
+
+        if (authDb) {
+            store["auth-db"] = authDb;
+        }
 
         return {
             "get": (key) => {

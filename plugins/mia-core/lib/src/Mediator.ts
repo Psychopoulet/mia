@@ -9,11 +9,14 @@
     import { join } from "node:path";
 
     // externals
-    import { Mediator, NotFoundError } from "node-pluginsmanager-plugin";
+    import { ConflictError, Mediator, NotFoundError, UnauthorizedError } from "node-pluginsmanager-plugin";
 
+    import { assertAdmin, assertSelfOrAdmin } from "./utils/assertPermissions";
     import findPluginByName from "./utils/findPluginByName";
+    import getCaller from "./utils/getCaller";
     import getFingerprint from "./utils/getFingerprint";
     import parseGithubPath from "./utils/parseGithubPath";
+    import { serializeToken, serializeUser } from "./utils/serializeAuth";
 
 // types & interfaces
 
@@ -31,6 +34,7 @@
     import type tUser from "./types/tools/models/User";
     import type { UserAttributes } from "./types/tools/models/User";
 
+    import type { AuthDatabase, AuthTokenPublic, AuthUserPublic, FullAuthPublic } from "./@types/AuthDatabase";
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";
 
@@ -57,10 +61,13 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
     "plugin-uninstall-running": [ components["schemas"]["PushEventPluginUninstallRunning"]["data"] ];
     "plugin-uninstall-success": [ components["schemas"]["PushEventPluginUninstallSuccess"]["data"] ];
     "plugin-uninstall-fail": [ components["schemas"]["PushEventPluginUninstallFail"]["data"] ];
+    "user.added": [ components["schemas"]["User"] ];
+    "user.removed": [ components["schemas"]["User"] ];
 }> {
 
     protected _container: ContainerPattern | null = null;
     protected _pluginsManager: PluginsManager | null = null;
+    protected _authDb: AuthDatabase | null = null;
 
     // constructor
 
@@ -70,6 +77,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
         this._container = container;
         this._pluginsManager = container.get<PluginsManager>("plugins-manager");
+        this._authDb = container.get<AuthDatabase>("auth-db");
 
         this._pluginsManager
             .on("installing", this._onInstalling)
@@ -90,6 +98,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         }
 
         this._pluginsManager = null;
+        this._authDb = null;
         this._container = null;
 
         return Promise.resolve();
@@ -103,6 +112,16 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         }
 
         return this._container;
+
+    }
+
+    private _getAuthDb (): AuthDatabase {
+
+        if (!this._authDb) {
+            throw new Error("Auth database is not initialized");
+        }
+
+        return this._authDb;
 
     }
 
@@ -405,6 +424,257 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         }
 
         return pluginsManager.getLatestGithubTag(plugin);
+
+    }
+
+    public getUsers (): Promise<operations["getUsers"]["responses"]["200"]["content"]["application/json"]> {
+
+        return this._getAuthDb().getUsers().then((users: AuthUserPublic[]): operations["getUsers"]["responses"]["200"]["content"]["application/json"] => {
+
+            return users.map(serializeUser);
+
+        });
+
+    }
+
+    // Create a user (admin only). Reject if the name already exists, persist via
+    // auth-db, then emit user.added with the public snapshot.
+    public createUser (url: iUrlAllowedParameters, body: operations["createUser"]["requestBody"]["content"]["application/json"]): Promise<operations["createUser"]["responses"]["201"]["content"]["application/json"]> {
+
+        const authDb: AuthDatabase = this._getAuthDb();
+
+        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+
+            assertAdmin(caller);
+
+            return authDb.getUserByName(body.name).then((existing: AuthUserPublic | undefined): Promise<void> => {
+
+                if (existing) {
+                    throw new ConflictError("User '" + body.name + "' already exists");
+                }
+
+                return authDb.addUser(body.name, body.password, Boolean(body.isAdmin));
+
+            });
+
+        }).then((): Promise<AuthUserPublic | undefined> => {
+
+            return authDb.getUserByName(body.name);
+
+        }).then((user: AuthUserPublic | undefined): operations["createUser"]["responses"]["201"]["content"]["application/json"] => {
+
+            if (!user) {
+                throw new Error("User was not created");
+            }
+
+            const serialized: components["schemas"]["User"] = serializeUser(user);
+
+            this.emit("user.added", serialized);
+
+            return serialized;
+
+        });
+
+    }
+
+    public getUser (url: iUrlAllowedParameters): Promise<operations["getUser"]["responses"]["200"]["content"]["application/json"]> {
+
+        const urlParamsPath: operations["getUser"]["parameters"]["path"] = url.path as operations["getUser"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return this._getAuthDb().getUserByName(name).then((user: AuthUserPublic | undefined): operations["getUser"]["responses"]["200"]["content"]["application/json"] => {
+
+            if (!user) {
+                throw new NotFoundError("User '" + name + "' not found");
+            }
+
+            return serializeUser(user);
+
+        });
+
+    }
+
+    // Update a user (self or admin). isAdmin change is admin-only; last-admin
+    // demote is rejected. Persist password and/or isAdmin, then return the public user.
+    public updateUser (url: iUrlAllowedParameters, body: operations["updateUser"]["requestBody"]["content"]["application/json"]): Promise<operations["updateUser"]["responses"]["200"]["content"]["application/json"]> {
+
+        const authDb: AuthDatabase = this._getAuthDb();
+        const urlParamsPath: operations["updateUser"]["parameters"]["path"] = url.path as operations["updateUser"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+
+            assertSelfOrAdmin(caller, name);
+
+            if ("boolean" === typeof body.isAdmin && !caller.isAdmin) {
+                throw new UnauthorizedError("Admin privileges required to change isAdmin");
+            }
+
+            return authDb.getUserByName(name).then((existing: AuthUserPublic | undefined): Promise<void> => {
+
+                if (!existing) {
+                    throw new NotFoundError("User '" + name + "' not found");
+                }
+
+                let lastAdminGuard: Promise<void> = Promise.resolve();
+
+                if (false === body.isAdmin && existing.isAdmin) {
+
+                    lastAdminGuard = authDb.getUsers().then((users: AuthUserPublic[]): void => {
+
+                        const adminCount: number = users.filter((user: AuthUserPublic): boolean => {
+                            return user.isAdmin;
+                        }).length;
+
+                        if (1 >= adminCount) {
+                            throw new ConflictError("Cannot remove the last admin");
+                        }
+
+                    });
+
+                }
+
+                return lastAdminGuard.then((): Promise<void> => {
+
+                    const tasks: Array<Promise<void>> = [];
+
+                    if ("string" === typeof body.password) {
+                        tasks.push(authDb.editUserPassword(name, body.password));
+                    }
+
+                    if ("boolean" === typeof body.isAdmin) {
+                        tasks.push(authDb.editUserIsAdmin(name, body.isAdmin));
+                    }
+
+                    return Promise.all(tasks).then((): void => {
+                        // no-op: wait for password / isAdmin updates
+                    });
+
+                });
+
+            });
+
+        }).then((): Promise<AuthUserPublic | undefined> => {
+
+            return authDb.getUserByName(name);
+
+        }).then((user: AuthUserPublic | undefined): operations["updateUser"]["responses"]["200"]["content"]["application/json"] => {
+
+            if (!user) {
+                throw new NotFoundError("User '" + name + "' not found");
+            }
+
+            return serializeUser(user);
+
+        });
+
+    }
+
+    // Delete a user (self or admin). Snapshot the public user first; reject
+    // last-admin; emit user.removed after a successful remove.
+    public deleteUser (url: iUrlAllowedParameters): Promise<void> {
+
+        const authDb: AuthDatabase = this._getAuthDb();
+        const urlParamsPath: operations["deleteUser"]["parameters"]["path"] = url.path as operations["deleteUser"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+
+            assertSelfOrAdmin(caller, name);
+
+            return authDb.getUserByName(name).then((existing: AuthUserPublic | undefined): Promise<void> => {
+
+                if (!existing) {
+                    throw new NotFoundError("User '" + name + "' not found");
+                }
+
+                const snapshot: components["schemas"]["User"] = serializeUser(existing);
+
+                let remove: Promise<void> = Promise.resolve();
+
+                if (!existing.isAdmin) {
+                    remove = authDb.removeUser(name);
+                }
+                else {
+
+                    remove = authDb.getUsers().then((users: AuthUserPublic[]): Promise<void> => {
+
+                        const adminCount: number = users.filter((user: AuthUserPublic): boolean => {
+                            return user.isAdmin;
+                        }).length;
+
+                        if (1 >= adminCount) {
+                            throw new ConflictError("Cannot delete the last admin");
+                        }
+
+                        return authDb.removeUser(name);
+
+                    });
+
+                }
+
+                return remove.then((): void => {
+
+                    this.emit("user.removed", snapshot);
+
+                });
+
+            });
+
+        });
+
+    }
+
+    public getUserTokens (url: iUrlAllowedParameters): Promise<operations["getUserTokens"]["responses"]["200"]["content"]["application/json"]> {
+
+        const authDb: AuthDatabase = this._getAuthDb();
+        const urlParamsPath: operations["getUserTokens"]["parameters"]["path"] = url.path as operations["getUserTokens"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<AuthTokenPublic[]> => {
+
+            assertSelfOrAdmin(caller, name);
+
+            return authDb.getUserByName(name).then((existing: AuthUserPublic | undefined): Promise<AuthTokenPublic[]> => {
+
+                if (!existing) {
+                    throw new NotFoundError("User '" + name + "' not found");
+                }
+
+                return authDb.getTokensByUserName(name);
+
+            });
+
+        }).then((tokens: AuthTokenPublic[]): operations["getUserTokens"]["responses"]["200"]["content"]["application/json"] => {
+
+            return tokens.map(serializeToken);
+
+        });
+
+    }
+
+    public deleteToken (url: iUrlAllowedParameters, body: operations["deleteToken"]["requestBody"]["content"]["application/json"]): Promise<void> {
+
+        const authDb: AuthDatabase = this._getAuthDb();
+        const token: string = body.token;
+
+        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+
+            return authDb.getUserByToken(token).then((owner: FullAuthPublic | undefined): Promise<void> => {
+
+                if (!owner) {
+                    throw new NotFoundError("Token not found");
+                }
+
+                if (!caller.isAdmin && caller.name !== owner.name) {
+                    throw new UnauthorizedError("Forbidden");
+                }
+
+                return authDb.removeToken(token);
+
+            });
+
+        });
 
     }
 

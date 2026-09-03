@@ -31,7 +31,9 @@ export default class ServerCore extends Server {
             .on("plugin-update-fail", this._onPluginUpdateFail)
             .on("plugin-uninstall-running", this._onPluginUninstallRunning)
             .on("plugin-uninstall-success", this._onPluginUninstallSuccess)
-            .on("plugin-uninstall-fail", this._onPluginUninstallFail);
+            .on("plugin-uninstall-fail", this._onPluginUninstallFail)
+            .on("user.added", this._onUserAdded)
+            .on("user.removed", this._onUserRemoved);
 
         return Promise.resolve();
 
@@ -53,7 +55,9 @@ export default class ServerCore extends Server {
             .off("plugin-update-fail", this._onPluginUpdateFail)
             .off("plugin-uninstall-running", this._onPluginUninstallRunning)
             .off("plugin-uninstall-success", this._onPluginUninstallSuccess)
-            .off("plugin-uninstall-fail", this._onPluginUninstallFail);
+            .off("plugin-uninstall-fail", this._onPluginUninstallFail)
+            .off("user.added", this._onUserAdded)
+            .off("user.removed", this._onUserRemoved);
 
         return Promise.resolve();
 
@@ -136,6 +140,18 @@ export default class ServerCore extends Server {
     private readonly _onPluginUninstallFail = (data: components["schemas"]["PushEventPluginUninstallFail"]["data"]): void => {
 
         this.push("plugin-uninstall-fail", data);
+
+    };
+
+    private readonly _onUserAdded = (data: components["schemas"]["PushEventUserAdded"]["data"]): void => {
+
+        this.push("user.added", data);
+
+    };
+
+    private readonly _onUserRemoved = (data: components["schemas"]["PushEventUserRemoved"]["data"]): void => {
+
+        this.push("user.removed", data);
 
     };
 
