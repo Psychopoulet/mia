@@ -17,6 +17,9 @@
 			"Error": {
 				"$ref": "./Descriptor.json#/components/schemas/Error"
 			},
+			"User": {
+				"$ref": "./Descriptor.json#/components/schemas/User"
+			},
 			"PushEventPluginInitialized": {
 				"type": "object",
 				"properties": {
@@ -451,6 +454,58 @@
 							"pluginName",
 							"error"
 						]
+					}
+				},
+				"required": [
+					"id",
+					"plugin",
+					"command",
+					"data"
+				]
+			},
+			"PushEventUserAdded": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"$ref": "#/components/schemas/PluginName"
+					},
+					"command": {
+						"type": "string",
+						"enum": [
+							"user.added"
+						]
+					},
+					"data": {
+						"$ref": "#/components/schemas/User"
+					}
+				},
+				"required": [
+					"id",
+					"plugin",
+					"command",
+					"data"
+				]
+			},
+			"PushEventUserRemoved": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"plugin": {
+						"$ref": "#/components/schemas/PluginName"
+					},
+					"command": {
+						"type": "string",
+						"enum": [
+							"user.removed"
+						]
+					},
+					"data": {
+						"$ref": "#/components/schemas/User"
 					}
 				},
 				"required": [
