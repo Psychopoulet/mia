@@ -70,7 +70,7 @@ export default class Plugin extends React.Component<iProps, iState> {
             "running": true
         });
 
-        this._sdk.getLastTag(this.props.plugin.name).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
+        this._sdk.getPluginLatestTag(this.props.plugin.name).then((data: operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]): void => {
 
             this.setState({
                 "lastTag": data,
@@ -106,7 +106,7 @@ export default class Plugin extends React.Component<iProps, iState> {
             "running": true
         });
 
-        this._sdk.updatePlugin(this.props.plugin.name).catch((err: Error): void => {
+        this._sdk.updatePluginFromGithub(this.props.plugin.name).catch((err: Error): void => {
 
             this.props.onError(err);
 
@@ -149,7 +149,7 @@ export default class Plugin extends React.Component<iProps, iState> {
 
         return <>
 
-            { this.state.lastTag && <Modal appId="MIAApp" title={ this.props.plugin.name }
+            { null !== this.state.lastTag && <Modal appId="{{plugin.name}}-app" title={ this.props.plugin.name }
                 centered
                 onClose={ this._handleCloseLastTag }
             >

@@ -1,0 +1,9 @@
+.nyc_output/
+package-lock.json
+coverage/
+lib/cjs/
+lib/src/Descriptor.ts
+public/dist/
+public/src/Descriptor.ts
+node_modules/
+PLAN.md

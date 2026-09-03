@@ -120,7 +120,7 @@ export default class Login extends React.Component<iPropsNode, iState> {
 
         return <div className="container-fluid">
 
-            <Modal appId="MIAApp" title="Login to MIA" centered size="lg" onSubmit={ this._handleLogin }>
+            <Modal appId="{{plugin.name}}-app" title="Login to MIA" centered size="lg" onSubmit={ this._handleLogin }>
 
                 <ModalBody>
 

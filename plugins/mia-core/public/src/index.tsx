@@ -9,4 +9,4 @@
 
 // private
 
-createRoot(document.getElementById("MIAApp") as HTMLElement).render(<App />);
+createRoot(document.getElementById("{{plugin.name}}-app") as HTMLElement).render(<App />);

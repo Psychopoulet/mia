@@ -16,10 +16,10 @@
 
     // locals
     import type { SDK } from "./SDK";
-    import type { components } from "./Descriptor";
+    import type { components, operations } from "./Descriptor";
 
     interface iState {
-        "status": "DISCONNECTED" | "CONNECTED" | "LOGGED";
+        "status": "DISCONNECTED" | "CONNECTED" | "LOGGED" | operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"];
         "error": components["schemas"]["Error"] | null;
     }
 
@@ -77,7 +77,34 @@ export default class App extends React.Component<iPropsNode, iState> {
     private readonly _onConnected = (): void => {
 
         this.setState({
-            "status": this._sdk.isLoggedIn() ? "LOGGED" : "CONNECTED"
+            "status": "CONNECTED"
+        });
+
+        this._sdk.getPluginStatus().then((status): void => {
+
+            if ("INITIALIZED" === status) {
+
+                this.setState({
+                    "status": this._sdk.isLoggedIn() ? "LOGGED" : "INITIALIZED"
+                });
+
+                return;
+
+            }
+
+            this.setState({
+                "status": status
+            });
+
+        }).catch((err: Error): void => {
+
+            this.setState({
+                "error": {
+                    "code": "UNKNOWN_ERROR",
+                    "message": err.message
+                }
+            });
+
         });
 
     };
@@ -90,7 +117,7 @@ export default class App extends React.Component<iPropsNode, iState> {
 
     };
 
-    private readonly _onError = (data: components["schemas"]["Error"]): void => {
+    private readonly _onError = (data: components["schemas"]["PushEventPluginError"]["data"]): void => {
 
         this.setState({
             "error": data
@@ -133,24 +160,45 @@ export default class App extends React.Component<iPropsNode, iState> {
             </div>;
 
         }
-        else if (![ "CONNECTED", "LOGGED" ].includes(this.state.status)) {
+        else if ("CONNECTED" === this.state.status) {
+
+            return <div className="container">
+                <Alert variant="info">Checking status...</Alert>
+            </div>;
+
+        }
+        else if ("RELEASED" === this.state.status) {
+
+            return <div className="container">
+                <Alert variant="warning">Not enabled...</Alert>
+            </div>;
+
+        }
+        else if ("ENABLED" === this.state.status) {
+
+            return <div className="container">
+                <Alert variant="info">Not initialized yet...</Alert>
+            </div>;
+
+        }
+        else if (![ "INITIALIZED", "LOGGED" ].includes(this.state.status)) {
 
             return <div className="container">
                 <Alert variant="warning">Unknown status: { this.state.status }</Alert>
             </div>;
 
         }
-        else {
+        else { // "INITIALIZED" | "LOGGED"
 
             return <div className="container-fluid">
 
-                { this.state.error && <Modal appId="MIAApp" title="Error" variant="danger" centered size="sm" onClose={ this._handleCloseError }>
+                { this.state.error && <Modal appId="{{plugin.name}}-app" title="Error" variant="danger" centered size="sm" onClose={ this._handleCloseError }>
                     <ModalBody>
                         { this.state.error.message || "An error occurred" }
                     </ModalBody>
                 </Modal> }
 
-                { "CONNECTED" === this.state.status && <Login /> }
+                { "INITIALIZED" === this.state.status && <Login /> }
                 { "LOGGED" === this.state.status && <Plugins onError={ this._handleError } /> }
 
             </div>;

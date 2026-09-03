@@ -13,7 +13,6 @@
     import User, { registerUser } from "../models/User";
     import { registerLog } from "../models/Log";
     import { registerToken } from "../models/Token";
-    import authDatabase from "../AuthDatabase";
 
 // types & interfaces
 
@@ -33,6 +32,38 @@
 
     }
 
+    // Sequelize parses sqlite:C:\... with url.parse(), treating "C:" as host "c".
+    // Always pass Windows (and any) file paths via options.storage instead of a URI.
+    function _getSqliteStorage (databaseUri: string): string {
+
+        let storage: string = databaseUri.replace(/^sqlite:/i, "");
+
+        if (storage.startsWith("//")) {
+            storage = storage.slice(2);
+        }
+
+        // sqlite:///C:/path → /C:/path
+        if (/^\/[A-Za-z]:[\\/]/.test(storage)) {
+            storage = storage.slice(1);
+        }
+
+        return storage;
+
+    }
+
+    function _getSequelizeSqliteOptions (storage: string): Options {
+
+        const sqlite3 = require("sqlite3") as object;
+
+        return {
+            "dialect": "sqlite",
+            "storage": storage,
+            "logging": false, // SQL echo would recurse once Winston writes to this database
+            "dialectModule": sqlite3
+        };
+
+    }
+
     function _getSequelizeUriOptions (databaseUri: string): Options {
 
         const dialect: string = _getUriDialect(databaseUri);
@@ -41,21 +72,28 @@
             throw new Error("Unsupported database dialect \"" + dialect + "\". Use postgres://, postgresql://, or sqlite://.");
         }
 
-        const options: Options = {
-            "logging": false // SQL echo would recurse once Winston writes to this database
+        if ("sqlite" === dialect) {
+            return _getSequelizeSqliteOptions(_getSqliteStorage(databaseUri));
+        }
+
+        const pg = require("pg") as object;
+
+        return {
+            "logging": false, // SQL echo would recurse once Winston writes to this database
+            "dialectModule": pg
         };
 
-        // dialectModule is dialect-specific; never force sqlite3 on a postgres URI
-        if ("sqlite" === dialect) {
-            const sqlite3 = require("sqlite3") as object;
-            options.dialectModule = sqlite3;
-        }
-        else {
-            const pg = require("pg") as object;
-            options.dialectModule = pg;
+    }
+
+    function _createSequelize (databaseUri: string): Sequelize {
+
+        const options: Options = _getSequelizeUriOptions(databaseUri);
+
+        if ("sqlite" === options.dialect) {
+            return new Sequelize(options);
         }
 
-        return options;
+        return new Sequelize(databaseUri, options);
 
     }
 
@@ -91,10 +129,6 @@
 
                 });
 
-            }).then((): void => {
-
-                container.set("auth-db", authDatabase);
-
             });
 
         });
@@ -113,7 +147,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
         const databaseUri: string = conf.get<string>("database-uri").trim();
 
         if ("" !== databaseUri) {
-            return _initDatabase(container, new Sequelize(databaseUri, _getSequelizeUriOptions(databaseUri)));
+            return _initDatabase(container, _createSequelize(databaseUri));
         }
 
     }
@@ -127,9 +161,7 @@ export default function generateDatabase (container: ContainerPattern): Promise<
             container.get<iLogger>("log").info("Database not detected, create one at " + databaseFile);
         }
 
-        const databaseUri: string = "sqlite:" + databaseFile;
-
-        return _initDatabase(container, new Sequelize(databaseUri, _getSequelizeUriOptions(databaseUri)));
+        return _initDatabase(container, new Sequelize(_getSequelizeSqliteOptions(databaseFile)));
 
     });
 

@@ -20,7 +20,7 @@
   "scripts": {
 
     "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/api/Descriptor.ts",
-    "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
+    "transpile-openapi-front": "echo 'builded in plugin mia-core'",
     "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
 
     "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
@@ -33,7 +33,7 @@
     "clean": "npm run clean-back && npm run clean-front",
 
     "build-back": "npm run clean-back && npm run transpile-openapi-back && npx tsc --project ./tsconfig.json",
-    "build-front": "npm run clean-front && npm run transpile-openapi-front && npx webpack --config ./webpack.config.js && npx webpack --config ./webpack.menu.config.js",
+    "build-front": "npm run clean-front && npm run transpile-openapi-front && npx webpack --config ./webpack.config.js",
     "build": "npm run build-back && npm run build-front",
 
     "check-node-engine": "npx check-node-engine",
@@ -67,7 +67,7 @@
   },
 
   "dependencies": {
-    "@apidevtools/swagger-parser": "12.1.0",
+    "@apidevtools/swagger-parser": "13.0.0",
     "@fortawesome/fontawesome-free": "7.3.1",
     "bcrypt": "6.0.0",
     "bootstrap": "5.3.8",
@@ -79,11 +79,11 @@
     "jsonwebtoken": "9.0.3",
     "node-confmanager": "1.15.0",
     "node-containerpattern": "1.12.0",
-    "node-pluginsmanager": "3.7.2",
+    "node-pluginsmanager": "3.8.0",
     "node-pluginsmanager-plugin": "7.4.4",
     "pg": "8.23.0",
     "sequelize": "6.37.8",
-    "sqlite3": "5.1.7",
+    "sqlite3": "6.0.1",
     "uniqid": "5.4.0",
     "winston": "3.19.0",
     "winston-transport": "4.9.0",
@@ -95,10 +95,10 @@
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.1",
     "@types/pg": "8.23.1",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.7",
     "@types/socket.io": "3.0.2",
     "@types/uniqid": "5.3.4",
     "@types/ws": "8.18.1",
@@ -106,7 +106,7 @@
     "check-version-modules": "2.5.0",
     "eslint-plugin-personnallinter": "git+ssh://git@github.com/Psychopoulet/eslint-plugin-personnallinter",
     "husky": "9.1.7",
-    "mocha": "11.8.0",
+    "mocha": "12.0.0",
     "openapi-typescript": "7.13.0",
     "react": "19.2.8",
     "react-bootstrap-fontawesome": "git+ssh://git@github.com/Psychopoulet/react-bootstrap-fontawesome",
@@ -116,11 +116,11 @@
     "ts-loader": "9.6.2",
     "typescript": "5.9.3",
     "used-deps-analyzer": "0.4.0",
-    "webpack": "5.109.2",
-    "webpack-cli": "7.2.2"
+    "webpack": "5.110.3",
+    "webpack-cli": "7.2.3"
   },
   "optionalDependencies": {
-    "pm2": "7.0.3"
+    "pm2": "7.0.4"
   },
 
   "author": "Sébastien VIDAL",

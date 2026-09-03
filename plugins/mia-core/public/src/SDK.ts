@@ -1,7 +1,7 @@
 // deps
 
-    // natives
-    import { EventEmitter } from "events";
+    // locals
+    import EventEmitter from "./EventEmitter";
 
 // types & interfaces
 
@@ -9,9 +9,10 @@
     type Timeout = ReturnType<typeof setTimeout>;
 
     // locals
-    import type { components, operations, paths } from "./Descriptor";
-    type tEvents = components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallStep"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"]
-        | components["schemas"]["PushEventPluginUpdateRunning"]| components["schemas"]["PushEventPluginUpdateStep"] | components["schemas"]["PushEventPluginUpdateSuccess"] | components["schemas"]["PushEventPluginUpdateFail"]
+    import type { components, paths, operations } from "./Descriptor";
+    type tEvents = components["schemas"]["PushEventPluginInitialized"] | components["schemas"]["PushEventPluginReleased"] | components["schemas"]["PushEventPluginError"]
+        | components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallStep"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"]
+        | components["schemas"]["PushEventPluginUpdateRunning"] | components["schemas"]["PushEventPluginUpdateStep"] | components["schemas"]["PushEventPluginUpdateSuccess"] | components["schemas"]["PushEventPluginUpdateFail"]
         | components["schemas"]["PushEventPluginUninstallRunning"] | components["schemas"]["PushEventPluginUninstallSuccess"] | components["schemas"]["PushEventPluginUninstallFail"];
 
     type HttpMethodsOf<P extends keyof paths> = {
@@ -25,14 +26,17 @@
 export class SDK extends EventEmitter<{
     "connected": [];
     "disconnected": [ number, string ];
+    "initialized": [];
+    "released": [];
+    "error": [ components["schemas"]["PushEventPluginError"]["data"] ];
     "plugin-install-running": [ components["schemas"]["PushEventPluginInstallRunning"]["data"] ];
     "plugin-install-step": [ components["schemas"]["PushEventPluginInstallStep"]["data"] ];
     "plugin-install-success": [ components["schemas"]["PushEventPluginInstallSuccess"]["data"] ];
     "plugin-install-fail": [ components["schemas"]["PushEventPluginInstallFail"]["data"] ];
     "plugin-update-running": [ components["schemas"]["PushEventPluginUpdateRunning"]["data"] ];
     "plugin-update-step": [ components["schemas"]["PushEventPluginUpdateStep"]["data"] ];
-    "plugin-update-success": [ components["schemas"]["PushEventPluginUpdateSuccess"]["data"] ];
     "plugin-update-fail": [ components["schemas"]["PushEventPluginUpdateFail"]["data"] ];
+    "plugin-update-success": [ components["schemas"]["PushEventPluginUpdateSuccess"]["data"] ];
     "plugin-uninstall-running": [ components["schemas"]["PushEventPluginUninstallRunning"]["data"] ];
     "plugin-uninstall-success": [ components["schemas"]["PushEventPluginUninstallSuccess"]["data"] ];
     "plugin-uninstall-fail": [ components["schemas"]["PushEventPluginUninstallFail"]["data"] ];
@@ -136,14 +140,38 @@ export class SDK extends EventEmitter<{
 
         };
 
+        this._socket.onerror = (evt: Event): void => {
+
+            // avoid catching error on reconnection
+            if (evt instanceof ErrorEvent) {
+
+                this.emit("error", {
+                    "code": "unknown",
+                    "message": evt.message
+                });
+
+            }
+
+        };
+
         this._socket.onmessage = (event: MessageEvent<string>): void => {
 
             const parsedMessage: tEvents = JSON.parse(event.data) as tEvents;
 
-            if ("core" === parsedMessage.plugin as string) { // must be forced string type to avoid useless type error
+            // must disable the rule because the plugin name can be sended by another plugin
+            if ("mia-core" === parsedMessage.plugin) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
                 switch (parsedMessage.command) {
 
+                    case "initialized":
+                        this.emit("initialized");
+                    break;
+                    case "released":
+                        this.emit("released");
+                    break;
+                    case "error":
+                        this.emit("error", parsedMessage.data);
+                    break;
                     case "plugin-install-running":
                         this.emit("plugin-install-running", parsedMessage.data);
                     break;
@@ -156,7 +184,6 @@ export class SDK extends EventEmitter<{
                     case "plugin-install-fail":
                         this.emit("plugin-install-fail", parsedMessage.data);
                     break;
-
                     case "plugin-update-running":
                         this.emit("plugin-update-running", parsedMessage.data);
                     break;
@@ -169,7 +196,6 @@ export class SDK extends EventEmitter<{
                     case "plugin-update-fail":
                         this.emit("plugin-update-fail", parsedMessage.data);
                     break;
-
                     case "plugin-uninstall-running":
                         this.emit("plugin-uninstall-running", parsedMessage.data);
                     break;
@@ -218,9 +244,51 @@ export class SDK extends EventEmitter<{
         return Boolean(this._token);
     }
 
+    public getPluginDescriptor (): Promise<operations["getPluginDescriptor"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/mia-core/api/descriptor";
+        const method: HttpMethodsOf<typeof url> = "get";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getPluginDescriptor"]["responses"]["200"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["getPluginDescriptor"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
+    public getPluginStatus (): Promise<operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/mia-core/api/status";
+        const method: HttpMethodsOf<typeof url> = "get";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"]> => {
+
+            if (404 === res.status) {
+                return Promise.resolve("RELEASED");
+            }
+
+            return this._parseResponse(res) as Promise<operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
     public login (name: string, password: string): Promise<operations["login"]["responses"]["201"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/auth";
+        const url: keyof paths = "/mia-core/api/auth";
         const method: HttpMethodsOf<typeof url> = "put";
         const body: operations["login"]["requestBody"]["content"]["application/json"] = {
             "name": name,
@@ -250,7 +318,7 @@ export class SDK extends EventEmitter<{
 
     public logout (): Promise<operations["logout"]["responses"]["204"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/auth";
+        const url: keyof paths = "/mia-core/api/auth";
         const method: HttpMethodsOf<typeof url> = "delete";
 
         return fetch(url, {
@@ -264,26 +332,7 @@ export class SDK extends EventEmitter<{
             localStorage.removeItem(SDK._tokenKey);
             this._token = null;
 
-            return this._parseResponse(res) as Promise<operations["logout"]["responses"]["204"]["content"]["application/json"]>;
-
-        });
-
-    }
-
-    public getDescriptor (): Promise<operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]> {
-
-        const url: keyof paths = "/api/descriptor";
-        const method: HttpMethodsOf<typeof url> = "get";
-
-        return fetch(url, {
-            "method": method,
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + this._token
-            }
-        }).then((res: Response): Promise<operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]> => {
-
-            return this._parseResponse(res) as Promise<operations["getDescriptor"]["responses"]["200"]["content"]["application/json"]>;
+            return this._parseResponse(res);
 
         });
 
@@ -291,7 +340,7 @@ export class SDK extends EventEmitter<{
 
     public getPlugins (): Promise<operations["getPlugins"]["responses"]["200"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/plugins";
+        const url: keyof paths = "/mia-core/api/plugins";
         const method: HttpMethodsOf<typeof url> = "get";
 
         return fetch(url, {
@@ -308,9 +357,9 @@ export class SDK extends EventEmitter<{
 
     }
 
-    public installPlugin (path: string): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
+    public installPluginFromGithub (path: string): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/plugins";
+        const url: keyof paths = "/mia-core/api/plugins";
         const method: HttpMethodsOf<typeof url> = "put";
 
         return fetch(url, {
@@ -324,15 +373,15 @@ export class SDK extends EventEmitter<{
             })
         }).then((res: Response): Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]> => {
 
-            return this._parseResponse(res) as Promise<operations["installPluginFromGithub"]["responses"]["201"]["content"]["application/json"]>;
+            return this._parseResponse(res);
 
         });
 
     }
 
-    public getLastTag (name: string): Promise<operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]> {
+    public getPluginLatestTag (name: string): Promise<operations["getPluginLatestTag"]["responses"]["200"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/plugins/{name}/latest-tag";
+        const url: keyof paths = "/mia-core/api/plugins/{name}/latest-tag";
         const method: HttpMethodsOf<typeof url> = "get";
 
         return fetch(url.replace("{name}", name), {
@@ -347,9 +396,9 @@ export class SDK extends EventEmitter<{
 
     }
 
-    public updatePlugin (name: string): Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]> {
+    public updatePluginFromGithub (name: string): Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/plugins/{name}";
+        const url: keyof paths = "/mia-core/api/plugins/{name}";
         const method: HttpMethodsOf<typeof url> = "post";
 
         return fetch(url.replace("{name}", name), {
@@ -359,14 +408,14 @@ export class SDK extends EventEmitter<{
                 "Authorization": "Bearer " + this._token
             }
         }).then((res: Response): Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]> => {
-            return this._parseResponse(res) as Promise<operations["updatePluginFromGithub"]["responses"]["204"]["content"]["application/json"]>;
+            return this._parseResponse(res);
         });
 
     }
 
     public deletePlugin (name: string): Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]> {
 
-        const url: keyof paths = "/api/plugins/{name}";
+        const url: keyof paths = "/mia-core/api/plugins/{name}";
         const method: HttpMethodsOf<typeof url> = "delete";
 
         return fetch(url.replace("{name}", name), {
@@ -376,7 +425,7 @@ export class SDK extends EventEmitter<{
                 "Authorization": "Bearer " + this._token
             }
         }).then((res: Response): Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]> => {
-            return this._parseResponse(res) as Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]>;
+            return this._parseResponse(res);
         });
 
     }

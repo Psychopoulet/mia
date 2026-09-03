@@ -1,7 +1,7 @@
 // deps
 
-    // natives
-    const { join } = require("node:path");
+	// natives
+	const { join } = require("node:path");
 
     // externals
     const TerserPlugin = require("terser-webpack-plugin");
@@ -14,12 +14,12 @@
 
 module.exports = {
 
-    "mode": "development",
+    "mode": "production",
 
-    "entry": join(PUBLIC, "menu-src", "index.tsx"),
+    "entry": join(PUBLIC, "src", "index.tsx"),
 
     "output": {
-        "filename": "menu.min.js",
+        "filename": "bundle.min.js",
         "path": join(PUBLIC, "dist")
     },
 
@@ -32,11 +32,11 @@ module.exports = {
                 "exclude": [ /node_modules/ ],
                 "use": [
                     {
-                        "loader": "ts-loader",
-                        "options": {
-                            "configFile": join(__dirname, "tsconfig-front.json")
-                        }
-                   }
+                            "loader": "ts-loader",
+                            "options": {
+                                "configFile": join(__dirname, "tsconfig-front.json")
+                            }
+                    }
                 ]
             }
         ]

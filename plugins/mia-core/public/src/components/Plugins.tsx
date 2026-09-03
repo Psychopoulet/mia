@@ -28,7 +28,7 @@
 
     interface iState {
         "loading": boolean;
-        "plugins": components["schemas"]["Plugin"][];
+        "plugins": Array<components["schemas"]["Plugin"]>;
     }
 
 // component

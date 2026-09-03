@@ -7,7 +7,7 @@
     } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "../src/SDK";
+    import getSDK from "../../plugins/mia-core/public/src/SDK";
     import ModalAddPluginFromGithub from "./ModalAddPluginFromGithub";
 
 // types & interfaces
@@ -16,8 +16,8 @@
     import type { iPropsNode } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "../src/SDK";
-    import type { components, operations } from "../src/Descriptor";
+    import type { SDK } from "../../plugins/mia-core/public/src/SDK";
+    import type { components, operations } from "../../plugins/mia-core/public/src/Descriptor";
 
     interface iState {
         "status": "DISCONNECTED" | "CONNECTED" | "LOGGED";
@@ -230,11 +230,11 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         e.preventDefault();
         e.stopPropagation();
 
-        this._sdk.logout().then(() => {
+        this._sdk.logout().then((): void => {
 
             window.location.assign("/");
 
-        }).catch((err) => {
+        }).catch((err: Error): void => {
 
             this.setState({
                 "error": {
