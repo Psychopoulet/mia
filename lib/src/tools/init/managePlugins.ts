@@ -96,7 +96,9 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
             logger.warning("Plugin " + pluginName + " uninstalled");
         });
 
-    return pluginsManager.addExternalPluginDirectory(join(__dirname, "..", "..", "..", "..", "plugins", "mia-core")).then((): Promise<void> => {
+    return pluginsManager.setOrder([ "mia-core" ]).then((): Promise<void> => {
+        return pluginsManager.addExternalPluginDirectory(join(__dirname, "..", "..", "..", "..", "plugins", "mia-core"));
+    }).then((): Promise<void> => {
         return pluginsManager.loadAll(container);
     }).then((): Promise<void> => {
         return pluginsManager.initAll(container);
