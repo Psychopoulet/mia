@@ -75,4 +75,25 @@ describe("check descriptor", () => {
 
     });
 
+    it("should expose users and tokens operationIds under /mia-core and omit /mia-users-management", async () => {
+
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const paths = descriptor.paths;
+
+        equal(paths["/mia-core/api/users"].get.operationId, "getUsers");
+        equal(paths["/mia-core/api/users"].put.operationId, "createUser");
+        equal(paths["/mia-core/api/users/{name}"].get.operationId, "getUser");
+        equal(paths["/mia-core/api/users/{name}"].post.operationId, "updateUser");
+        equal(paths["/mia-core/api/users/{name}"].delete.operationId, "deleteUser");
+        equal(paths["/mia-core/api/users/{name}/tokens"].get.operationId, "getUserTokens");
+        equal(paths["/mia-core/api/tokens"].delete.operationId, "deleteToken");
+
+        const leftover = Object.keys(paths).filter((path) => {
+            return path.startsWith("/mia-users-management");
+        });
+
+        equal(leftover.length, 0, leftover.join(", "));
+
+    });
+
 });
