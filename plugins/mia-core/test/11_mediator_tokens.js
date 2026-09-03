@@ -10,8 +10,8 @@
     const { UnauthorizedError, NotFoundError } = require("node-pluginsmanager-plugin");
 
     // locals
-    const { installStubs, createContainer } = require("./helpers/mediatorHarness");
-    const { createAuthDb, authHeaders } = require("./helpers/authDbHarness");
+    const { installStubs, createContainer, useAuthStore } = require("./helpers/mediatorHarness");
+    const { createAuthStore, authHeaders } = require("./helpers/authStoreHarness");
 
     installStubs();
 
@@ -28,7 +28,6 @@ describe("Mediator tokens", () => {
 
     let descriptor = null;
     let resourcesDir = "";
-    let authDb = null;
     let mediator = null;
 
     before(async () => {
@@ -40,19 +39,20 @@ describe("Mediator tokens", () => {
 
     beforeEach(async () => {
 
-        authDb = createAuthDb();
-        authDb.seedUser("admin", true, "tok-admin");
-        authDb.seedUser("alice", false, "tok-alice");
-        authDb.seedUser("bob", false, "tok-bob");
+        const store = createAuthStore();
+
+        store.seedUser("admin", true, "tok-admin");
+        store.seedUser("alice", false, "tok-alice");
+        store.seedUser("bob", false, "tok-bob");
+
+        useAuthStore(store);
 
         mediator = new Mediator({
             "descriptor": descriptor,
             "externalResourcesDirectory": resourcesDir
         });
 
-        await mediator._initWorkSpace(createContainer({
-            "auth-db": authDb
-        }));
+        await mediator._initWorkSpace(createContainer());
 
     });
 
@@ -60,7 +60,6 @@ describe("Mediator tokens", () => {
 
         const instance = mediator;
         mediator = null;
-        authDb = null;
 
         if (null !== instance) {
             await instance._releaseWorkSpace();
@@ -265,7 +264,7 @@ describe("Mediator tokens", () => {
 
     describe("edge cases", () => {
 
-        it("should fail when auth-db is not initialized", async () => {
+        it("should fail when the mediator is not initialized", async () => {
 
             const current = mediator;
             mediator = null;
@@ -274,82 +273,14 @@ describe("Mediator tokens", () => {
             let failed = false;
 
             try {
-                await current.getUsers();
+                await current.getPlugins();
             }
             catch (err) {
                 failed = true;
-                strictEqual(err.message, "Auth database is not initialized");
+                strictEqual(err.message, "Mediator is not initialized");
             }
 
             strictEqual(failed, true);
-
-        }).timeout(MAX_TIMEOUT);
-
-        it("should fail when createUser cannot reload the user", async () => {
-
-            const originalGet = authDb.getUserByName.bind(authDb);
-            let calls = 0;
-
-            authDb.getUserByName = (name) => {
-
-                calls += 1;
-
-                if (1 === calls) {
-                    return Promise.resolve();
-                }
-
-                return originalGet(name);
-
-            };
-
-            authDb.addUser = () => {
-                return Promise.resolve();
-            };
-
-            let failed = false;
-
-            try {
-                await mediator.createUser(authHeaders("tok-admin"), {
-                    "name": "erin",
-                    "password": "secret"
-                });
-            }
-            catch (err) {
-                failed = true;
-                strictEqual(err.message, "User was not created");
-            }
-
-            strictEqual(failed, true);
-
-        }).timeout(MAX_TIMEOUT);
-
-        it("should fail when updateUser cannot reload the user", async () => {
-
-            const originalGet = authDb.getUserByName.bind(authDb);
-            let calls = 0;
-
-            authDb.getUserByName = (name) => {
-
-                calls += 1;
-
-                if (1 === calls) {
-                    return originalGet(name);
-                }
-
-                return Promise.resolve();
-
-            };
-
-            await rejects(() => {
-                return mediator.updateUser({
-                    ...authHeaders("tok-admin"),
-                    "path": {
-                        "name": "alice"
-                    }
-                }, {
-                    "password": "x"
-                });
-            }, NotFoundError);
 
         }).timeout(MAX_TIMEOUT);
 

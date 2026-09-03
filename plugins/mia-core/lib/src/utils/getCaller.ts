@@ -4,7 +4,7 @@
     import { UnauthorizedError } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { AuthDatabase, FullAuthPublic } from "../@types/AuthDatabase";
+    import type { FullAuthPublic } from "../types/tools/models/Token";
 
 // types & interfaces
 
@@ -44,9 +44,12 @@ function _readHeader (urlParameters: iUrlWithHeaders, name: string): string | nu
 
 /**
  * Resolve the current user from the Bearer token for **authorization** (self/admin).
- * Authentication itself is enforced by the MIA host; this only maps token → user via auth-db.
+ * Authentication itself is enforced by the MIA host middleware; this only maps token → user.
  */
-export default function getCaller (authDb: AuthDatabase, urlParameters: iUrlWithHeaders): Promise<FullAuthPublic> {
+export default function getCaller (
+    getUserByToken: (token: string) => Promise<FullAuthPublic | undefined>,
+    urlParameters: iUrlWithHeaders
+): Promise<FullAuthPublic> {
 
     const authorization: string | null = _readHeader(urlParameters, "authorization");
 
@@ -61,7 +64,7 @@ export default function getCaller (authDb: AuthDatabase, urlParameters: iUrlWith
         throw new UnauthorizedError("Invalid Authorization header");
     }
 
-    return authDb.getUserByToken(tokenFromHeader.trim()).then((user: FullAuthPublic | undefined): FullAuthPublic => {
+    return getUserByToken(tokenFromHeader.trim()).then((user: FullAuthPublic | undefined): FullAuthPublic => {
 
         if (!user) {
             throw new UnauthorizedError("Invalid token");

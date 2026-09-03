@@ -1,6 +1,13 @@
 // locals
-import type { AuthTokenPublic, AuthUserPublic } from "../@types/AuthDatabase";
+import type { AuthTokenPublic } from "../types/tools/models/Token";
 import type { components } from "../Descriptor";
+
+// public shape of a host User row (password excluded by the model default scope)
+export interface AuthUserPublic {
+    "name": string;
+    "isAdmin": boolean;
+    "createdAt": Date | string;
+}
 
 // module
 
@@ -20,7 +27,7 @@ export function serializeUser (user: AuthUserPublic): components["schemas"]["Use
 
     return {
         "name": user.name,
-        "isAdmin": user.isAdmin,
+        "isAdmin": Boolean(user.isAdmin), // sqlite stores booleans as 0 / 1
         "createdAt": toIsoDate(user.createdAt)
     };
 

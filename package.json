@@ -19,10 +19,6 @@
 
   "scripts": {
 
-    "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/api/Descriptor.ts",
-    "transpile-openapi-front": "echo 'builded in plugin mia-core'",
-    "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
-
     "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
     "lint-front": "echo 'Frontend lint not implemented yet.'",
     "lint-tests": "echo 'Tests not implemented yet.'",
@@ -32,8 +28,8 @@
     "clean-front": "npx rimraf ./public/cjs && npx rimraf ./public/src/Descriptor.ts",
     "clean": "npm run clean-back && npm run clean-front",
 
-    "build-back": "npm run clean-back && npm run transpile-openapi-back && npx tsc --project ./tsconfig.json",
-    "build-front": "npm run clean-front && npm run transpile-openapi-front && npx webpack --config ./webpack.config.js",
+    "build-back": "npm run clean-back && npx tsc --project ./tsconfig.json",
+    "build-front": "npm run clean-front && npx webpack --config ./webpack.config.js",
     "build": "npm run build-back && npm run build-front",
 
     "check-node-engine": "npx check-node-engine",
@@ -67,14 +63,12 @@
   },
 
   "dependencies": {
-    "@apidevtools/swagger-parser": "13.0.0",
     "@fortawesome/fontawesome-free": "7.3.1",
     "bcrypt": "6.0.0",
     "bootstrap": "5.3.8",
     "compression": "1.8.1",
     "cors": "2.8.6",
     "express": "5.2.1",
-    "express-openapi-validator": "5.6.2",
     "helmet": "8.3.0",
     "jsonwebtoken": "9.0.3",
     "node-confmanager": "1.15.0",

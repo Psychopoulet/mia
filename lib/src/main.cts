@@ -15,7 +15,6 @@
     import generateConf from "./tools/init/generateConf";
     import generateDatabase from "./tools/init/generateDatabase";
     import generateLogger from "./tools/init/generateLogger";
-    import checkDescriptor from "./tools/init/checkDescriptor";
     import managePlugins from "./tools/init/managePlugins";
     import generateServer from "./tools/init/generateServer";
 
@@ -54,12 +53,6 @@
     }).then((): Promise<void> => {
 
         return registerAppData(container);
-
-    // check descriptor
-
-    }).then((): Promise<void> => {
-
-        return checkDescriptor(container);
 
     // ensure app directories
 

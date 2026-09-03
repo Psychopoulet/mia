@@ -31,10 +31,10 @@
     import type { sign as tSign } from "./types/tools/AuthJWT";
     import type tExtractToken from "./types/tools/extractToken";
     import type tToken from "./types/tools/models/Token";
+    import type { AuthTokenPublic, FullAuthPublic } from "./types/tools/models/Token";
     import type tUser from "./types/tools/models/User";
     import type { UserAttributes } from "./types/tools/models/User";
 
-    import type { AuthDatabase, AuthTokenPublic, AuthUserPublic, FullAuthPublic } from "./@types/AuthDatabase";
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";
 
@@ -44,6 +44,34 @@
     const extractToken = (require("../../../../lib/cjs/tools/extractToken") as { "default": typeof tExtractToken }).default;
     const Token = (require("../../../../lib/cjs/tools/models/Token") as { "default": typeof tToken }).default;
     const User = (require("../../../../lib/cjs/tools/models/User") as { "default": typeof tUser }).default;
+
+// private
+
+    // Authentication is enforced by the host middleware; this only resolves the
+    // caller identity from its Bearer token, for self / admin checks.
+    function _getCaller (url: iUrlAllowedParameters): Promise<FullAuthPublic> {
+
+        return getCaller((token: string): Promise<FullAuthPublic | undefined> => {
+            return Token.getUserByToken(token);
+        }, url);
+
+    }
+
+    function _assertNotLastAdmin (message: string): Promise<void> {
+
+        return User.count({
+            "where": {
+                "isAdmin": true
+            }
+        }).then((adminCount: number): void => {
+
+            if (1 >= adminCount) {
+                throw new ConflictError(message);
+            }
+
+        });
+
+    }
 
 // module
 
@@ -67,7 +95,6 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     protected _container: ContainerPattern | null = null;
     protected _pluginsManager: PluginsManager | null = null;
-    protected _authDb: AuthDatabase | null = null;
 
     // constructor
 
@@ -77,7 +104,6 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
         this._container = container;
         this._pluginsManager = container.get<PluginsManager>("plugins-manager");
-        this._authDb = container.get<AuthDatabase>("auth-db");
 
         this._pluginsManager
             .on("installing", this._onInstalling)
@@ -98,7 +124,6 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         }
 
         this._pluginsManager = null;
-        this._authDb = null;
         this._container = null;
 
         return Promise.resolve();
@@ -112,16 +137,6 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         }
 
         return this._container;
-
-    }
-
-    private _getAuthDb (): AuthDatabase {
-
-        if (!this._authDb) {
-            throw new Error("Auth database is not initialized");
-        }
-
-        return this._authDb;
 
     }
 
@@ -429,7 +444,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     public getUsers (): Promise<operations["getUsers"]["responses"]["200"]["content"]["application/json"]> {
 
-        return this._getAuthDb().getUsers().then((users: AuthUserPublic[]): operations["getUsers"]["responses"]["200"]["content"]["application/json"] => {
+        return User.findAll().then((users: tUser[]): operations["getUsers"]["responses"]["200"]["content"]["application/json"] => {
 
             return users.map(serializeUser);
 
@@ -438,34 +453,33 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
     }
 
     // Create a user (admin only). Reject if the name already exists, persist via
-    // auth-db, then emit user.added with the public snapshot.
+    // the host User model, then emit user.added with the public snapshot.
     public createUser (url: iUrlAllowedParameters, body: operations["createUser"]["requestBody"]["content"]["application/json"]): Promise<operations["createUser"]["responses"]["201"]["content"]["application/json"]> {
 
-        const authDb: AuthDatabase = this._getAuthDb();
-
-        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<tUser | null> => {
 
             assertAdmin(caller);
 
-            return authDb.getUserByName(body.name).then((existing: AuthUserPublic | undefined): Promise<void> => {
-
-                if (existing) {
-                    throw new ConflictError("User '" + body.name + "' already exists");
+            return User.findOne({
+                "where": {
+                    "name": body.name
                 }
-
-                return authDb.addUser(body.name, body.password, Boolean(body.isAdmin));
-
             });
 
-        }).then((): Promise<AuthUserPublic | undefined> => {
+        }).then((existing: tUser | null): Promise<tUser> => {
 
-            return authDb.getUserByName(body.name);
-
-        }).then((user: AuthUserPublic | undefined): operations["createUser"]["responses"]["201"]["content"]["application/json"] => {
-
-            if (!user) {
-                throw new Error("User was not created");
+            if (existing) {
+                throw new ConflictError("User '" + body.name + "' already exists");
             }
+
+            // password is hashed by the host User model hooks
+            return User.create({
+                "name": body.name,
+                "password": body.password,
+                "isAdmin": Boolean(body.isAdmin)
+            });
+
+        }).then((user: tUser): operations["createUser"]["responses"]["201"]["content"]["application/json"] => {
 
             const serialized: components["schemas"]["User"] = serializeUser(user);
 
@@ -482,7 +496,11 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         const urlParamsPath: operations["getUser"]["parameters"]["path"] = url.path as operations["getUser"]["parameters"]["path"];
         const name: string = urlParamsPath.name;
 
-        return this._getAuthDb().getUserByName(name).then((user: AuthUserPublic | undefined): operations["getUser"]["responses"]["200"]["content"]["application/json"] => {
+        return User.findOne({
+            "where": {
+                "name": name
+            }
+        }).then((user: tUser | null): operations["getUser"]["responses"]["200"]["content"]["application/json"] => {
 
             if (!user) {
                 throw new NotFoundError("User '" + name + "' not found");
@@ -498,11 +516,10 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
     // demote is rejected. Persist password and/or isAdmin, then return the public user.
     public updateUser (url: iUrlAllowedParameters, body: operations["updateUser"]["requestBody"]["content"]["application/json"]): Promise<operations["updateUser"]["responses"]["200"]["content"]["application/json"]> {
 
-        const authDb: AuthDatabase = this._getAuthDb();
         const urlParamsPath: operations["updateUser"]["parameters"]["path"] = url.path as operations["updateUser"]["parameters"]["path"];
         const name: string = urlParamsPath.name;
 
-        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<tUser> => {
 
             assertSelfOrAdmin(caller, name);
 
@@ -510,7 +527,11 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
                 throw new UnauthorizedError("Admin privileges required to change isAdmin");
             }
 
-            return authDb.getUserByName(name).then((existing: AuthUserPublic | undefined): Promise<void> => {
+            return User.findOne({
+                "where": {
+                    "name": name
+                }
+            }).then((existing: tUser | null): Promise<tUser> => {
 
                 if (!existing) {
                     throw new NotFoundError("User '" + name + "' not found");
@@ -519,50 +540,32 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
                 let lastAdminGuard: Promise<void> = Promise.resolve();
 
                 if (false === body.isAdmin && existing.isAdmin) {
-
-                    lastAdminGuard = authDb.getUsers().then((users: AuthUserPublic[]): void => {
-
-                        const adminCount: number = users.filter((user: AuthUserPublic): boolean => {
-                            return user.isAdmin;
-                        }).length;
-
-                        if (1 >= adminCount) {
-                            throw new ConflictError("Cannot remove the last admin");
-                        }
-
-                    });
-
+                    lastAdminGuard = _assertNotLastAdmin("Cannot remove the last admin");
                 }
 
-                return lastAdminGuard.then((): Promise<void> => {
+                return lastAdminGuard.then((): Promise<tUser> => {
 
-                    const tasks: Array<Promise<void>> = [];
+                    const attributes: Partial<UserAttributes> = {};
 
                     if ("string" === typeof body.password) {
-                        tasks.push(authDb.editUserPassword(name, body.password));
+                        attributes.password = body.password; // hashed by the host User model hooks
                     }
 
                     if ("boolean" === typeof body.isAdmin) {
-                        tasks.push(authDb.editUserIsAdmin(name, body.isAdmin));
+                        attributes.isAdmin = body.isAdmin;
                     }
 
-                    return Promise.all(tasks).then((): void => {
-                        // no-op: wait for password / isAdmin updates
-                    });
+                    if (!Object.keys(attributes).length) {
+                        return Promise.resolve(existing);
+                    }
+
+                    return existing.update(attributes);
 
                 });
 
             });
 
-        }).then((): Promise<AuthUserPublic | undefined> => {
-
-            return authDb.getUserByName(name);
-
-        }).then((user: AuthUserPublic | undefined): operations["updateUser"]["responses"]["200"]["content"]["application/json"] => {
-
-            if (!user) {
-                throw new NotFoundError("User '" + name + "' not found");
-            }
+        }).then((user: tUser): operations["updateUser"]["responses"]["200"]["content"]["application/json"] => {
 
             return serializeUser(user);
 
@@ -574,15 +577,18 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
     // last-admin; emit user.removed after a successful remove.
     public deleteUser (url: iUrlAllowedParameters): Promise<void> {
 
-        const authDb: AuthDatabase = this._getAuthDb();
         const urlParamsPath: operations["deleteUser"]["parameters"]["path"] = url.path as operations["deleteUser"]["parameters"]["path"];
         const name: string = urlParamsPath.name;
 
-        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<void> => {
 
             assertSelfOrAdmin(caller, name);
 
-            return authDb.getUserByName(name).then((existing: AuthUserPublic | undefined): Promise<void> => {
+            return User.findOne({
+                "where": {
+                    "name": name
+                }
+            }).then((existing: tUser | null): Promise<void> => {
 
                 if (!existing) {
                     throw new NotFoundError("User '" + name + "' not found");
@@ -590,30 +596,18 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
                 const snapshot: components["schemas"]["User"] = serializeUser(existing);
 
-                let remove: Promise<void> = Promise.resolve();
+                let lastAdminGuard: Promise<void> = Promise.resolve();
 
-                if (!existing.isAdmin) {
-                    remove = authDb.removeUser(name);
-                }
-                else {
-
-                    remove = authDb.getUsers().then((users: AuthUserPublic[]): Promise<void> => {
-
-                        const adminCount: number = users.filter((user: AuthUserPublic): boolean => {
-                            return user.isAdmin;
-                        }).length;
-
-                        if (1 >= adminCount) {
-                            throw new ConflictError("Cannot delete the last admin");
-                        }
-
-                        return authDb.removeUser(name);
-
-                    });
-
+                if (existing.isAdmin) {
+                    lastAdminGuard = _assertNotLastAdmin("Cannot delete the last admin");
                 }
 
-                return remove.then((): void => {
+                // tokens are destroyed by the host User model hooks
+                return lastAdminGuard.then((): Promise<void> => {
+
+                    return existing.destroy();
+
+                }).then((): void => {
 
                     this.emit("user.removed", snapshot);
 
@@ -627,21 +621,24 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     public getUserTokens (url: iUrlAllowedParameters): Promise<operations["getUserTokens"]["responses"]["200"]["content"]["application/json"]> {
 
-        const authDb: AuthDatabase = this._getAuthDb();
         const urlParamsPath: operations["getUserTokens"]["parameters"]["path"] = url.path as operations["getUserTokens"]["parameters"]["path"];
         const name: string = urlParamsPath.name;
 
-        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<AuthTokenPublic[]> => {
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<AuthTokenPublic[]> => {
 
             assertSelfOrAdmin(caller, name);
 
-            return authDb.getUserByName(name).then((existing: AuthUserPublic | undefined): Promise<AuthTokenPublic[]> => {
+            return User.findOne({
+                "where": {
+                    "name": name
+                }
+            }).then((existing: tUser | null): Promise<AuthTokenPublic[]> => {
 
                 if (!existing) {
                     throw new NotFoundError("User '" + name + "' not found");
                 }
 
-                return authDb.getTokensByUserName(name);
+                return Token.getByUserName(name);
 
             });
 
@@ -655,12 +652,11 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
     public deleteToken (url: iUrlAllowedParameters, body: operations["deleteToken"]["requestBody"]["content"]["application/json"]): Promise<void> {
 
-        const authDb: AuthDatabase = this._getAuthDb();
         const token: string = body.token;
 
-        return getCaller(authDb, url).then((caller: FullAuthPublic): Promise<void> => {
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<void> => {
 
-            return authDb.getUserByToken(token).then((owner: FullAuthPublic | undefined): Promise<void> => {
+            return Token.getUserByToken(token).then((owner: FullAuthPublic | undefined): Promise<void> => {
 
                 if (!owner) {
                     throw new NotFoundError("Token not found");
@@ -670,7 +666,13 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
                     throw new UnauthorizedError("Forbidden");
                 }
 
-                return authDb.removeToken(token);
+                return Token.destroy({
+                    "where": {
+                        "token": token
+                    }
+                }).then((): void => {
+                    // token revoked
+                });
 
             });
 

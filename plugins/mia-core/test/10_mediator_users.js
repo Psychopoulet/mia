@@ -10,8 +10,8 @@
     const { UnauthorizedError, NotFoundError, ConflictError } = require("node-pluginsmanager-plugin");
 
     // locals
-    const { installStubs, createContainer } = require("./helpers/mediatorHarness");
-    const { createAuthDb, authHeaders } = require("./helpers/authDbHarness");
+    const { installStubs, createContainer, useAuthStore } = require("./helpers/mediatorHarness");
+    const { createAuthStore, authHeaders } = require("./helpers/authStoreHarness");
 
     installStubs();
 
@@ -28,7 +28,6 @@ describe("Mediator users", () => {
 
     let descriptor = null;
     let resourcesDir = "";
-    let authDb = null;
     let mediator = null;
 
     before(async () => {
@@ -40,19 +39,20 @@ describe("Mediator users", () => {
 
     beforeEach(async () => {
 
-        authDb = createAuthDb();
-        authDb.seedUser("admin", true, "tok-admin");
-        authDb.seedUser("alice", false, "tok-alice");
-        authDb.seedUser("bob", false, "tok-bob");
+        const store = createAuthStore();
+
+        store.seedUser("admin", true, "tok-admin");
+        store.seedUser("alice", false, "tok-alice");
+        store.seedUser("bob", false, "tok-bob");
+
+        useAuthStore(store);
 
         mediator = new Mediator({
             "descriptor": descriptor,
             "externalResourcesDirectory": resourcesDir
         });
 
-        await mediator._initWorkSpace(createContainer({
-            authDb
-        }));
+        await mediator._initWorkSpace(createContainer());
 
     });
 
@@ -60,7 +60,6 @@ describe("Mediator users", () => {
 
         const instance = mediator;
         mediator = null;
-        authDb = null;
 
         if (null !== instance) {
             await instance._releaseWorkSpace();
@@ -202,6 +201,23 @@ describe("Mediator users", () => {
             });
 
             strictEqual(user.name, "alice");
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should return the user unchanged when there is nothing to update", async () => {
+
+            const user = await mediator.updateUser({
+                ...authHeaders("tok-alice"),
+                "path": {
+                    "name": "alice"
+                }
+            }, {});
+
+            deepStrictEqual(user, {
+                "name": "alice",
+                "isAdmin": false,
+                "createdAt": "2024-01-01T00:00:00.000Z"
+            });
 
         }).timeout(MAX_TIMEOUT);
 

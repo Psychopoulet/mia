@@ -4,7 +4,7 @@
     import { UnauthorizedError } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { FullAuthPublic } from "../@types/AuthDatabase";
+    import type { FullAuthPublic } from "../types/tools/models/Token";
 
 // module
 
