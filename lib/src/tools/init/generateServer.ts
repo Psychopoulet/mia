@@ -9,25 +9,14 @@
     import cors from "cors";
     import express from "express";
     import helmet from "helmet";
-    import { middleware as openApiValidatorMiddleware } from "express-openapi-validator";
     import { formateError, NotFoundError } from "node-pluginsmanager-plugin";
     import { WebSocketServer } from "ws";
 
     // locals
 
     import getRequestPath from "./getRequestPath";
-    import socketPush from "../socketPush";
 
     import authorization from "../../api/authorization";
-
-    import login from "../../api/login";
-    import logout from "../../api/logout";
-    import getDescriptor from "../../api/getDescriptor";
-    import getPlugins from "../../api/getPlugins";
-    import installPluginFromGithub from "../../api/installPluginFromGithub";
-    import updatePluginFromGithub from "../../api/updatePluginFromGithub";
-    import deletePlugin from "../../api/deletePlugin";
-    import getPluginLatestTag from "../../api/getPluginLatestTag";
 
 // types & interfaces
 
@@ -44,23 +33,15 @@
 
     // locals
     import type { iLogger } from "./generateLogger";
-    import type { components } from "../../api/Descriptor";
 
 // consts
 
-    const OPENAPI_DOCUMENT: string = join(__dirname, "..", "..", "..", "..", "lib", "data");
     const PUBLIC_DIRECTORY: string = join(__dirname, "..", "..", "..", "..", "public");
     const LIBS_DIRECTORY: string = join(__dirname, "..", "..", "..", "..", "node_modules");
 
 // module
 
 export default function generateServer (container: ContainerPattern): Promise<void> {
-
-    const validator = openApiValidatorMiddleware({
-        "apiSpec": join(OPENAPI_DOCUMENT, "Descriptor.json"),
-        "validateRequests": true,
-        "validateResponses": false
-    });
 
     return Promise.resolve().then((): Promise<void> => {
 
@@ -158,30 +139,6 @@ export default function generateServer (container: ContainerPattern): Promise<vo
 
                     });
 
-            // api
-
-                // no authorization required
-
-                app.put("/api/auth", validator, (req: Request, res: Response, next: NextFunction): void => {
-                    login(container, req, res, next);
-                }).delete("/api/auth", validator, (req: Request, res: Response, next: NextFunction): void => {
-                    logout(container, req, res, next);
-                });
-
-                // authorization required
-
-                app.get("/api/descriptor", validator, getDescriptor).get("/api/plugins", (req: Request, res: Response, next: NextFunction): void => {
-                    getPlugins(container, req, res, next);
-                }).put("/api/plugins", validator, (req: Request, res: Response, next: NextFunction): void => {
-                    installPluginFromGithub(container, req, res, next);
-                }).post("/api/plugins/:name", validator, (req: Request, res: Response, next: NextFunction): void => {
-                    updatePluginFromGithub(container, req, res, next);
-                }).delete("/api/plugins/:name", validator, (req: Request, res: Response, next: NextFunction): void => {
-                    deletePlugin(container, req, res, next);
-                }).get("/api/plugins/:name/latest-tag", validator, (req: Request, res: Response, next: NextFunction): void => {
-                    getPluginLatestTag(container, req, res, next);
-                });
-
             // link request to plugins
 
             app.use((req: Request, res: Response, next: NextFunction): void => {
@@ -270,34 +227,6 @@ export default function generateServer (container: ContainerPattern): Promise<vo
                     }
 
                 });
-
-            });
-
-            // register plugins manager events
-
-            container.get<Pluginsmanager>("plugins-manager").on("installing", (pluginName: string, currentStep: number, maxSteps: number, stepMessage: string): void => {
-
-                const command: components["schemas"]["PushEventPluginInstallStep"]["command"] = "plugin-install-step";
-                const data: components["schemas"]["PushEventPluginInstallStep"]["data"] = {
-                    pluginName,
-                    currentStep,
-                    maxSteps,
-                    stepMessage
-                };
-
-                socketPush(wss, command, data);
-
-            }).on("updating", (pluginName: string, currentStep: number, maxSteps: number, stepMessage: string): void => {
-
-                const command: components["schemas"]["PushEventPluginUpdateStep"]["command"] = "plugin-update-step";
-                const data: components["schemas"]["PushEventPluginUpdateStep"]["data"] = {
-                    pluginName,
-                    currentStep,
-                    maxSteps,
-                    stepMessage
-                };
-
-                socketPush(wss, command, data);
 
             });
 

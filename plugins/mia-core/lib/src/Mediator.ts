@@ -9,11 +9,14 @@
     import { join } from "node:path";
 
     // externals
-    import { Mediator, NotFoundError } from "node-pluginsmanager-plugin";
+    import { ConflictError, Mediator, NotFoundError, UnauthorizedError } from "node-pluginsmanager-plugin";
 
+    import { assertAdmin, assertSelfOrAdmin } from "./utils/assertPermissions";
     import findPluginByName from "./utils/findPluginByName";
+    import getCaller from "./utils/getCaller";
     import getFingerprint from "./utils/getFingerprint";
     import parseGithubPath from "./utils/parseGithubPath";
+    import { serializeToken, serializeUser } from "./utils/serializeAuth";
 
 // types & interfaces
 
@@ -28,6 +31,7 @@
     import type { sign as tSign } from "./types/tools/AuthJWT";
     import type tExtractToken from "./types/tools/extractToken";
     import type tToken from "./types/tools/models/Token";
+    import type { AuthTokenPublic, FullAuthPublic } from "./types/tools/models/Token";
     import type tUser from "./types/tools/models/User";
     import type { UserAttributes } from "./types/tools/models/User";
 
@@ -40,6 +44,34 @@
     const extractToken = (require("../../../../lib/cjs/tools/extractToken") as { "default": typeof tExtractToken }).default;
     const Token = (require("../../../../lib/cjs/tools/models/Token") as { "default": typeof tToken }).default;
     const User = (require("../../../../lib/cjs/tools/models/User") as { "default": typeof tUser }).default;
+
+// private
+
+    // Authentication is enforced by the host middleware; this only resolves the
+    // caller identity from its Bearer token, for self / admin checks.
+    function _getCaller (url: iUrlAllowedParameters): Promise<FullAuthPublic> {
+
+        return getCaller((token: string): Promise<FullAuthPublic | undefined> => {
+            return Token.getUserByToken(token);
+        }, url);
+
+    }
+
+    function _assertNotLastAdmin (message: string): Promise<void> {
+
+        return User.count({
+            "where": {
+                "isAdmin": true
+            }
+        }).then((adminCount: number): void => {
+
+            if (1 >= adminCount) {
+                throw new ConflictError(message);
+            }
+
+        });
+
+    }
 
 // module
 
@@ -57,6 +89,8 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
     "plugin-uninstall-running": [ components["schemas"]["PushEventPluginUninstallRunning"]["data"] ];
     "plugin-uninstall-success": [ components["schemas"]["PushEventPluginUninstallSuccess"]["data"] ];
     "plugin-uninstall-fail": [ components["schemas"]["PushEventPluginUninstallFail"]["data"] ];
+    "user.added": [ components["schemas"]["User"] ];
+    "user.removed": [ components["schemas"]["User"] ];
 }> {
 
     protected _container: ContainerPattern | null = null;
@@ -405,6 +439,244 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         }
 
         return pluginsManager.getLatestGithubTag(plugin);
+
+    }
+
+    public getUsers (): Promise<operations["getUsers"]["responses"]["200"]["content"]["application/json"]> {
+
+        return User.findAll().then((users: tUser[]): operations["getUsers"]["responses"]["200"]["content"]["application/json"] => {
+
+            return users.map(serializeUser);
+
+        });
+
+    }
+
+    // Create a user (admin only). Reject if the name already exists, persist via
+    // the host User model, then emit user.added with the public snapshot.
+    public createUser (url: iUrlAllowedParameters, body: operations["createUser"]["requestBody"]["content"]["application/json"]): Promise<operations["createUser"]["responses"]["201"]["content"]["application/json"]> {
+
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<tUser | null> => {
+
+            assertAdmin(caller);
+
+            return User.findOne({
+                "where": {
+                    "name": body.name
+                }
+            });
+
+        }).then((existing: tUser | null): Promise<tUser> => {
+
+            if (existing) {
+                throw new ConflictError("User '" + body.name + "' already exists");
+            }
+
+            // password is hashed by the host User model hooks
+            return User.create({
+                "name": body.name,
+                "password": body.password,
+                "isAdmin": Boolean(body.isAdmin)
+            });
+
+        }).then((user: tUser): operations["createUser"]["responses"]["201"]["content"]["application/json"] => {
+
+            const serialized: components["schemas"]["User"] = serializeUser(user);
+
+            this.emit("user.added", serialized);
+
+            return serialized;
+
+        });
+
+    }
+
+    public getUser (url: iUrlAllowedParameters): Promise<operations["getUser"]["responses"]["200"]["content"]["application/json"]> {
+
+        const urlParamsPath: operations["getUser"]["parameters"]["path"] = url.path as operations["getUser"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return User.findOne({
+            "where": {
+                "name": name
+            }
+        }).then((user: tUser | null): operations["getUser"]["responses"]["200"]["content"]["application/json"] => {
+
+            if (!user) {
+                throw new NotFoundError("User '" + name + "' not found");
+            }
+
+            return serializeUser(user);
+
+        });
+
+    }
+
+    // Update a user (self or admin). isAdmin change is admin-only; last-admin
+    // demote is rejected. Persist password and/or isAdmin, then return the public user.
+    public updateUser (url: iUrlAllowedParameters, body: operations["updateUser"]["requestBody"]["content"]["application/json"]): Promise<operations["updateUser"]["responses"]["200"]["content"]["application/json"]> {
+
+        const urlParamsPath: operations["updateUser"]["parameters"]["path"] = url.path as operations["updateUser"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<tUser> => {
+
+            assertSelfOrAdmin(caller, name);
+
+            if ("boolean" === typeof body.isAdmin && !caller.isAdmin) {
+                throw new UnauthorizedError("Admin privileges required to change isAdmin");
+            }
+
+            return User.findOne({
+                "where": {
+                    "name": name
+                }
+            }).then((existing: tUser | null): Promise<tUser> => {
+
+                if (!existing) {
+                    throw new NotFoundError("User '" + name + "' not found");
+                }
+
+                let lastAdminGuard: Promise<void> = Promise.resolve();
+
+                if (false === body.isAdmin && existing.isAdmin) {
+                    lastAdminGuard = _assertNotLastAdmin("Cannot remove the last admin");
+                }
+
+                return lastAdminGuard.then((): Promise<tUser> => {
+
+                    const attributes: Partial<UserAttributes> = {};
+
+                    if ("string" === typeof body.password) {
+                        attributes.password = body.password; // hashed by the host User model hooks
+                    }
+
+                    if ("boolean" === typeof body.isAdmin) {
+                        attributes.isAdmin = body.isAdmin;
+                    }
+
+                    if (!Object.keys(attributes).length) {
+                        return Promise.resolve(existing);
+                    }
+
+                    return existing.update(attributes);
+
+                });
+
+            });
+
+        }).then((user: tUser): operations["updateUser"]["responses"]["200"]["content"]["application/json"] => {
+
+            return serializeUser(user);
+
+        });
+
+    }
+
+    // Delete a user (self or admin). Snapshot the public user first; reject
+    // last-admin; emit user.removed after a successful remove.
+    public deleteUser (url: iUrlAllowedParameters): Promise<void> {
+
+        const urlParamsPath: operations["deleteUser"]["parameters"]["path"] = url.path as operations["deleteUser"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<void> => {
+
+            assertSelfOrAdmin(caller, name);
+
+            return User.findOne({
+                "where": {
+                    "name": name
+                }
+            }).then((existing: tUser | null): Promise<void> => {
+
+                if (!existing) {
+                    throw new NotFoundError("User '" + name + "' not found");
+                }
+
+                const snapshot: components["schemas"]["User"] = serializeUser(existing);
+
+                let lastAdminGuard: Promise<void> = Promise.resolve();
+
+                if (existing.isAdmin) {
+                    lastAdminGuard = _assertNotLastAdmin("Cannot delete the last admin");
+                }
+
+                // tokens are destroyed by the host User model hooks
+                return lastAdminGuard.then((): Promise<void> => {
+
+                    return existing.destroy();
+
+                }).then((): void => {
+
+                    this.emit("user.removed", snapshot);
+
+                });
+
+            });
+
+        });
+
+    }
+
+    public getUserTokens (url: iUrlAllowedParameters): Promise<operations["getUserTokens"]["responses"]["200"]["content"]["application/json"]> {
+
+        const urlParamsPath: operations["getUserTokens"]["parameters"]["path"] = url.path as operations["getUserTokens"]["parameters"]["path"];
+        const name: string = urlParamsPath.name;
+
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<AuthTokenPublic[]> => {
+
+            assertSelfOrAdmin(caller, name);
+
+            return User.findOne({
+                "where": {
+                    "name": name
+                }
+            }).then((existing: tUser | null): Promise<AuthTokenPublic[]> => {
+
+                if (!existing) {
+                    throw new NotFoundError("User '" + name + "' not found");
+                }
+
+                return Token.getByUserName(name);
+
+            });
+
+        }).then((tokens: AuthTokenPublic[]): operations["getUserTokens"]["responses"]["200"]["content"]["application/json"] => {
+
+            return tokens.map(serializeToken);
+
+        });
+
+    }
+
+    public deleteToken (url: iUrlAllowedParameters, body: operations["deleteToken"]["requestBody"]["content"]["application/json"]): Promise<void> {
+
+        const token: string = body.token;
+
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<void> => {
+
+            return Token.getUserByToken(token).then((owner: FullAuthPublic | undefined): Promise<void> => {
+
+                if (!owner) {
+                    throw new NotFoundError("Token not found");
+                }
+
+                if (!caller.isAdmin && caller.name !== owner.name) {
+                    throw new UnauthorizedError("Forbidden");
+                }
+
+                return Token.destroy({
+                    "where": {
+                        "token": token
+                    }
+                }).then((): void => {
+                    // token revoked
+                });
+
+            });
+
+        });
 
     }
 

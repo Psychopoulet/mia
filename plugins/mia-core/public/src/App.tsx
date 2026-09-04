@@ -2,12 +2,14 @@
 
     // externals
     import React from "react";
-    import { Alert, Modal, ModalBody } from "react-bootstrap-fontawesome";
+    import { Alert, Modal, ModalBody, NavTabs } from "react-bootstrap-fontawesome";
 
     // locals
     import getSDK from "./SDK";
     import Login from "./components/Login";
     import Plugins from "./components/Plugins";
+    import CurrentUserProvider from "./components/CurrentUserProvider";
+    import UsersManagement from "./components/UsersManagement";
 
 // types & interfaces
 
@@ -21,6 +23,7 @@
     interface iState {
         "status": "DISCONNECTED" | "CONNECTED" | "LOGGED" | operations["getPluginStatus"]["responses"]["200"]["content"]["application/json"];
         "error": components["schemas"]["Error"] | null;
+        "tabIndex": number;
     }
 
 // component
@@ -45,7 +48,8 @@ export default class App extends React.Component<iPropsNode, iState> {
 
         this.state = {
             "status": "DISCONNECTED",
-            "error": null
+            "error": null,
+            "tabIndex": 0
         };
 
     }
@@ -149,6 +153,17 @@ export default class App extends React.Component<iPropsNode, iState> {
 
     };
 
+    private readonly _handleSelectTab = (e: React.MouseEvent<HTMLAnchorElement>, newIndex: number): void => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.setState({
+            "tabIndex": newIndex
+        });
+
+    };
+
     // render
 
     public render (): React.JSX.Element {
@@ -199,7 +214,20 @@ export default class App extends React.Component<iPropsNode, iState> {
                 </Modal> }
 
                 { "INITIALIZED" === this.state.status && <Login /> }
-                { "LOGGED" === this.state.status && <Plugins onError={ this._handleError } /> }
+                { "LOGGED" === this.state.status && <>
+
+                    <NavTabs items={ [ "Plugins", "Users" ] }
+                        selectedIndex={ this.state.tabIndex }
+                        onSelect={ this._handleSelectTab }
+                    />
+
+                    { 0 === this.state.tabIndex && <Plugins onError={ this._handleError } /> }
+
+                    { 1 === this.state.tabIndex && <CurrentUserProvider onError={ this._handleError }>
+                        <UsersManagement onError={ this._handleError } />
+                    </CurrentUserProvider> }
+
+                </> }
 
             </div>;
 

@@ -13,7 +13,8 @@
     type tEvents = components["schemas"]["PushEventPluginInitialized"] | components["schemas"]["PushEventPluginReleased"] | components["schemas"]["PushEventPluginError"]
         | components["schemas"]["PushEventPluginInstallRunning"] | components["schemas"]["PushEventPluginInstallStep"] | components["schemas"]["PushEventPluginInstallSuccess"] | components["schemas"]["PushEventPluginInstallFail"]
         | components["schemas"]["PushEventPluginUpdateRunning"] | components["schemas"]["PushEventPluginUpdateStep"] | components["schemas"]["PushEventPluginUpdateSuccess"] | components["schemas"]["PushEventPluginUpdateFail"]
-        | components["schemas"]["PushEventPluginUninstallRunning"] | components["schemas"]["PushEventPluginUninstallSuccess"] | components["schemas"]["PushEventPluginUninstallFail"];
+        | components["schemas"]["PushEventPluginUninstallRunning"] | components["schemas"]["PushEventPluginUninstallSuccess"] | components["schemas"]["PushEventPluginUninstallFail"]
+        | components["schemas"]["PushEventUserAdded"] | components["schemas"]["PushEventUserRemoved"];
 
     type HttpMethodsOf<P extends keyof paths> = {
         [M in keyof paths[P]]: paths[P][M] extends { "responses": unknown }
@@ -40,6 +41,8 @@ export class SDK extends EventEmitter<{
     "plugin-uninstall-running": [ components["schemas"]["PushEventPluginUninstallRunning"]["data"] ];
     "plugin-uninstall-success": [ components["schemas"]["PushEventPluginUninstallSuccess"]["data"] ];
     "plugin-uninstall-fail": [ components["schemas"]["PushEventPluginUninstallFail"]["data"] ];
+    "user.added": [ components["schemas"]["User"] ];
+    "user.removed": [ components["schemas"]["User"] ];
 }> {
 
     // static
@@ -204,6 +207,12 @@ export class SDK extends EventEmitter<{
                     break;
                     case "plugin-uninstall-fail":
                         this.emit("plugin-uninstall-fail", parsedMessage.data);
+                    break;
+                    case "user.added":
+                        this.emit("user.added", parsedMessage.data);
+                    break;
+                    case "user.removed":
+                        this.emit("user.removed", parsedMessage.data);
                     break;
 
                     default:
@@ -426,6 +435,161 @@ export class SDK extends EventEmitter<{
             }
         }).then((res: Response): Promise<operations["deletePlugin"]["responses"]["204"]["content"]["application/json"]> => {
             return this._parseResponse(res);
+        });
+
+    }
+
+    public getUsers (): Promise<operations["getUsers"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/mia-core/api/users";
+        const method: HttpMethodsOf<typeof url> = "get";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getUsers"]["responses"]["200"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["getUsers"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
+    public createUser (
+        data: operations["createUser"]["requestBody"]["content"]["application/json"]
+    ): Promise<operations["createUser"]["responses"]["201"]["content"]["application/json"]> {
+
+        const url: keyof paths = "/mia-core/api/users";
+        const method: HttpMethodsOf<typeof url> = "put";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            },
+            "body": JSON.stringify(data)
+        }).then((res: Response): Promise<operations["createUser"]["responses"]["201"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["createUser"]["responses"]["201"]["content"]["application/json"]>;
+
+        });
+
+    }
+
+    public getUser (
+        name: operations["getUser"]["parameters"]["path"]["name"]
+    ): Promise<operations["getUser"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: `/mia-core/api/users/${string}` = `/mia-core/api/users/${encodeURIComponent(name)}`;
+        const method: HttpMethodsOf<"/mia-core/api/users/{name}"> = "get";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getUser"]["responses"]["200"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["getUser"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
+    public updateUser (
+        name: operations["updateUser"]["parameters"]["path"]["name"],
+        data: operations["updateUser"]["requestBody"]["content"]["application/json"]
+    ): Promise<operations["updateUser"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: `/mia-core/api/users/${string}` = `/mia-core/api/users/${encodeURIComponent(name)}`;
+        const method: HttpMethodsOf<"/mia-core/api/users/{name}"> = "post";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            },
+            "body": JSON.stringify(data)
+        }).then((res: Response): Promise<operations["updateUser"]["responses"]["200"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["updateUser"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
+    public deleteUser (name: operations["deleteUser"]["parameters"]["path"]["name"]): Promise<void> {
+
+        const url: `/mia-core/api/users/${string}` = `/mia-core/api/users/${encodeURIComponent(name)}`;
+        const method: HttpMethodsOf<"/mia-core/api/users/{name}"> = "delete";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<void> => {
+
+            if (res.ok) {
+                return Promise.resolve();
+            }
+
+            return this._parseResponse(res) as Promise<void>;
+
+        });
+
+    }
+
+    public getUserTokens (
+        name: operations["getUserTokens"]["parameters"]["path"]["name"]
+    ): Promise<operations["getUserTokens"]["responses"]["200"]["content"]["application/json"]> {
+
+        const url: `/mia-core/api/users/${string}/tokens` = `/mia-core/api/users/${encodeURIComponent(name)}/tokens`;
+        const method: HttpMethodsOf<"/mia-core/api/users/{name}/tokens"> = "get";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getUserTokens"]["responses"]["200"]["content"]["application/json"]> => {
+
+            return this._parseResponse(res) as Promise<operations["getUserTokens"]["responses"]["200"]["content"]["application/json"]>;
+
+        });
+
+    }
+
+    public deleteToken (
+        data: operations["deleteToken"]["requestBody"]["content"]["application/json"]
+    ): Promise<void> {
+
+        const url: keyof paths = "/mia-core/api/tokens";
+        const method: HttpMethodsOf<typeof url> = "delete";
+
+        return fetch(url, {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            },
+            "body": JSON.stringify(data)
+        }).then((res: Response): Promise<void> => {
+
+            if (res.ok) {
+                return Promise.resolve();
+            }
+
+            return this._parseResponse(res) as Promise<void>;
+
         });
 
     }

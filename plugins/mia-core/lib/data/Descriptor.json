@@ -164,11 +164,6 @@
 				"description": "",
 				"summary": "Plugin's descriptor",
 				"operationId": "getPluginDescriptor",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
 				"responses": {
 					"200": {
 						"description": "Plugin's descriptor",
@@ -198,9 +193,6 @@
 				"description": "",
 				"summary": "Plugin's status",
 				"operationId": "getPluginStatus",
-				"security": [
-					{ "bearerAuth": [] }
-				],
 				"responses": {
 					"200": {
 						"description": "Plugin's status",
@@ -247,7 +239,21 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/User"
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"minLength": 1
+									},
+									"password": {
+										"type": "string",
+										"minLength": 1
+									}
+								},
+								"required": [
+									"name",
+									"password"
+								]
 							}
 						}
 					}
@@ -280,9 +286,7 @@
 				"summary": "Logout",
 				"operationId": "logout",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"204": {
@@ -310,9 +314,7 @@
 				"summary": "Get all plugins",
 				"operationId": "getPlugins",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -346,9 +348,7 @@
 				"summary": "Add a plugin from a GitHub repository",
 				"operationId": "installPluginFromGithub",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"requestBody": {
 					"required": true,
@@ -396,9 +396,7 @@
 				"summary": "Update a plugin from its GitHub repository",
 				"operationId": "updatePluginFromGithub",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"parameters": [
 					{
@@ -434,9 +432,7 @@
 				"summary": "Delete a plugin",
 				"operationId": "deletePlugin",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"parameters": [
 					{
@@ -474,9 +470,7 @@
 				"summary": "Get the latest tag of a plugin",
 				"operationId": "getPluginLatestTag",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"parameters": [
 					{
@@ -498,6 +492,324 @@
 								}
 							}
 						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/users": {
+			"get": {
+				"description": "",
+				"summary": "List users",
+				"operationId": "getUsers",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Users list",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/User"
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"description": "",
+				"summary": "Create user",
+				"operationId": "createUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"minLength": 1
+									},
+									"password": {
+										"type": "string",
+										"minLength": 1
+									},
+									"isAdmin": {
+										"type": "boolean",
+										"default": false
+									}
+								},
+								"required": [
+									"name",
+									"password"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "User created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/users/{name}": {
+			"parameters": [
+				{
+					"name": "name",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			],
+			"get": {
+				"description": "",
+				"summary": "Get user",
+				"operationId": "getUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "User",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"description": "",
+				"summary": "Update user",
+				"operationId": "updateUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string",
+										"minLength": 1
+									},
+									"isAdmin": {
+										"type": "boolean"
+									}
+								},
+								"additionalProperties": false,
+								"minProperties": 1
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "User updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Delete user",
+				"operationId": "deleteUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"204": {
+						"description": "User deleted"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/users/{name}/tokens": {
+			"parameters": [
+				{
+					"name": "name",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			],
+			"get": {
+				"description": "",
+				"summary": "List user tokens",
+				"operationId": "getUserTokens",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Tokens list",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"token": {
+												"type": "string",
+												"minLength": 1
+											},
+											"fingerprint": {
+												"type": "string"
+											},
+											"createdAt": {
+												"type": "string",
+												"format": "date-time"
+											}
+										},
+										"required": [
+											"token",
+											"fingerprint",
+											"createdAt"
+										]
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/tokens": {
+			"delete": {
+				"description": "",
+				"summary": "Delete token",
+				"operationId": "deleteToken",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"token": {
+										"type": "string",
+										"minLength": 1
+									}
+								},
+								"required": [
+									"token"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"204": {
+						"description": "Token deleted"
 					},
 					"default": {
 						"description": "An error occurred",
@@ -551,19 +863,25 @@
 			},
 			"User": {
 				"type": "object",
+				"description": "Public user representation (no password)",
 				"properties": {
 					"name": {
 						"type": "string",
-						"minLength": 1
+						"minLength": 1,
+						"description": "Immutable username"
 					},
-					"password": {
+					"isAdmin": {
+						"type": "boolean"
+					},
+					"createdAt": {
 						"type": "string",
-						"minLength": 1
+						"format": "date-time"
 					}
 				},
 				"required": [
 					"name",
-					"password"
+					"isAdmin",
+					"createdAt"
 				]
 			},
 			"Token": {
@@ -665,6 +983,12 @@
 			},
 			"PushEventPluginUninstallFail": {
 				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallFail"
+			},
+			"PushEventUserAdded": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventUserAdded"
+			},
+			"PushEventUserRemoved": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventUserRemoved"
 			}
 		}
 	},

@@ -8,26 +8,50 @@
 
     const originalLoad = Module._load;
 
-    const stubs = {
-        "sign": (name) => {
-            return Promise.resolve("jwt-" + name);
-        },
-        "extractToken": () => {
-            return "bearer-token";
-        },
-        "getByNameAndPassword": () => {
-            return Promise.resolve({
-                "id": 1,
-                "name": "admin"
-            });
-        },
-        "tokenCreate": () => {
-            return Promise.resolve();
-        },
-        "tokenDestroy": () => {
-            return Promise.resolve(1);
-        }
-    };
+    function defaultStubs () {
+
+        return {
+            "sign": (name) => {
+                return Promise.resolve("jwt-" + name);
+            },
+            "extractToken": () => {
+                return "bearer-token";
+            },
+            "getByNameAndPassword": () => {
+                return Promise.resolve({
+                    "id": 1,
+                    "name": "admin"
+                });
+            },
+            "userFindAll": () => {
+                return Promise.resolve([]);
+            },
+            "userFindOne": () => {
+                return Promise.resolve(null);
+            },
+            "userCreate": () => {
+                return Promise.resolve(null);
+            },
+            "userCount": () => {
+                return Promise.resolve(0);
+            },
+            "tokenCreate": () => {
+                return Promise.resolve();
+            },
+            "tokenDestroy": () => {
+                return Promise.resolve(1);
+            },
+            "tokenGetUserByToken": () => {
+                return Promise.resolve();
+            },
+            "tokenGetByUserName": () => {
+                return Promise.resolve([]);
+            }
+        };
+
+    }
+
+    const stubs = defaultStubs();
 
 // private
 
@@ -135,6 +159,18 @@
                     "default": {
                         "getByNameAndPassword": (...args) => {
                             return stubs.getByNameAndPassword(...args);
+                        },
+                        "findAll": (...args) => {
+                            return stubs.userFindAll(...args);
+                        },
+                        "findOne": (...args) => {
+                            return stubs.userFindOne(...args);
+                        },
+                        "create": (...args) => {
+                            return stubs.userCreate(...args);
+                        },
+                        "count": (...args) => {
+                            return stubs.userCount(...args);
                         }
                     }
                 };
@@ -149,6 +185,12 @@
                         },
                         "destroy": (...args) => {
                             return stubs.tokenDestroy(...args);
+                        },
+                        "getUserByToken": (...args) => {
+                            return stubs.tokenGetUserByToken(...args);
+                        },
+                        "getByUserName": (...args) => {
+                            return stubs.tokenGetByUserName(...args);
                         }
                     }
                 };
@@ -166,28 +208,21 @@
 
     function resetStubs () {
 
-        stubs.sign = (name) => {
-            return Promise.resolve("jwt-" + name);
-        };
+        Object.assign(stubs, defaultStubs());
 
-        stubs.extractToken = () => {
-            return "bearer-token";
-        };
+    }
 
-        stubs.getByNameAndPassword = () => {
-            return Promise.resolve({
-                "id": 1,
-                "name": "admin"
-            });
-        };
+    // back the User / Token stubs with an in-memory store (see authStoreHarness)
+    function useAuthStore (store) {
 
-        stubs.tokenCreate = () => {
-            return Promise.resolve();
-        };
+        stubs.userFindAll = store.User.findAll;
+        stubs.userFindOne = store.User.findOne;
+        stubs.userCreate = store.User.create;
+        stubs.userCount = store.User.count;
 
-        stubs.tokenDestroy = () => {
-            return Promise.resolve(1);
-        };
+        stubs.tokenGetUserByToken = store.Token.getUserByToken;
+        stubs.tokenGetByUserName = store.Token.getByUserName;
+        stubs.tokenDestroy = store.Token.destroy;
 
     }
 
@@ -198,6 +233,7 @@ module.exports = {
     installStubs,
     restoreStubs,
     resetStubs,
+    useAuthStore,
     createContainer,
     createPluginsManager,
     fakePlugin
