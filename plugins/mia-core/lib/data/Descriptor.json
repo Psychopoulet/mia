@@ -164,11 +164,6 @@
 				"description": "",
 				"summary": "Plugin's descriptor",
 				"operationId": "getPluginDescriptor",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
 				"responses": {
 					"200": {
 						"description": "Plugin's descriptor",
@@ -198,9 +193,6 @@
 				"description": "",
 				"summary": "Plugin's status",
 				"operationId": "getPluginStatus",
-				"security": [
-					{ "bearerAuth": [] }
-				],
 				"responses": {
 					"200": {
 						"description": "Plugin's status",
@@ -294,9 +286,7 @@
 				"summary": "Logout",
 				"operationId": "logout",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"204": {
@@ -324,9 +314,7 @@
 				"summary": "Get all plugins",
 				"operationId": "getPlugins",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -360,9 +348,7 @@
 				"summary": "Add a plugin from a GitHub repository",
 				"operationId": "installPluginFromGithub",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"requestBody": {
 					"required": true,
@@ -410,9 +396,7 @@
 				"summary": "Update a plugin from its GitHub repository",
 				"operationId": "updatePluginFromGithub",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"parameters": [
 					{
@@ -448,9 +432,7 @@
 				"summary": "Delete a plugin",
 				"operationId": "deletePlugin",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"parameters": [
 					{
@@ -488,9 +470,7 @@
 				"summary": "Get the latest tag of a plugin",
 				"operationId": "getPluginLatestTag",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"parameters": [
 					{
@@ -532,9 +512,7 @@
 				"summary": "List users",
 				"operationId": "getUsers",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -567,9 +545,7 @@
 				"summary": "Create user",
 				"operationId": "createUser",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"requestBody": {
 					"required": true,
@@ -640,9 +616,7 @@
 				"summary": "Get user",
 				"operationId": "getUser",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -672,9 +646,7 @@
 				"summary": "Update user",
 				"operationId": "updateUser",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"requestBody": {
 					"required": true,
@@ -725,9 +697,7 @@
 				"summary": "Delete user",
 				"operationId": "deleteUser",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"204": {
@@ -763,9 +733,7 @@
 				"summary": "List user tokens",
 				"operationId": "getUserTokens",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"responses": {
 					"200": {
@@ -818,9 +786,7 @@
 				"summary": "Delete token",
 				"operationId": "deleteToken",
 				"security": [
-					{
-						"bearerAuth": []
-					}
+					{ "bearerAuth": [] }
 				],
 				"requestBody": {
 					"required": true,
