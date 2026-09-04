@@ -78,7 +78,6 @@
     "pg": "8.23.0",
     "sequelize": "6.37.8",
     "sqlite3": "6.0.1",
-    "uniqid": "5.4.0",
     "winston": "3.19.0",
     "winston-transport": "4.9.0",
     "ws": "8.21.3"
@@ -94,7 +93,6 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@types/socket.io": "3.0.2",
-    "@types/uniqid": "5.3.4",
     "@types/ws": "8.18.1",
     "check-node-engine": "1.2.0",
     "check-version-modules": "2.5.0",
