@@ -90,9 +90,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install mia-core dependencies
+        run: npm --prefix ./plugins/mia-core install
+
       # must be FORCED to allow mia-core build
-      - name: Run transpile-openapi
-        run: npm run transpile-openapi
+      - name: Run mia-core transpile-openapi
+        run: npm --prefix ./plugins/mia-core run transpile-openapi
 
       # must be BEFORE linting for mia-core definitions import
       - name: Run build

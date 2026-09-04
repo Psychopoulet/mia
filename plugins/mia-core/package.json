@@ -23,9 +23,9 @@
     "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
     "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
 
-    "lint-back": "npm run transpile-openapi-back && npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
-    "lint-front": "npm run transpile-openapi-front && npx eslint --config .eslintrc-front.js --ext .tsx,.ts ./public/src/**/*",
-    "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js ./test/**/*",
+    "lint-back": "npm run transpile-openapi-back && npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\"",
+    "lint-front": "npm run transpile-openapi-front && npx eslint --config .eslintrc-front.js --ext .tsx,.ts \"./public/src/**/*\"",
+    "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js \"./test/**/*\"",
     "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
 
     "clean-back": "npx rimraf ./lib/cjs",

@@ -19,9 +19,7 @@
 
   "scripts": {
 
-    "transpile-openapi": "npm --prefix ./plugins/mia-core run transpile-openapi",
-
-    "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/* && npm --prefix ./plugins/mia-core run lint-back",
+    "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\" && npm --prefix ./plugins/mia-core run lint-back",
     "lint-front": "echo 'Frontend lint not implemented yet.' && npm --prefix ./plugins/mia-core run lint-front",
     "lint-tests": "echo 'Tests lint not implemented yet.' && npm --prefix ./plugins/mia-core run lint-tests",
     "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
