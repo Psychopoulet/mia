@@ -2,7 +2,7 @@
 	"openapi": "3.1.2",
 	"info": {
 		"title": "mia-core",
-		"version": "2.0.3",
+		"version": "2.1.0",
 		"description": "MIA - easy IOT.",
 		"license": {
 			"name": "ISC",
