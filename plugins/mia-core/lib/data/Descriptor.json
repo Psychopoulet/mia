@@ -1,0 +1,1005 @@
+{
+	"openapi": "3.1.2",
+	"info": {
+		"title": "mia-core",
+		"version": "2.1.0",
+		"description": "MIA - easy IOT.",
+		"license": {
+			"name": "ISC",
+			"url": "https://en.wikipedia.org/wiki/ISC_license"
+		}
+	},
+	"paths": {
+
+		"/public/menu.min.js": {
+			"get": {
+				"description": "",
+				"summary": "Global app menu",
+				"operationId": "getFrontMenu",
+				"responses": {
+					"200": {
+						"description": "Global app menu",
+						"content": {
+							"text/javascript": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/menu.min.js.map": {
+			"get": {
+				"description": "",
+				"summary": "Global app menu map",
+				"operationId": "getFrontMenuMap",
+				"responses": {
+					"200": {
+						"description": "Global app menu map",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+
+		"/mia-core/public/index.html": {
+			"get": {
+				"description": "",
+				"summary": "Front page",
+				"operationId": "getFrontIndex",
+				"responses": {
+					"200": {
+						"description": "Front page",
+						"content": {
+							"text/html": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/public/bundle.min.js": {
+			"get": {
+				"description": "",
+				"summary": "Front app",
+				"operationId": "getFrontApp",
+				"responses": {
+					"200": {
+						"description": "Front app",
+						"content": {
+							"text/javascript": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/public/bundle.min.js.map": {
+			"get": {
+				"description": "",
+				"summary": "Front app map",
+				"operationId": "getFrontAppMap",
+				"responses": {
+					"200": {
+						"description": "Front app map",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/descriptor": {
+			"get": {
+				"description": "",
+				"summary": "Plugin's descriptor",
+				"operationId": "getPluginDescriptor",
+				"responses": {
+					"200": {
+						"description": "Plugin's descriptor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/status": {
+			"get": {
+				"description": "",
+				"summary": "Plugin's status",
+				"operationId": "getPluginStatus",
+				"responses": {
+					"200": {
+						"description": "Plugin's status",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"enum": [ "ENABLED", "INITIALIZED", "RELEASED" ]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "The plugin is not enabled (=RELEASED)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+
+		"/mia-core/api/auth": {
+			"put": {
+				"description": "",
+				"summary": "Login",
+				"operationId": "login",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"minLength": 1
+									},
+									"password": {
+										"type": "string",
+										"minLength": 1
+									}
+								},
+								"required": [
+									"name",
+									"password"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Authorization token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Token"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Logout",
+				"operationId": "logout",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"204": {
+						"description": "Logout",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/plugins": {
+			"get": {
+				"description": "",
+				"summary": "Get all plugins",
+				"operationId": "getPlugins",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Plugins list",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"uniqueItems": true,
+									"items": {
+										"$ref": "#/components/schemas/Plugin"
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"description": "",
+				"summary": "Add a plugin from a GitHub repository",
+				"operationId": "installPluginFromGithub",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"path": {
+										"type": "string",
+										"description": "GitHub repository path (owner/repo)",
+										"minLength": 8
+									}
+								},
+								"required": [
+									"path"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Add a plugin from a GitHub repository",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/plugins/{name}": {
+			"post": {
+				"description": "",
+				"summary": "Update a plugin from its GitHub repository",
+				"operationId": "updatePluginFromGithub",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Update a plugin from its GitHub repository",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Delete a plugin",
+				"operationId": "deletePlugin",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Delete a plugin",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/plugins/{name}/latest-tag": {
+			"get": {
+				"description": "",
+				"summary": "Get the latest tag of a plugin",
+				"operationId": "getPluginLatestTag",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PluginName"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Get the latest tag of a plugin",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/users": {
+			"get": {
+				"description": "",
+				"summary": "List users",
+				"operationId": "getUsers",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Users list",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/User"
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"description": "",
+				"summary": "Create user",
+				"operationId": "createUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"minLength": 1
+									},
+									"password": {
+										"type": "string",
+										"minLength": 1
+									},
+									"isAdmin": {
+										"type": "boolean",
+										"default": false
+									}
+								},
+								"required": [
+									"name",
+									"password"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "User created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/users/{name}": {
+			"parameters": [
+				{
+					"name": "name",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			],
+			"get": {
+				"description": "",
+				"summary": "Get user",
+				"operationId": "getUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "User",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"description": "",
+				"summary": "Update user",
+				"operationId": "updateUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string",
+										"minLength": 1
+									},
+									"isAdmin": {
+										"type": "boolean"
+									}
+								},
+								"additionalProperties": false,
+								"minProperties": 1
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "User updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Delete user",
+				"operationId": "deleteUser",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"204": {
+						"description": "User deleted"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/users/{name}/tokens": {
+			"parameters": [
+				{
+					"name": "name",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			],
+			"get": {
+				"description": "",
+				"summary": "List user tokens",
+				"operationId": "getUserTokens",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"responses": {
+					"200": {
+						"description": "Tokens list",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"token": {
+												"type": "string",
+												"minLength": 1
+											},
+											"fingerprint": {
+												"type": "string"
+											},
+											"createdAt": {
+												"type": "string",
+												"format": "date-time"
+											}
+										},
+										"required": [
+											"token",
+											"fingerprint",
+											"createdAt"
+										]
+									}
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mia-core/api/tokens": {
+			"delete": {
+				"description": "",
+				"summary": "Delete token",
+				"operationId": "deleteToken",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"token": {
+										"type": "string",
+										"minLength": 1
+									}
+								},
+								"required": [
+									"token"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"204": {
+						"description": "Token deleted"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		},
+		"schemas": {
+			"PluginName": {
+				"type": "string",
+				"enum": [
+					"mia-core"
+				]
+			},
+			"Error": {
+				"type": "object",
+				"description": "JSON Error description",
+				"properties": {
+					"code": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"code",
+					"message"
+				]
+			},
+			"Version": {
+				"type": "string",
+				"minLength": 5,
+				"pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+			},
+			"User": {
+				"type": "object",
+				"description": "Public user representation (no password)",
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Immutable username"
+					},
+					"isAdmin": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"name",
+					"isAdmin",
+					"createdAt"
+				]
+			},
+			"Token": {
+				"type": "string",
+				"minLength": 1
+			},
+			"Plugin": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"$ref": "#/components/schemas/PluginName"
+					},
+					"version": {
+						"$ref": "#/components/schemas/Version"
+					},
+					"description": {
+						"type": "string",
+						"minLength": 1
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"dependencies": {
+						"type": "object",
+						"additionalProperties": true
+					},
+					"engines": {
+						"type": "object",
+						"properties": {
+							"node": {
+								"$ref": "#/components/schemas/Version"
+							}
+						}
+					},
+					"authors": {
+						"type": "array",
+						"uniqueItems": true,
+						"items": {
+							"type": "string"
+						}
+					},
+					"license": {
+						"type": "string"
+					},
+					"repository": {
+						"type": "string",
+						"format": "uri"
+					}
+				},
+				"required": [
+					"name",
+					"version",
+					"description",
+					"enabled",
+					"dependencies",
+					"engines",
+					"authors",
+					"license"
+				]
+			},
+			"PushEventPluginInitialized": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInitialized"
+			},
+			"PushEventPluginReleased": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginReleased"
+			},
+			"PushEventPluginError": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginError"
+			},
+			"PushEventPluginInstallRunning": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallRunning"
+			},
+			"PushEventPluginInstallStep": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallStep"
+			},
+			"PushEventPluginInstallSuccess": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallSuccess"
+			},
+			"PushEventPluginInstallFail": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInstallFail"
+			},
+			"PushEventPluginUpdateRunning": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateRunning"
+			},
+			"PushEventPluginUpdateStep": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateStep"
+			},
+			"PushEventPluginUpdateSuccess": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateSuccess"
+			},
+			"PushEventPluginUpdateFail": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUpdateFail"
+			},
+			"PushEventPluginUninstallRunning": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallRunning"
+			},
+			"PushEventPluginUninstallSuccess": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallSuccess"
+			},
+			"PushEventPluginUninstallFail": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginUninstallFail"
+			},
+			"PushEventUserAdded": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventUserAdded"
+			},
+			"PushEventUserRemoved": {
+				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventUserRemoved"
+			}
+		}
+	},
+	"externalDocs": {
+		"description": "Find out more about this API",
+		"url": "https://github.com/Psychopoulet/mia#readme"
+	},
+	"servers": [
+		{
+			"url": "http://localhost:8000/",
+			"description": "test server"
+		}
+	]
+}

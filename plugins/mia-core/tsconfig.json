@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+
+        "target": "es2022",
+        "module": "commonjs",
+
+        "rootDir": "./lib/src",
+        "outDir": "./lib/cjs",
+
+        "declaration": true,
+        "declarationDir": "./lib/cjs",
+
+
+        "alwaysStrict": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": false,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true
+
+    },
+    "include": [
+        "./lib/src/main.cts",
+        "./lib/src/Server.ts",
+        "./lib/src/Mediator.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

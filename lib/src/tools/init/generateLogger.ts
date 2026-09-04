@@ -2,6 +2,10 @@
 
     // externals
     import winston from "winston";
+    import Transport from "winston-transport";
+
+    // locals
+    import Log from "../models/Log";
 
 // types & interfaces
 
@@ -20,15 +24,62 @@
         "debug": (content: string) => void
     }
 
+    interface iLogInfo {
+        [key: string]: unknown;
+        "level"?: unknown;
+        "message"?: unknown;
+        "timestamp"?: unknown;
+    }
+
 // module
 
+class SequelizeTransport extends Transport {
+
+    public log (info: iLogInfo, callback: () => void): void {
+
+        const { level, message, "timestamp": rawTimestamp, ...meta } = info;
+
+        let timestamp: Date = new Date();
+
+        if (rawTimestamp instanceof Date) {
+            timestamp = rawTimestamp;
+        }
+        else if ("string" === typeof rawTimestamp || "number" === typeof rawTimestamp) {
+            timestamp = new Date(rawTimestamp);
+        }
+
+        Log.create({
+            "level": String(level),
+            "message": String(message),
+            "timestamp": Number.isNaN(timestamp.getTime()) ? new Date() : timestamp,
+            "meta": 0 < Object.keys(meta).length ? meta : null
+        }).then((): void => {
+
+            this.emit("logged", info);
+            callback();
+
+        }).catch((err: Error): void => {
+
+            // never log through Winston here: that would recurse into this transport
+            this.emit("error", err);
+            callback();
+
+        });
+
+    }
+
+}
+
 export default function generateLogger (container: ContainerPattern): void {
+
+    const conf: ConfManager = container.get<ConfManager>("conf");
+    const logLevel: string = conf.get<boolean>("debug") ? "debug" : "info";
 
     const logger = winston.createLogger({
 
         "transports": [
             new winston.transports.File({
-                "level": container.get<ConfManager>("conf").get<boolean>("debug") ? "debug" : "info",
+                "level": logLevel,
                 "filename": container.get<string>("logs-file"),
                 "format": winston.format.combine(
                     winston.format.timestamp({
@@ -36,6 +87,13 @@ export default function generateLogger (container: ContainerPattern): void {
                     }),
                     winston.format.json()
                 )
+            }),
+            // extra destination: persist the same logs in SQL (database already exists)
+            new SequelizeTransport({
+                "level": logLevel,
+                "format": winston.format.timestamp({
+                    "format": "YYYY-MM-DD HH:mm:ss"
+                })
             })
         ],
 
@@ -59,7 +117,7 @@ export default function generateLogger (container: ContainerPattern): void {
         "debug": "grey"
     });
 
-    if (container.get<ConfManager>("conf").get<boolean>("debug")) {
+    if (conf.get<boolean>("debug")) {
 
         logger.add(new winston.transports.Console({
             "level": "debug",

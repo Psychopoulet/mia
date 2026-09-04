@@ -4,14 +4,14 @@
     import React from "react";
     import {
         Modal, ModalBody, ModalFooter,
-        InputText,
+        InputReadOnly, InputText,
         InvalidFeedBack,
         Button,
         generateFocus
     } from "react-bootstrap-fontawesome";
 
     // locals
-    import getSDK from "../src/SDK";
+    import getSDK from "../../plugins/mia-core/public/src/SDK";
 
 // types & interfaces
 
@@ -19,8 +19,8 @@
     import type { iPropsNode, iGenerateFocusCallback } from "react-bootstrap-fontawesome";
 
     // locals
-    import type { SDK } from "../src/SDK";
-    import type { components } from "../src/Descriptor";
+    import type { SDK } from "../../plugins/mia-core/public/src/SDK";
+    import type { components } from "../../plugins/mia-core/public/src/Descriptor";
 
     interface iProps extends iPropsNode {
         "onClose": (e?: React.MouseEvent<HTMLButtonElement>) => void;
@@ -153,7 +153,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
             "error": null
         });
 
-        this._sdk.installPlugin("https://github.com/" + this.state.user + "/" + this.state.repository).then((): void => {
+        this._sdk.installPluginFromGithub("https://github.com/" + this.state.user + "/" + this.state.repository).then((): void => {
 
             this.props.onClose();
 
@@ -171,7 +171,8 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
     public render (): React.JSX.Element {
 
-        return <Modal appId="MIAMenu" title="Repository URL" centered
+        return <Modal appId="MIAMenu" title="Repository URL"
+            centered size="lg"
             onClose={ this.props.onClose }
             onSubmit={ this._handleSubmit }
         >
@@ -180,7 +181,9 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
                 <div className={ "input-group" + (this.state.error ? " mb-2" : "") }>
 
-                    <span className="input-group-text">https://github.com/</span>
+                    <InputReadOnly value="https://github.com" disabled={ this.state.running } />
+
+                    <span className="input-group-text">/</span>
 
                     <InputText disabled={ this.state.running }
                         value={ this.state.user } onChange={ this._handleChangeUser }

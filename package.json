@@ -1,7 +1,7 @@
 {
 
   "name": "mia",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "MIA - easy IOT.",
 
   "type": "commonjs",
@@ -19,28 +19,26 @@
 
   "scripts": {
 
-    "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/api/Descriptor.ts",
-    "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
-    "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
+    "transpile-openapi": "npm --prefix ./plugins/mia-core run transpile-openapi",
 
-    "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/*",
-    "lint-front": "echo 'Frontend lint not implemented yet.'",
-    "lint-tests": "echo 'Tests not implemented yet.'",
+    "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts ./lib/src/**/* && npm --prefix ./plugins/mia-core run lint-back",
+    "lint-front": "echo 'Frontend lint not implemented yet.' && npm --prefix ./plugins/mia-core run lint-front",
+    "lint-tests": "echo 'Tests lint not implemented yet.' && npm --prefix ./plugins/mia-core run lint-tests",
     "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
 
     "clean-back": "npx rimraf ./lib/cjs && npx rimraf ./lib/src/api/Descriptor.ts",
     "clean-front": "npx rimraf ./public/cjs && npx rimraf ./public/src/Descriptor.ts",
     "clean": "npm run clean-back && npm run clean-front",
 
-    "build-back": "npm run clean-back && npm run transpile-openapi-back && npx tsc --project ./tsconfig.json",
-    "build-front": "npm run clean-front && npm run transpile-openapi-front && npx webpack --config ./webpack.config.js && npx webpack --config ./webpack.menu.config.js",
+    "build-back": "npm run clean-back && npx tsc --project ./tsconfig.json && npm --prefix ./plugins/mia-core run build-back",
+    "build-front": "npm run clean-front && npx webpack --config ./webpack.config.js && npm --prefix ./plugins/mia-core run build-front",
     "build": "npm run build-back && npm run build-front",
 
-    "check-node-engine": "npx check-node-engine",
-    "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\"",
-    "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch",
-    "unit-tests": "npx mocha",
-    "unit-tests-local": "npx nyc --reporter=html --reporter=text mocha",
+    "check-node-engine": "npx check-node-engine && npm --prefix ./plugins/mia-core run check-node-engine",
+    "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && npm --prefix ./plugins/mia-core run check-requires",
+    "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch && npm --prefix ./plugins/mia-core run check-updates",
+    "unit-tests": "echo 'Tests not implemented yet.' && npm --prefix ./plugins/mia-core run unit-tests",
+    "unit-tests-local": "echo 'Tests not implemented yet.' && npm --prefix ./plugins/mia-core run unit-tests-local",
 
     "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests-local",
 
@@ -56,6 +54,7 @@
 
   "files": [
     "lib/cjs",
+    "lib/data",
     "public/dist",
     "public/pictures",
     "public/index.html",
@@ -66,43 +65,42 @@
   },
 
   "dependencies": {
-    "@apidevtools/swagger-parser": "12.1.0",
     "@fortawesome/fontawesome-free": "7.3.1",
     "bcrypt": "6.0.0",
-    "better-sqlite3": "13.0.3",
     "bootstrap": "5.3.8",
     "compression": "1.8.1",
     "cors": "2.8.6",
     "express": "5.2.1",
-    "express-openapi-validator": "5.6.2",
     "helmet": "8.3.0",
     "jsonwebtoken": "9.0.3",
     "node-confmanager": "1.15.0",
     "node-containerpattern": "1.12.0",
-    "node-pluginsmanager": "3.7.1",
-    "node-pluginsmanager-plugin": "7.4.3",
-    "uniqid": "5.4.0",
+    "node-pluginsmanager": "3.8.0",
+    "node-pluginsmanager-plugin": "7.4.4",
+    "pg": "8.23.0",
+    "sequelize": "6.37.8",
+    "sqlite3": "6.0.1",
     "winston": "3.19.0",
+    "winston-transport": "4.9.0",
     "ws": "8.21.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "9.6.0",
     "@types/bcrypt": "6.0.0",
     "@types/compression": "1.8.1",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.1",
+    "@types/pg": "8.23.1",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.7",
     "@types/socket.io": "3.0.2",
-    "@types/uniqid": "5.3.4",
     "@types/ws": "8.18.1",
-    "check-node-engine": "1.1.0",
+    "check-node-engine": "1.2.0",
     "check-version-modules": "2.5.0",
     "eslint-plugin-personnallinter": "git+ssh://git@github.com/Psychopoulet/eslint-plugin-personnallinter",
     "husky": "9.1.7",
-    "mocha": "11.8.0",
+    "mocha": "12.0.0",
     "openapi-typescript": "7.13.0",
     "react": "19.2.8",
     "react-bootstrap-fontawesome": "git+ssh://git@github.com/Psychopoulet/react-bootstrap-fontawesome",
@@ -112,11 +110,11 @@
     "ts-loader": "9.6.2",
     "typescript": "5.9.3",
     "used-deps-analyzer": "0.4.0",
-    "webpack": "5.109.2",
-    "webpack-cli": "7.2.2"
+    "webpack": "5.110.3",
+    "webpack-cli": "7.2.3"
   },
   "optionalDependencies": {
-    "pm2": "7.0.3"
+    "pm2": "7.0.4"
   },
 
   "author": "Sébastien VIDAL",
