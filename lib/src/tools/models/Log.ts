@@ -1,12 +1,12 @@
 // deps
 
     // externals
-    import { DataTypes, Model } from "sequelize";
+    import { DataTypes, Model, Op } from "sequelize";
 
 // types & interfaces
 
     // externals
-    import type { Optional, Sequelize } from "sequelize";
+    import type { Optional, Sequelize, WhereOptions } from "sequelize";
 
     // locals
 
@@ -24,6 +24,17 @@
 
 // module
 
+function rangeWhere (from: Date, to: Date): WhereOptions<LogAttributes> {
+
+    return {
+        "timestamp": {
+            [Op.gte]: from,
+            [Op.lte]: to
+        }
+    };
+
+}
+
 export default class Log extends Model<LogAttributes, LogCreationAttributes> implements LogAttributes {
 
     public declare id: number;
@@ -31,6 +42,31 @@ export default class Log extends Model<LogAttributes, LogCreationAttributes> imp
     public declare message: string;
     public declare timestamp: Date;
     public declare meta: object | null;
+
+    // keep Op inside the model: plugins must not depend on sequelize at runtime
+    public static findInRange (from: Date, to: Date, level?: string): Promise<Log[]> {
+
+        const where: WhereOptions<LogAttributes> = "string" === typeof level && "" !== level
+            ? { ...rangeWhere(from, to), "level": level }
+            : rangeWhere(from, to);
+
+        return Log.findAll({
+            "where": where,
+            "order": [
+                [ "timestamp", "ASC" ],
+                [ "id", "ASC" ]
+            ]
+        });
+
+    }
+
+    public static destroyInRange (from: Date, to: Date): Promise<number> {
+
+        return Log.destroy({
+            "where": rangeWhere(from, to)
+        });
+
+    }
 
 }
 
