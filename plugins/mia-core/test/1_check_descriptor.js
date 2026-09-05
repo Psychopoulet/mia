@@ -96,4 +96,21 @@ describe("check descriptor", () => {
 
     });
 
+    it("should expose logs operationIds on /mia-core/api/logs", async () => {
+
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const route = descriptor.paths["/mia-core/api/logs"];
+
+        equal(Boolean(route), true, "Missing path /mia-core/api/logs");
+
+        equal(route.get.operationId, "getLogs");
+        equal(route.delete.operationId, "deleteLogs");
+
+        equal(Boolean(route.get.responses["200"].content["text/plain"]), true, "getLogs does not expose text/plain on 200");
+        equal(Object.keys(route.get.responses["200"].content).length, 1, "getLogs exposes more than text/plain on 200");
+
+        equal(Boolean(route.delete.requestBody), false, "deleteLogs should not have a requestBody");
+
+    });
+
 });

@@ -88,4 +88,23 @@ describe("logout", () => {
 
     }).timeout(MAX_TIMEOUT);
 
+    it("should fall back on empty headers when none is provided", () => {
+
+        let receivedHeaders = null;
+
+        stubs.extractToken = (request) => {
+            receivedHeaders = request.headers;
+            return "session-token";
+        };
+
+        return mediator.logout({}).then(() => {
+
+            strictEqual(typeof receivedHeaders, "object");
+            strictEqual(Object.keys(receivedHeaders).length, 0);
+            strictEqual(destroyedWhere.where.token, "session-token");
+
+        });
+
+    }).timeout(MAX_TIMEOUT);
+
 });

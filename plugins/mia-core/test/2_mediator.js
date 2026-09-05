@@ -113,6 +113,20 @@ describe("mediator", () => {
 
         }).timeout(MAX_TIMEOUT);
 
+        it("should release workspace twice without failing", () => {
+
+            return mediator._releaseWorkSpace().then(() => {
+
+                return mediator._releaseWorkSpace();
+
+            }).then(() => {
+
+                return mediator._initWorkSpace(container);
+
+            });
+
+        }).timeout(MAX_TIMEOUT);
+
         it("should replace plugin placeholders in front index", () => {
 
             return mediator.getFrontIndex().then((content) => {

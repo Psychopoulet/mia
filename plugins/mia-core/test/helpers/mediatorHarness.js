@@ -46,6 +46,12 @@
             },
             "tokenGetByUserName": () => {
                 return Promise.resolve([]);
+            },
+            "logFindInRange": () => {
+                return Promise.resolve([]);
+            },
+            "logDestroyInRange": () => {
+                return Promise.resolve(0);
             }
         };
 
@@ -191,6 +197,20 @@
                         },
                         "getByUserName": (...args) => {
                             return stubs.tokenGetByUserName(...args);
+                        }
+                    }
+                };
+            }
+
+            if (normalized.endsWith("cjs/tools/models/Log")) {
+                return {
+                    "__esModule": true,
+                    "default": {
+                        "findInRange": (...args) => {
+                            return stubs.logFindInRange(...args);
+                        },
+                        "destroyInRange": (...args) => {
+                            return stubs.logDestroyInRange(...args);
                         }
                     }
                 };
