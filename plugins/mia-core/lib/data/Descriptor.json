@@ -823,6 +823,109 @@
 					}
 				}
 			}
+		},
+		"/mia-core/api/logs": {
+			"get": {
+				"description": "",
+				"summary": "Read logs in a date range",
+				"operationId": "getLogs",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "from",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "to",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "level",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/LogLevel"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "One formatted log line per record",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Purge logs in a date range",
+				"operationId": "deleteLogs",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "from",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "to",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Logs purged"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"components": {
@@ -941,6 +1044,10 @@
 					"authors",
 					"license"
 				]
+			},
+			"LogLevel": {
+				"type": "string",
+				"enum": [ "critical", "error", "warning", "success", "info", "debug" ]
 			},
 			"PushEventPluginInitialized": {
 				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInitialized"
