@@ -858,6 +858,16 @@
 						"schema": {
 							"$ref": "#/components/schemas/LogLevel"
 						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"description": "Maximum number of returned records. Clamped server-side to a hard maximum of 10000, so a higher value yields the cap instead of an error. A range matching more records than the effective limit is rejected, never truncated.",
+						"schema": {
+							"type": "integer",
+							"minimum": 1
+						}
 					}
 				],
 				"responses": {
