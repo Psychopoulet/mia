@@ -5,6 +5,8 @@
 
     // locals
     const formatLogLine = require("../lib/cjs/utils/formatLogLine.js").default;
+    const parseLogsLimit = require("../lib/cjs/utils/parseLogsLimit.js").default;
+    const { LOGS_HARD_LIMIT } = require("../lib/cjs/utils/parseLogsLimit.js");
     const parseLogsRange = require("../lib/cjs/utils/parseLogsRange.js").default;
 
 // consts
@@ -71,6 +73,24 @@ describe("logs utils", () => {
                 "timestamp": "2024-03-01T13:00:00.000Z",
                 "meta": null
             }), "2024-03-01T13:00:00.000Z [DEBUG] raw row");
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should omit meta when it is undefined", () => {
+
+            const record = {
+                "id": 5,
+                "level": "warning",
+                "message": "missing meta",
+                "timestamp": new Date("2024-03-01T14:00:00.000Z")
+            };
+
+            strictEqual("undefined" === typeof record.meta, true);
+
+            const line = formatLogLine(record);
+
+            strictEqual(line.includes("undefined"), false);
+            strictEqual(line, "2024-03-01T14:00:00.000Z [WARNING] missing meta");
 
         }).timeout(MAX_TIMEOUT);
 
@@ -181,6 +201,80 @@ describe("logs utils", () => {
                 return parseLogsRange({
                     "from": TO,
                     "to": FROM
+                });
+            }, RangeError);
+
+        }).timeout(MAX_TIMEOUT);
+
+    });
+
+    describe("parseLogsLimit", () => {
+
+        it("should return the hard cap when \"limit\" is absent", () => {
+
+            strictEqual(LOGS_HARD_LIMIT, 10000);
+            strictEqual(parseLogsLimit(), LOGS_HARD_LIMIT);
+            strictEqual(parseLogsLimit({}), LOGS_HARD_LIMIT);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should return the hard cap when \"limit\" is empty", () => {
+
+            strictEqual(parseLogsLimit({
+                "limit": ""
+            }), LOGS_HARD_LIMIT);
+
+            strictEqual(parseLogsLimit({
+                "limit": "   "
+            }), LOGS_HARD_LIMIT);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should return a valid in-range value as-is", () => {
+
+            strictEqual(parseLogsLimit({
+                "limit": 50
+            }), 50);
+
+            strictEqual(parseLogsLimit({
+                "limit": "50"
+            }), 50);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should clamp a value above the cap to the hard limit", () => {
+
+            strictEqual(parseLogsLimit({
+                "limit": 999999
+            }), LOGS_HARD_LIMIT);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should throw RangeError when \"limit\" is 0", () => {
+
+            throws(() => {
+                return parseLogsLimit({
+                    "limit": 0
+                });
+            }, RangeError);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should throw RangeError when \"limit\" is negative", () => {
+
+            throws(() => {
+                return parseLogsLimit({
+                    "limit": -1
+                });
+            }, RangeError);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should throw RangeError when \"limit\" is not numeric", () => {
+
+            throws(() => {
+                return parseLogsLimit({
+                    "limit": "not-a-number"
                 });
             }, RangeError);
 

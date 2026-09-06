@@ -113,4 +113,26 @@ describe("check descriptor", () => {
 
     });
 
+    it("should expose an optional uncapped limit on getLogs and only 200 + default", async () => {
+
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const route = descriptor.paths["/mia-core/api/logs"];
+        const limitParam = route.get.parameters.find((param) => {
+            return "limit" === param.name && "query" === param.in;
+        });
+
+        equal(Boolean(limitParam), true, "getLogs is missing an optional limit query parameter");
+        equal(limitParam.required, false, "getLogs limit must be optional");
+        equal(limitParam.schema.type, "integer", "getLogs limit must be an integer");
+        equal(limitParam.schema.minimum, 1, "getLogs limit must have minimum 1");
+        equal(Object.hasOwn(limitParam.schema, "maximum"), false, "getLogs limit must not declare a maximum");
+
+        const responseKeys = Object.keys(route.get.responses);
+
+        equal(responseKeys.length, 2, "getLogs must declare exactly 200 and default");
+        equal(responseKeys.includes("200"), true, "getLogs is missing the 200 response");
+        equal(responseKeys.includes("default"), true, "getLogs is missing the default response");
+
+    });
+
 });

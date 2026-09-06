@@ -69,6 +69,7 @@ describe("Mediator logs", () => {
     let descriptor = null;
     let resourcesDir = "";
     let mediator = null;
+    let countCalls = [];
     let findCalls = [];
     let destroyCalls = [];
 
@@ -83,6 +84,7 @@ describe("Mediator logs", () => {
 
         resetStubs();
 
+        countCalls = [];
         findCalls = [];
         destroyCalls = [];
 
@@ -90,12 +92,25 @@ describe("Mediator logs", () => {
             return Promise.resolve(ADMIN_CALLER);
         };
 
-        stubs.logFindInRange = (from, to, level) => {
+        stubs.logCountInRange = (from, to, level) => {
 
-            findCalls.push({
+            countCalls.push({
                 "from": from,
                 "to": to,
                 "level": level
+            });
+
+            return Promise.resolve(0);
+
+        };
+
+        stubs.logFindInRange = (...args) => {
+
+            findCalls.push({
+                "from": args[0],
+                "to": args[1],
+                "level": args[2],
+                "limit": args[3]
             });
 
             return Promise.resolve([]);
@@ -140,6 +155,10 @@ describe("Mediator logs", () => {
     describe("getLogs", () => {
 
         it("should format one plain-text line per record, in timestamp order", async () => {
+
+            stubs.logCountInRange = () => {
+                return Promise.resolve(LOG_ROWS.length);
+            };
 
             stubs.logFindInRange = () => {
                 return Promise.resolve(LOG_ROWS);
@@ -300,6 +319,223 @@ describe("Mediator logs", () => {
 
             strictEqual(content, "");
             strictEqual(findCalls.length, 1);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should forward the default hard limit when \"limit\" is absent", async () => {
+
+            await mediator.getLogs({
+                ...authHeaders("tok-admin"),
+                "query": {
+                    "from": FROM,
+                    "to": TO
+                }
+            });
+
+            strictEqual(findCalls.length, 1);
+            strictEqual(findCalls[0].limit, 10000);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should forward an explicit in-range limit to the bounded read", async () => {
+
+            await mediator.getLogs({
+                ...authHeaders("tok-admin"),
+                "query": {
+                    "from": FROM,
+                    "to": TO,
+                    "limit": 50
+                }
+            });
+
+            strictEqual(findCalls.length, 1);
+            strictEqual(findCalls[0].limit, 50);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should clamp a limit above the cap to 10000", async () => {
+
+            await mediator.getLogs({
+                ...authHeaders("tok-admin"),
+                "query": {
+                    "from": FROM,
+                    "to": TO,
+                    "limit": 999999
+                }
+            });
+
+            strictEqual(findCalls.length, 1);
+            strictEqual(findCalls[0].limit, 10000);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should reject RangeError when \"limit\" is 0", async () => {
+
+            await rejects(() => {
+                return mediator.getLogs({
+                    ...authHeaders("tok-admin"),
+                    "query": {
+                        "from": FROM,
+                        "to": TO,
+                        "limit": 0
+                    }
+                });
+            }, RangeError);
+
+            strictEqual(countCalls.length, 0);
+            strictEqual(findCalls.length, 0);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should reject RangeError when \"limit\" is negative", async () => {
+
+            await rejects(() => {
+                return mediator.getLogs({
+                    ...authHeaders("tok-admin"),
+                    "query": {
+                        "from": FROM,
+                        "to": TO,
+                        "limit": -1
+                    }
+                });
+            }, RangeError);
+
+            strictEqual(countCalls.length, 0);
+            strictEqual(findCalls.length, 0);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should reject RangeError when \"limit\" is not numeric", async () => {
+
+            await rejects(() => {
+                return mediator.getLogs({
+                    ...authHeaders("tok-admin"),
+                    "query": {
+                        "from": FROM,
+                        "to": TO,
+                        "limit": "not-a-number"
+                    }
+                });
+            }, RangeError);
+
+            strictEqual(countCalls.length, 0);
+            strictEqual(findCalls.length, 0);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should reject RangeError when the count exceeds the default limit and skip the read", async () => {
+
+            stubs.logCountInRange = () => {
+
+                countCalls.push({});
+
+                return Promise.resolve(10001);
+
+            };
+
+            await rejects(() => {
+                return mediator.getLogs({
+                    ...authHeaders("tok-admin"),
+                    "query": {
+                        "from": FROM,
+                        "to": TO
+                    }
+                });
+            }, (err) => {
+
+                strictEqual(err instanceof RangeError, true);
+                strictEqual(err.message.includes("Narrow the range"), true);
+
+                return true;
+
+            });
+
+            strictEqual(findCalls.length, 0);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should reject RangeError when the count exceeds an explicit small limit and skip the read", async () => {
+
+            stubs.logCountInRange = () => {
+
+                countCalls.push({});
+
+                return Promise.resolve(100);
+
+            };
+
+            await rejects(() => {
+                return mediator.getLogs({
+                    ...authHeaders("tok-admin"),
+                    "query": {
+                        "from": FROM,
+                        "to": TO,
+                        "limit": 10
+                    }
+                });
+            }, (err) => {
+
+                strictEqual(err instanceof RangeError, true);
+                strictEqual(err.message.includes("Narrow the range"), true);
+
+                return true;
+
+            });
+
+            strictEqual(findCalls.length, 0);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should read when the count equals the effective limit", async () => {
+
+            stubs.logCountInRange = () => {
+
+                countCalls.push({});
+
+                return Promise.resolve(50);
+
+            };
+
+            await mediator.getLogs({
+                ...authHeaders("tok-admin"),
+                "query": {
+                    "from": FROM,
+                    "to": TO,
+                    "limit": 50
+                }
+            });
+
+            strictEqual(countCalls.length, 1);
+            strictEqual(findCalls.length, 1);
+            strictEqual(findCalls[0].limit, 50);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should reject overflow with RangeError for a non-admin signed-in caller", async () => {
+
+            stubs.tokenGetUserByToken = () => {
+                return Promise.resolve(USER_CALLER);
+            };
+
+            stubs.logCountInRange = () => {
+
+                countCalls.push({});
+
+                return Promise.resolve(10001);
+
+            };
+
+            await rejects(() => {
+                return mediator.getLogs({
+                    ...authHeaders("tok-alice"),
+                    "query": {
+                        "from": FROM,
+                        "to": TO
+                    }
+                });
+            }, RangeError);
+
+            strictEqual(findCalls.length, 0);
 
         }).timeout(MAX_TIMEOUT);
 

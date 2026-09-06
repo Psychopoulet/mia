@@ -47,6 +47,9 @@
             "tokenGetByUserName": () => {
                 return Promise.resolve([]);
             },
+            "logCountInRange": () => {
+                return Promise.resolve(0);
+            },
             "logFindInRange": () => {
                 return Promise.resolve([]);
             },
@@ -206,6 +209,9 @@
                 return {
                     "__esModule": true,
                     "default": {
+                        "countInRange": (...args) => {
+                            return stubs.logCountInRange(...args);
+                        },
                         "findInRange": (...args) => {
                             return stubs.logFindInRange(...args);
                         },
