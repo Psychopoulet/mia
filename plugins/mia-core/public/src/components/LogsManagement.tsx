@@ -3,9 +3,10 @@
     // externals
     import React from "react";
     import {
+        Alert,
         Card, CardHeader, CardBody, CardFooter,
         InputTextLabel, SelectLabel,
-        Alert, Button
+        ButtonGroup, Button
     } from "react-bootstrap-fontawesome";
 
     // locals
@@ -371,21 +372,25 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                 <CardFooter>
 
-                    <Button title="Export logs"
-                        icon="save" variant="success"
-                        disabled={ this.state.loading || !hasLogs }
-                        onClick={ this._handleExport }
-                    >
-                        Export
-                    </Button>
+                    <ButtonGroup block>
 
-                    { showPurge && <Button title="Purge logs"
-                        icon="trash" variant="danger"
-                        disabled={ this.state.loading || !rangeValid }
-                        onClick={ this._handleOpenPurge }
-                    >
-                        Purge
-                    </Button> }
+                        <Button title="Export logs"
+                            icon="save" variant="success"
+                            disabled={ this.state.loading || !hasLogs }
+                            onClick={ this._handleExport }
+                        >
+                            Export
+                        </Button>
+
+                        { showPurge && <Button title="Purge logs"
+                            icon="trash" variant="danger"
+                            disabled={ this.state.loading || !rangeValid }
+                            onClick={ this._handleOpenPurge }
+                        >
+                            Purge
+                        </Button> }
+
+                    </ButtonGroup>
 
                 </CardFooter>
 
