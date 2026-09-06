@@ -1,12 +1,12 @@
 // deps
 
     // externals
-    import { DataTypes, Model } from "sequelize";
+    import { DataTypes, Model, Op } from "sequelize";
 
 // types & interfaces
 
     // externals
-    import type { Optional, Sequelize } from "sequelize";
+    import type { FindOptions, Optional, Sequelize, WhereOptions } from "sequelize";
 
     // locals
 
@@ -24,6 +24,17 @@
 
 // module
 
+function rangeWhere (from: Date, to: Date): WhereOptions<LogAttributes> {
+
+    return {
+        "timestamp": {
+            [Op.gte]: from,
+            [Op.lte]: to
+        }
+    };
+
+}
+
 export default class Log extends Model<LogAttributes, LogCreationAttributes> implements LogAttributes {
 
     public declare id: number;
@@ -31,6 +42,49 @@ export default class Log extends Model<LogAttributes, LogCreationAttributes> imp
     public declare message: string;
     public declare timestamp: Date;
     public declare meta: object | null;
+
+    // keep Op inside the model: plugins must not depend on sequelize at runtime
+    public static countInRange (from: Date, to: Date, level?: string): Promise<number> {
+
+        const where: WhereOptions<LogAttributes> = "string" === typeof level && "" !== level
+            ? { ...rangeWhere(from, to), "level": level }
+            : rangeWhere(from, to);
+
+        return Log.count({
+            "where": where
+        });
+
+    }
+
+    public static findInRange (from: Date, to: Date, level?: string, limit?: number): Promise<Log[]> {
+
+        const where: WhereOptions<LogAttributes> = "string" === typeof level && "" !== level
+            ? { ...rangeWhere(from, to), "level": level }
+            : rangeWhere(from, to);
+
+        const options: FindOptions<LogAttributes> = {
+            "where": where,
+            "order": [
+                [ "timestamp", "ASC" ],
+                [ "id", "ASC" ]
+            ]
+        };
+
+        if ("number" === typeof limit && Number.isInteger(limit) && 0 < limit) {
+            options.limit = limit;
+        }
+
+        return Log.findAll(options);
+
+    }
+
+    public static destroyInRange (from: Date, to: Date): Promise<number> {
+
+        return Log.destroy({
+            "where": rangeWhere(from, to)
+        });
+
+    }
 
 }
 

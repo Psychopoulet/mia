@@ -106,6 +106,17 @@ export class SDK extends EventEmitter<{
 
     }
 
+    protected _parseTextResponse (res: Response): Promise<string> {
+
+        if (res.ok) {
+            return res.text();
+        }
+
+        // on a failed request, "_parseResponse" only rejects with the formatted error
+        return this._parseResponse(res) as Promise<string>;
+
+    }
+
     // public methods
 
     public connect (): void {
@@ -582,6 +593,71 @@ export class SDK extends EventEmitter<{
                 "Authorization": "Bearer " + this._token
             },
             "body": JSON.stringify(data)
+        }).then((res: Response): Promise<void> => {
+
+            if (res.ok) {
+                return Promise.resolve();
+            }
+
+            return this._parseResponse(res) as Promise<void>;
+
+        });
+
+    }
+
+    // any signed-in user
+    // optional limit after level keeps existing call sites valid
+    public getLogs ( // eslint-disable-line @typescript-eslint/max-params
+        from: string, to: string, level?: components["schemas"]["LogLevel"], limit?: number
+    ): Promise<operations["getLogs"]["responses"]["200"]["content"]["text/plain"]> {
+
+        const url: keyof paths = "/mia-core/api/logs";
+        const method: HttpMethodsOf<typeof url> = "get";
+
+        const query: URLSearchParams = new URLSearchParams({
+            "from": from,
+            "to": to
+        });
+
+        if ("undefined" !== typeof level) {
+            query.set("level", level);
+        }
+
+        if ("undefined" !== typeof limit && 0 < limit) {
+            query.set("limit", String(limit));
+        }
+
+        return fetch(url + "?" + query.toString(), {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
+        }).then((res: Response): Promise<operations["getLogs"]["responses"]["200"]["content"]["text/plain"]> => {
+
+            return this._parseTextResponse(res);
+
+        });
+
+    }
+
+    // only admins
+    public deleteLogs (from: string, to: string): Promise<void> {
+
+        const url: keyof paths = "/mia-core/api/logs";
+        const method: HttpMethodsOf<typeof url> = "delete";
+
+        const query: URLSearchParams = new URLSearchParams({
+            "from": from,
+            "to": to
+        });
+
+        return fetch(url + "?" + query.toString(), {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this._token
+            }
         }).then((res: Response): Promise<void> => {
 
             if (res.ok) {

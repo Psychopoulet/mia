@@ -46,6 +46,15 @@
             },
             "tokenGetByUserName": () => {
                 return Promise.resolve([]);
+            },
+            "logCountInRange": () => {
+                return Promise.resolve(0);
+            },
+            "logFindInRange": () => {
+                return Promise.resolve([]);
+            },
+            "logDestroyInRange": () => {
+                return Promise.resolve(0);
             }
         };
 
@@ -191,6 +200,23 @@
                         },
                         "getByUserName": (...args) => {
                             return stubs.tokenGetByUserName(...args);
+                        }
+                    }
+                };
+            }
+
+            if (normalized.endsWith("cjs/tools/models/Log")) {
+                return {
+                    "__esModule": true,
+                    "default": {
+                        "countInRange": (...args) => {
+                            return stubs.logCountInRange(...args);
+                        },
+                        "findInRange": (...args) => {
+                            return stubs.logFindInRange(...args);
+                        },
+                        "destroyInRange": (...args) => {
+                            return stubs.logDestroyInRange(...args);
                         }
                     }
                 };

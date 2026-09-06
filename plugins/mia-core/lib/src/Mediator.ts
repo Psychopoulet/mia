@@ -13,9 +13,12 @@
 
     import { assertAdmin, assertSelfOrAdmin } from "./utils/assertPermissions";
     import findPluginByName from "./utils/findPluginByName";
+    import formatLogLine from "./utils/formatLogLine";
     import getCaller from "./utils/getCaller";
     import getFingerprint from "./utils/getFingerprint";
     import parseGithubPath from "./utils/parseGithubPath";
+    import parseLogsLimit from "./utils/parseLogsLimit";
+    import parseLogsRange from "./utils/parseLogsRange";
     import { serializeToken, serializeUser } from "./utils/serializeAuth";
 
 // types & interfaces
@@ -30,6 +33,7 @@
     // locals
     import type { sign as tSign } from "./types/tools/AuthJWT";
     import type tExtractToken from "./types/tools/extractToken";
+    import type tLog from "./types/tools/models/Log";
     import type tToken from "./types/tools/models/Token";
     import type { AuthTokenPublic, FullAuthPublic } from "./types/tools/models/Token";
     import type tUser from "./types/tools/models/User";
@@ -37,11 +41,13 @@
 
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";
+    import type { iLogsRange } from "./utils/parseLogsRange";
 
 // runtime bindings (host mia project, compiled CJS)
 
     const { sign } = require("../../../../lib/cjs/tools/AuthJWT") as { "sign": typeof tSign };
     const extractToken = (require("../../../../lib/cjs/tools/extractToken") as { "default": typeof tExtractToken }).default;
+    const Log = (require("../../../../lib/cjs/tools/models/Log") as { "default": typeof tLog }).default;
     const Token = (require("../../../../lib/cjs/tools/models/Token") as { "default": typeof tToken }).default;
     const User = (require("../../../../lib/cjs/tools/models/User") as { "default": typeof tUser }).default;
 
@@ -676,6 +682,49 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
             });
 
+        });
+
+    }
+
+    public getLogs (url: iUrlAllowedParameters): Promise<operations["getLogs"]["responses"]["200"]["content"]["text/plain"]> {
+
+        const urlParamsQuery: operations["getLogs"]["parameters"]["query"] = (url.query ?? {}) as operations["getLogs"]["parameters"]["query"];
+
+        return Promise.resolve().then((): Promise<tLog[]> => {
+
+            const range: iLogsRange = parseLogsRange(url.query);
+            const limit: number = parseLogsLimit(url.query);
+
+            return Log.countInRange(range.from, range.to, urlParamsQuery.level).then((count: number): Promise<tLog[]> => {
+
+                if (count > limit) {
+                    throw new RangeError(count + " matching records exceed the effective limit of " + limit + ". Narrow the range or raise \"limit\".");
+                }
+
+                return Log.findInRange(range.from, range.to, urlParamsQuery.level, limit);
+
+            });
+
+        }).then((logs: tLog[]): operations["getLogs"]["responses"]["200"]["content"]["text/plain"] => {
+
+            return logs.map(formatLogLine).join("\n");
+
+        });
+
+    }
+
+    public deleteLogs (url: iUrlAllowedParameters): Promise<void> {
+
+        return _getCaller(url).then((caller: FullAuthPublic): Promise<number> => {
+
+            assertAdmin(caller);
+
+            const range: iLogsRange = parseLogsRange(url.query);
+
+            return Log.destroyInRange(range.from, range.to);
+
+        }).then((): void => {
+            // logs purged
         });
 
     }

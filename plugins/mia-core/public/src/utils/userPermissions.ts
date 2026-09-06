@@ -26,3 +26,7 @@ export function canManageUserTokens (me: User, targetName: string): boolean {
 export function canSetIsAdmin (me: User): boolean {
     return me.isAdmin;
 }
+
+export function canPurgeLogs (me: User): boolean {
+    return me.isAdmin;
+}

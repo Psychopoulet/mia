@@ -2,7 +2,7 @@
 	"openapi": "3.1.2",
 	"info": {
 		"title": "mia-core",
-		"version": "2.1.0",
+		"version": "2.2.0",
 		"description": "MIA - easy IOT.",
 		"license": {
 			"name": "ISC",
@@ -823,6 +823,119 @@
 					}
 				}
 			}
+		},
+		"/mia-core/api/logs": {
+			"get": {
+				"description": "",
+				"summary": "Read logs in a date range",
+				"operationId": "getLogs",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "from",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "to",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "level",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/LogLevel"
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"description": "Maximum number of returned records. Clamped server-side to a hard maximum of 10000, so a higher value yields the cap instead of an error. A range matching more records than the effective limit is rejected, never truncated.",
+						"schema": {
+							"type": "integer",
+							"minimum": 1
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "One formatted log line per record",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"description": "",
+				"summary": "Purge logs in a date range",
+				"operationId": "deleteLogs",
+				"security": [
+					{ "bearerAuth": [] }
+				],
+				"parameters": [
+					{
+						"name": "from",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "to",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Logs purged"
+					},
+					"default": {
+						"description": "An error occurred",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"components": {
@@ -941,6 +1054,10 @@
 					"authors",
 					"license"
 				]
+			},
+			"LogLevel": {
+				"type": "string",
+				"enum": [ "critical", "error", "warning", "success", "info", "debug" ]
 			},
 			"PushEventPluginInitialized": {
 				"$ref": "./DescriptorEvents.json#/components/schemas/PushEventPluginInitialized"

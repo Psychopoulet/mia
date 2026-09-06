@@ -96,4 +96,43 @@ describe("check descriptor", () => {
 
     });
 
+    it("should expose logs operationIds on /mia-core/api/logs", async () => {
+
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const route = descriptor.paths["/mia-core/api/logs"];
+
+        equal(Boolean(route), true, "Missing path /mia-core/api/logs");
+
+        equal(route.get.operationId, "getLogs");
+        equal(route.delete.operationId, "deleteLogs");
+
+        equal(Boolean(route.get.responses["200"].content["text/plain"]), true, "getLogs does not expose text/plain on 200");
+        equal(Object.keys(route.get.responses["200"].content).length, 1, "getLogs exposes more than text/plain on 200");
+
+        equal(Boolean(route.delete.requestBody), false, "deleteLogs should not have a requestBody");
+
+    });
+
+    it("should expose an optional uncapped limit on getLogs and only 200 + default", async () => {
+
+        const descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
+        const route = descriptor.paths["/mia-core/api/logs"];
+        const limitParam = route.get.parameters.find((param) => {
+            return "limit" === param.name && "query" === param.in;
+        });
+
+        equal(Boolean(limitParam), true, "getLogs is missing an optional limit query parameter");
+        equal(limitParam.required, false, "getLogs limit must be optional");
+        equal(limitParam.schema.type, "integer", "getLogs limit must be an integer");
+        equal(limitParam.schema.minimum, 1, "getLogs limit must have minimum 1");
+        equal(Object.hasOwn(limitParam.schema, "maximum"), false, "getLogs limit must not declare a maximum");
+
+        const responseKeys = Object.keys(route.get.responses);
+
+        equal(responseKeys.length, 2, "getLogs must declare exactly 200 and default");
+        equal(responseKeys.includes("200"), true, "getLogs is missing the 200 response");
+        equal(responseKeys.includes("default"), true, "getLogs is missing the default response");
+
+    });
+
 });

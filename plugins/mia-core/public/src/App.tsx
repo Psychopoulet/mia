@@ -10,6 +10,7 @@
     import Plugins from "./components/Plugins";
     import CurrentUserProvider from "./components/CurrentUserProvider";
     import UsersManagement from "./components/UsersManagement";
+    import LogsManagement from "./components/LogsManagement";
 
 // types & interfaces
 
@@ -216,7 +217,11 @@ export default class App extends React.Component<iPropsNode, iState> {
                 { "INITIALIZED" === this.state.status && <Login /> }
                 { "LOGGED" === this.state.status && <>
 
-                    <NavTabs items={ [ "Plugins", "Users" ] }
+                    <NavTabs items={ [
+                        "Plugins",
+                        "Users",
+                        "Logs"
+                    ] }
                         selectedIndex={ this.state.tabIndex }
                         onSelect={ this._handleSelectTab }
                     />
@@ -225,6 +230,10 @@ export default class App extends React.Component<iPropsNode, iState> {
 
                     { 1 === this.state.tabIndex && <CurrentUserProvider onError={ this._handleError }>
                         <UsersManagement onError={ this._handleError } />
+                    </CurrentUserProvider> }
+
+                    { 2 === this.state.tabIndex && <CurrentUserProvider onError={ this._handleError }>
+                        <LogsManagement onError={ this._handleError } />
                     </CurrentUserProvider> }
 
                 </> }

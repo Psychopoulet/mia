@@ -44,6 +44,20 @@ The **Users** tab lists every account. From there you can create, update, or del
 
 Usernames never change after creation. Tokens can only be listed or deleted (not created or edited here).
 
+## Logs
+
+The **Logs** tab shows what the app recorded over a period of time.
+
+Pick a start and an end date-time — the last 24 hours are proposed by default — then load the logs. You can also narrow the result to a single level (critical, error, warning, success, info, or debug) instead of showing them all. You may set an optional maximum number of records; leave it empty to use the app's own maximum.
+
+If the chosen period matches too many records, the load is refused and a message asks you to pick a narrower period. Nothing is displayed in that case — the result is never silently cut short.
+
+The logs are displayed as plain text, one line per record. If nothing was recorded in the chosen period, a message tells you so.
+
+**Export** downloads the loaded logs as a flat file, ready to share or archive.
+
+Administrators also see a **Purge** button, which permanently deletes every log of the chosen period. You are asked to confirm before anything is deleted, and the displayed logs are refreshed once the purge is done.
+
 ## Who can do what
 
 **Administrators**
@@ -51,11 +65,13 @@ Usernames never change after creation. Tokens can only be listed or deleted (not
 - Edit any user’s password and admin flag.
 - Delete any user.
 - List and delete any user’s tokens.
+- Purge every log of a chosen period.
 
 **Any signed-in user**
 - See the user list.
 - Edit their own password.
 - Delete their own account.
 - List and delete their own tokens.
+- Read and export logs.
 
 Actions that do not apply to you are hidden in the interface.
