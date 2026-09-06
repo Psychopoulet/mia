@@ -280,6 +280,26 @@ describe("logs utils", () => {
 
         }).timeout(MAX_TIMEOUT);
 
+        it("should throw RangeError when \"limit\" is a non-integer number", () => {
+
+            throws(() => {
+                return parseLogsLimit({
+                    "limit": 1.5
+                });
+            }, RangeError);
+
+        }).timeout(MAX_TIMEOUT);
+
+        it("should throw RangeError when \"limit\" is neither a number nor a string", () => {
+
+            throws(() => {
+                return parseLogsLimit({
+                    "limit": true
+                });
+            }, RangeError);
+
+        }).timeout(MAX_TIMEOUT);
+
     });
 
 });
