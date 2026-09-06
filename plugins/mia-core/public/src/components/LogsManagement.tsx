@@ -36,6 +36,8 @@
         "from": string;
         "to": string;
         "level": "" | LogLevel;
+        "limit": string;
+        "error": string | null;
         "purgeOpened": boolean;
     }
 
@@ -66,8 +68,16 @@
 
     }
 
-    function parseRangeBound (bound: string): string {
-        return new Date(bound).toISOString();
+    function parseRangeBound (bound: string): string | null {
+
+        const date: Date = new Date(bound);
+
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
+
+        return date.toISOString();
+
     }
 
 // component
@@ -96,6 +106,8 @@ export default class LogsManagement extends React.Component<iProps, iState> {
             "from": formatRangeBound(new Date(now.getTime() - ONE_DAY)),
             "to": formatRangeBound(now),
             "level": "",
+            "limit": "",
+            "error": null,
             "purgeOpened": false
         };
 
@@ -105,33 +117,60 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
     private _loadLogs (): void {
 
-        this.setState({
-            "loading": true
-        });
+        const from: string | null = parseRangeBound(this.state.from);
+        const to: string | null = parseRangeBound(this.state.to);
 
-        const from: string = parseRangeBound(this.state.from);
-        const to: string = parseRangeBound(this.state.to);
-
-        // "all levels" must not send any "level" filter
-        const request: Promise<string> = "" === this.state.level
-            ? getSDK().getLogs(from, to)
-            : getSDK().getLogs(from, to, this.state.level);
-
-        request.then((logs: string): void => {
+        if (null === from || null === to) {
 
             this.setState({
                 "loading": false,
-                "logs": logs
+                "logs": null,
+                "error": "Please enter a valid date range."
+            });
+
+            return;
+
+        }
+
+        this.setState({
+            "loading": true,
+            "error": null
+        });
+
+        this._requestLogs(from, to).then((logs: string): void => {
+
+            this.setState({
+                "loading": false,
+                "logs": logs,
+                "error": null
             });
 
         }).catch((err: Error): void => {
 
-            this.props.onError(err);
             this.setState({
-                "loading": false
+                "loading": false,
+                "logs": null,
+                "error": err.message
             });
 
         });
+
+    }
+
+    private _requestLogs (from: string, to: string): Promise<string> {
+
+        const limit: number = Number(this.state.limit);
+        const hasLimit: boolean = "" !== this.state.limit && Number.isFinite(limit) && 0 < limit;
+        const omitted: { "level"?: LogLevel } = {};
+
+        // "all levels" must not send any "level" filter
+        if (hasLimit) {
+            return getSDK().getLogs(from, to, "" === this.state.level ? omitted.level : this.state.level, limit);
+        }
+
+        return "" === this.state.level
+            ? getSDK().getLogs(from, to)
+            : getSDK().getLogs(from, to, this.state.level);
 
     }
 
@@ -166,6 +205,17 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
         this.setState({
             "level": value as "" | LogLevel
+        });
+
+    };
+
+    private readonly _handleChangeLimit = (e: React.ChangeEvent<HTMLInputElement>, value: string): void => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.setState({
+            "limit": value
         });
 
     };
@@ -230,15 +280,17 @@ export default class LogsManagement extends React.Component<iProps, iState> {
     public render (): React.JSX.Element {
 
         const me: User | null = this.context.user;
-        const rangeFilled: boolean = Boolean(this.state.from && this.state.to);
+        const fromIso: string | null = parseRangeBound(this.state.from);
+        const toIso: string | null = parseRangeBound(this.state.to);
+        const rangeValid: boolean = null !== fromIso && null !== toIso;
         const hasLogs: boolean = null !== this.state.logs && "" !== this.state.logs;
         const showPurge: boolean = Boolean(me && canPurgeLogs(me));
 
         return <>
 
-            { this.state.purgeOpened && rangeFilled && <LogsPurgeModal
-                from={ parseRangeBound(this.state.from) }
-                to={ parseRangeBound(this.state.to) }
+            { this.state.purgeOpened && null !== fromIso && null !== toIso && <LogsPurgeModal
+                from={ fromIso }
+                to={ toIso }
                 onClose={ this._handleClosePurge }
                 onPurged={ this._handlePurged }
                 onError={ this.props.onError }
@@ -252,21 +304,21 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                     <div className="row">
 
-                        <div className="col-12 col-md-4">
+                        <div className="col-12 col-md-3">
                             <InputTextLabel id="logs-from" label="From" type="datetime-local"
                                 disabled={ this.state.loading }
                                 value={ this.state.from } onChange={ this._handleChangeFrom }
                             />
                         </div>
 
-                        <div className="col-12 col-md-4">
+                        <div className="col-12 col-md-3">
                             <InputTextLabel id="logs-to" label="To" type="datetime-local"
                                 disabled={ this.state.loading }
                                 value={ this.state.to } onChange={ this._handleChangeTo }
                             />
                         </div>
 
-                        <div className="col-12 col-md-4">
+                        <div className="col-12 col-md-3">
                             <SelectLabel id="logs-level" label="Level"
                                 disabled={ this.state.loading }
                                 value={ this.state.level } onChange={ this._handleChangeLevel }
@@ -281,11 +333,19 @@ export default class LogsManagement extends React.Component<iProps, iState> {
                             </SelectLabel>
                         </div>
 
+                        <div className="col-12 col-md-3">
+                            <InputTextLabel id="logs-limit" label="Max records" type="number"
+                                disabled={ this.state.loading }
+                                placeholder="10000 when empty"
+                                value={ this.state.limit } onChange={ this._handleChangeLimit }
+                            />
+                        </div>
+
                     </div>
 
                     <Button title="Load logs"
                         icon="sync" variant="primary" block
-                        disabled={ this.state.loading || !rangeFilled }
+                        disabled={ this.state.loading || !rangeValid }
                         onClick={ this._handleLoad }
                     >
                         Load logs
@@ -293,9 +353,13 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                 </CardBody>
 
+                { !this.state.loading && null !== this.state.error && <CardBody>
+                    <Alert variant="danger">{ this.state.error }</Alert>
+                </CardBody> }
+
                 { this.state.loading && <CardBody><Alert variant="info">Loading logs...</Alert></CardBody> }
 
-                { !this.state.loading && "" === this.state.logs && <CardBody>
+                { !this.state.loading && null === this.state.error && "" === this.state.logs && <CardBody>
                     <Alert variant="warning">No logs for this range</Alert>
                 </CardBody> }
 
@@ -317,7 +381,7 @@ export default class LogsManagement extends React.Component<iProps, iState> {
 
                     { showPurge && <Button title="Purge logs"
                         icon="trash" variant="danger"
-                        disabled={ this.state.loading || !rangeFilled }
+                        disabled={ this.state.loading || !rangeValid }
                         onClick={ this._handleOpenPurge }
                     >
                         Purge

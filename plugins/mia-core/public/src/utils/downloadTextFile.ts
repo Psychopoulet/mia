@@ -19,6 +19,8 @@ export default function downloadTextFile (content: string, fileName: string): vo
     link.click();
     document.body.removeChild(link);
 
-    URL.revokeObjectURL(url);
+    setTimeout((): void => {
+        URL.revokeObjectURL(url);
+    }, 0);
 
 }
