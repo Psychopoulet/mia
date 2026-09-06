@@ -14,7 +14,8 @@ export default class Log extends Model<LogAttributes, LogCreationAttributes> imp
     message: string;
     timestamp: Date;
     meta: object | null;
-    static findInRange(from: Date, to: Date, level?: string): Promise<Log[]>;
+    static countInRange(from: Date, to: Date, level?: string): Promise<number>;
+    static findInRange(from: Date, to: Date, level?: string, limit?: number): Promise<Log[]>;
     static destroyInRange(from: Date, to: Date): Promise<number>;
 }
 export declare function registerLog(sequelize: Sequelize): void;

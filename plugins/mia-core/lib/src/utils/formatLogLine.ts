@@ -15,6 +15,6 @@ export default function formatLogLine (log: LogAttributes): string {
     const message: string = log.message.replace(/[\r\n]+/gu, " ");
     const line: string = timestamp + " [" + log.level.toUpperCase() + "] " + message;
 
-    return null === log.meta ? line : line + " " + JSON.stringify(log.meta);
+    return "undefined" === typeof log.meta || null === log.meta ? line : line + " " + JSON.stringify(log.meta);
 
 }

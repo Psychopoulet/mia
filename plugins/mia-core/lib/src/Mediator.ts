@@ -17,6 +17,7 @@
     import getCaller from "./utils/getCaller";
     import getFingerprint from "./utils/getFingerprint";
     import parseGithubPath from "./utils/parseGithubPath";
+    import parseLogsLimit from "./utils/parseLogsLimit";
     import parseLogsRange from "./utils/parseLogsRange";
     import { serializeToken, serializeUser } from "./utils/serializeAuth";
 
@@ -692,8 +693,17 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         return Promise.resolve().then((): Promise<tLog[]> => {
 
             const range: iLogsRange = parseLogsRange(url.query);
+            const limit: number = parseLogsLimit(url.query);
 
-            return Log.findInRange(range.from, range.to, urlParamsQuery.level);
+            return Log.countInRange(range.from, range.to, urlParamsQuery.level).then((count: number): Promise<tLog[]> => {
+
+                if (count > limit) {
+                    throw new RangeError(count + " matching records exceed the effective limit of " + limit + ". Narrow the range or raise \"limit\".");
+                }
+
+                return Log.findInRange(range.from, range.to, urlParamsQuery.level, limit);
+
+            });
 
         }).then((logs: tLog[]): operations["getLogs"]["responses"]["200"]["content"]["text/plain"] => {
 
