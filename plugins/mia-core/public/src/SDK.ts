@@ -606,8 +606,9 @@ export class SDK extends EventEmitter<{
     }
 
     // any signed-in user
-    public getLogs (
-        from: string, to: string, level?: components["schemas"]["LogLevel"]
+    // optional limit after level keeps existing call sites valid
+    public getLogs ( // eslint-disable-line @typescript-eslint/max-params
+        from: string, to: string, level?: components["schemas"]["LogLevel"], limit?: number
     ): Promise<operations["getLogs"]["responses"]["200"]["content"]["text/plain"]> {
 
         const url: keyof paths = "/mia-core/api/logs";
@@ -620,6 +621,10 @@ export class SDK extends EventEmitter<{
 
         if ("undefined" !== typeof level) {
             query.set("level", level);
+        }
+
+        if ("undefined" !== typeof limit && 0 < limit) {
+            query.set("limit", String(limit));
         }
 
         return fetch(url + "?" + query.toString(), {
