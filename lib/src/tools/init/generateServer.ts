@@ -52,7 +52,8 @@ export default function generateServer (container: ContainerPattern): Promise<vo
             const app: Express = express()
                 .use(cors())
                 .use(helmet({
-                    "contentSecurityPolicy": false
+                    "contentSecurityPolicy": false,
+                    "crossOriginResourcePolicy": false
                 }))
                 .use(compression())
                 .use(express.json());
