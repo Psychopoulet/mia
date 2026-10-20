@@ -32,11 +32,11 @@
 
     const container: ContainerPattern = new ContainerPattern();
 
-// run
+// module
 
-    // generate basic logger
+export default function startApplication (): Promise<void> {
 
-    Promise.resolve().then((): void => {
+    return Promise.resolve().then((): void => {
 
         container
             .set("log", {
@@ -171,3 +171,16 @@
         process.exit(1);
 
     });
+
+}
+
+// loaded by a test : export only. started as the program : boot.
+if (require.main === module) {
+
+    startApplication().catch((): void => {
+
+        // startup and shutdown failures already exit from inside startApplication
+
+    });
+
+}

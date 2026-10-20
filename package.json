@@ -35,10 +35,10 @@
     "check-node-engine": "npx check-node-engine && npm --prefix ./plugins/mia-core run check-node-engine",
     "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && npm --prefix ./plugins/mia-core run check-requires",
     "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch && npm --prefix ./plugins/mia-core run check-updates",
-    "unit-tests": "echo 'Tests not implemented yet.' && npm --prefix ./plugins/mia-core run unit-tests",
-    "unit-tests-local": "echo 'Tests not implemented yet.' && npm --prefix ./plugins/mia-core run unit-tests-local",
+    "unit-tests": "npx c8 --reporter=text-summary --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts mocha --require ./test/register.js && npm --prefix ./plugins/mia-core run unit-tests",
+    "unit-tests-local": "npx c8 --reporter=html --reporter=text --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts mocha --require ./test/register.js && npm --prefix ./plugins/mia-core run unit-tests-local",
 
-    "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests-local",
+    "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests",
 
     "start": "node lib/cjs/main.cjs",
 
@@ -90,6 +90,7 @@
     "@types/pg": "8.23.1",
     "@types/socket.io": "3.0.2",
     "@types/ws": "8.18.2",
+    "c8": "12.0.0",
     "check-node-engine": "1.2.0",
     "check-version-modules": "2.5.0",
     "eslint-plugin-personnallinter": "git+ssh://git@github.com/Psychopoulet/eslint-plugin-personnallinter",
