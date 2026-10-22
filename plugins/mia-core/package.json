@@ -54,7 +54,7 @@
     "public/index.html"
   ],
   "engines": {
-    "node": ">=22.23.3"
+    "node": ">=22.23.4"
   },
   "dependencies": {
     "node-pluginsmanager-plugin": "7.4.4"
