@@ -35,7 +35,7 @@
     "check-node-engine": "npx check-node-engine && npm --prefix ./plugins/mia-core run check-node-engine",
     "check-requires": "npx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && npm --prefix ./plugins/mia-core run check-requires",
     "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch && npm --prefix ./plugins/mia-core run check-updates",
-    "unit-tests": "npx c8 --reporter=text-summary --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts mocha --require ./test/register.js && npm --prefix ./plugins/mia-core run unit-tests",
+    "unit-tests": "npx c8 --reporter=text-summary --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts --check-coverage --statements 95 --branches 95 --functions 95 --lines 95 mocha --require ./test/register.js && npm --prefix ./plugins/mia-core run unit-tests",
     "unit-tests-local": "npx c8 --reporter=html --reporter=text --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts mocha --require ./test/register.js && npm --prefix ./plugins/mia-core run unit-tests-local",
 
     "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests",
