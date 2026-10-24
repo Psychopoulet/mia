@@ -4,10 +4,10 @@
     const { strictEqual, throws } = require("node:assert");
 
     // locals
-    const formatLogLine = require("../lib/cjs/utils/formatLogLine.js").default;
-    const parseLogsLimit = require("../lib/cjs/utils/parseLogsLimit.js").default;
-    const { LOGS_HARD_LIMIT } = require("../lib/cjs/utils/parseLogsLimit.js");
-    const parseLogsRange = require("../lib/cjs/utils/parseLogsRange.js").default;
+    const formatLogLine = require("../lib/src/utils/formatLogLine.ts").default;
+    const parseLogsLimit = require("../lib/src/utils/parseLogsLimit.ts").default;
+    const { LOGS_HARD_LIMIT } = require("../lib/src/utils/parseLogsLimit.ts");
+    const parseLogsRange = require("../lib/src/utils/parseLogsRange.ts").default;
 
 // consts
 

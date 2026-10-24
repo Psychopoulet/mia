@@ -16,7 +16,7 @@
 
     installStubs();
 
-    const Mediator = require("../lib/cjs/Mediator.js").default;
+    const Mediator = require("../lib/src/Mediator.ts").default;
     const { NotFoundError } = require("node-pluginsmanager-plugin");
 
 // consts
