@@ -88,13 +88,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm audit fix
 
       - name: Run audit
         run: npm audit --omit=dev --omit=optional
 
       - name: Install mia-core dependencies
-        run: npm --prefix ./plugins/mia-core install
+        run: |
+          npm --prefix ./plugins/mia-core install
+          npm --prefix ./plugins/mia-core audit fix
 
       # must be FORCED to allow mia-core build
       - name: Run mia-core transpile-openapi
