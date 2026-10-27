@@ -6,11 +6,15 @@ WORKDIR /app
 COPY --chown=node:node package.json ./
 COPY --chown=node:node pm2.json ./
 COPY --chown=node:node lib/cjs/ ./lib/cjs/
-COPY --chown=node:node lib/data/ ./lib/data/
-COPY --chown=node:node public/dist/ ./public/dist/
 COPY --chown=node:node public/pictures/ ./public/pictures/
-COPY --chown=node:node public/index.html ./public/index.html
 COPY --chown=node:node build/checkInstalls.js ./build/checkInstalls.js
+
+# copy mia-core files
+COPY --chown=node:node plugins/mia-core/package.json ./plugins/mia-core/package.json
+COPY --chown=node:node plugins/mia-core/lib/cjs/ ./plugins/mia-core/lib/cjs/
+COPY --chown=node:node plugins/mia-core/lib/data/ ./plugins/mia-core/lib/data/
+COPY --chown=node:node plugins/mia-core/public/dist/ ./plugins/mia-core/public/dist/
+COPY --chown=node:node plugins/mia-core/public/index.html ./plugins/mia-core/public/index.html
 
 # install binaries
 RUN apk add --no-cache git
@@ -23,9 +27,8 @@ RUN apk add --no-cache vlc
 RUN sed -i 's/geteuid/getppid/' /usr/bin/vlc
 
 # install node packages
-RUN npm install --omit=dev --omit=optional
+RUN npm run install-prod
 RUN npm install -g pm2
-RUN npm audit fix || echo 0
 
 # force plugins compilation for this platform
 RUN node ./build/checkInstalls.js

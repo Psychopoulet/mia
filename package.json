@@ -19,6 +19,9 @@
 
   "scripts": {
 
+    "install-prod": "npm install --omit=dev --omit=optional && npm audit fix --omit=dev --omit=optional && npm --prefix ./plugins/mia-core run install-prod",
+    "install-dev": "npm install --allow-git=root && npm audit fix --allow-git=root && npx husky && npm --prefix ./plugins/mia-core run install-dev",
+
     "lint-back": "npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\" && npm --prefix ./plugins/mia-core run lint-back",
     "lint-front": "echo 'Frontend lint not implemented (see mia-core plugin).' && npm --prefix ./plugins/mia-core run lint-front",
     "lint-tests": "echo 'Tests lint not implemented yet.' && npm --prefix ./plugins/mia-core run lint-tests",
@@ -52,7 +55,6 @@
 
   "files": [
     "lib/cjs",
-    "lib/data",
     "public/pictures",
     "pm2.json"
   ],
@@ -115,6 +117,10 @@
   },
   "bugs": {
     "url": "https://github.com/Psychopoulet/mia/issues"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "sqlite3@6.0.1": true
   }
 
 }
