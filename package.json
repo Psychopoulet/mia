@@ -105,6 +105,9 @@
   "optionalDependencies": {
     "pm2": "7.1.1"
   },
+  "overrides": {
+    "uuid": "11.1.1"
+  },
 
   "author": "Sébastien VIDAL",
   "contributors": [],
