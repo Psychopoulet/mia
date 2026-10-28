@@ -1,7 +1,7 @@
 {
 
   "name": "mia-core",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "MIA - easy IOT.",
 
   "type": "commonjs",
