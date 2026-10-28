@@ -311,6 +311,13 @@ describe("host edges", () => {
                 "timestamp": "not-a-date"
             }, resolve);
         });
+        await new Promise((resolve) => {
+            transport.log({
+                "level": "info",
+                "message": "numeric",
+                "timestamp": 0
+            }, resolve);
+        });
         await rejects(() => {
             return _swap(Log, "min", () => {
                 return Promise.resolve(1);
@@ -322,6 +329,22 @@ describe("host edges", () => {
                 });
             });
         }, /Invalid/);
+        await rejects(() => {
+            return _swap(Log, "min", () => {
+                return Promise.resolve(true);
+            }, () => {
+                return Log.getLogsLimits();
+            });
+        }, /Invalid "oldest" log timestamp/);
+        strictEqual(await _swap(Token, "findOne", () => {
+            return Promise.resolve({
+                "get": () => {
+                    return undefined;
+                }
+            });
+        }, () => {
+            return Token.getUserByToken("orphan");
+        }), undefined);
 
         Object.defineProperty(headers, "authorization", {
             "enumerable": true,
