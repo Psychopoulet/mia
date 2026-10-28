@@ -55,6 +55,12 @@
             },
             "logDestroyInRange": () => {
                 return Promise.resolve(0);
+            },
+            "logGetLogsLimits": () => {
+                return Promise.resolve({
+                    "oldest": new Date("2024-03-01T00:00:00.000Z"),
+                    "newest": new Date("2024-03-02T00:00:00.000Z")
+                });
             }
         };
 
@@ -217,6 +223,9 @@
                         },
                         "destroyInRange": (...args) => {
                             return stubs.logDestroyInRange(...args);
+                        },
+                        "getLogsLimits": (...args) => {
+                            return stubs.logGetLogsLimits(...args);
                         }
                     }
                 };
