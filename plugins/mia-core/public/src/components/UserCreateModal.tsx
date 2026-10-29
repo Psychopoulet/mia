@@ -43,7 +43,7 @@ export default class UserCreateModal extends React.Component<iProps, iState> {
 
     // private
 
-    private readonly _generateFocus: iGenerateFocusCallback;
+        private readonly _generateFocus: iGenerateFocusCallback<HTMLInputElement> = generateFocus<HTMLInputElement>();
 
     // constructor
 
@@ -57,8 +57,6 @@ export default class UserCreateModal extends React.Component<iProps, iState> {
             "password": "",
             "isAdmin": false
         };
-
-        this._generateFocus = generateFocus<HTMLInputElement>();
 
     }
 
@@ -146,7 +144,7 @@ export default class UserCreateModal extends React.Component<iProps, iState> {
 
                 <InputTextLabel id="create-user-name" label="Username"
                     disabled={ this.state.running }
-                    _ref={ this._generateFocus.ref as React.RefObject<HTMLInputElement> }
+                    _ref={ this._generateFocus.ref }
                     value={ this.state.name } onChange={ this._handleChangeName }
                 />
 

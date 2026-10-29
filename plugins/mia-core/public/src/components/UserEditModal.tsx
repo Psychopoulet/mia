@@ -51,7 +51,7 @@ export default class UserEditModal extends React.Component<iProps, iState> {
 
     // private
 
-        private readonly _generateFocus: iGenerateFocusCallback;
+        private readonly _generateFocus: iGenerateFocusCallback<HTMLInputElement> = generateFocus<HTMLInputElement>();
 
     // constructor
 
@@ -64,8 +64,6 @@ export default class UserEditModal extends React.Component<iProps, iState> {
             "password": "",
             "isAdmin": props.user.isAdmin
         };
-
-        this._generateFocus = generateFocus<HTMLInputElement>();
 
     }
 
@@ -165,7 +163,7 @@ export default class UserEditModal extends React.Component<iProps, iState> {
 
                 <InputTextLabel id="edit-user-password" label="New password (optional)" type="password"
                     disabled={ this.state.running }
-                    _ref={ this._generateFocus.ref as React.RefObject<HTMLInputElement> }
+                    _ref={ this._generateFocus.ref }
                     value={ this.state.password } onChange={ this._handleChangePassword }
                 />
 

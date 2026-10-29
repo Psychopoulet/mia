@@ -55,7 +55,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
     // private
 
         private readonly _sdk: SDK = getSDK();
-        private readonly _generateFocus: iGenerateFocusCallback = generateFocus<HTMLSelectElement>();
+        private readonly _generateFocus: iGenerateFocusCallback<HTMLSelectElement> = generateFocus<HTMLSelectElement>();
         private _repositoriesTimeout: Timeout | null = null;
         private _repositoriesRequest: number = 0;
 
@@ -307,7 +307,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
                     <Select disabled={ repositoryDisabled }
                         value={ this.state.repository } onChange={ this._handleChangeRepository }
-                        _ref={ this._generateFocus.ref as React.RefObject<HTMLSelectElement> }
+                        _ref={ this._generateFocus.ref }
                     >
 
                         { 0 === this.state.repositories.length
