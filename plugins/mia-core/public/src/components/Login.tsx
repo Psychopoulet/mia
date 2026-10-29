@@ -39,7 +39,7 @@ export default class Login extends React.Component<iPropsNode, iState> {
     // private
 
         private readonly _sdk: SDK = getSDK();
-        private readonly _generateFocus: iGenerateFocusCallback = generateFocus<HTMLInputElement>();
+        private readonly _generateFocus: iGenerateFocusCallback<HTMLInputElement> = generateFocus<HTMLInputElement>();
 
     // constructor
 
@@ -125,7 +125,7 @@ export default class Login extends React.Component<iPropsNode, iState> {
                 <ModalBody>
 
                     <InputTextLabel label="name" disabled={ this.state.loading }
-                        _ref={ this._generateFocus.ref as React.RefObject<HTMLInputElement> }
+                        _ref={ this._generateFocus.ref }
                         value={ this.state.name } onChange={ this._handleChangeName }
                     />
 

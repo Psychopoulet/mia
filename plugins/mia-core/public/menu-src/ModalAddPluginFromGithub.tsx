@@ -4,7 +4,7 @@
     import React from "react";
     import {
         Modal, ModalBody, ModalFooter,
-        InputReadOnly, InputText,
+        InputReadOnly, InputText, Select,
         InvalidFeedBack,
         Button,
         generateFocus
@@ -12,8 +12,12 @@
 
     // locals
     import getSDK from "../src/SDK";
+    import downloadGithubRepositories from "./utils/downloadGithubRepositories";
 
 // types & interfaces
+
+    // natives
+    type Timeout = ReturnType<typeof setTimeout>;
 
     // externals
     import type { iPropsNode, iGenerateFocusCallback } from "react-bootstrap-fontawesome";
@@ -28,11 +32,17 @@
 
     interface iState {
         "running": boolean;
+        "loading": boolean;
         "step": components["schemas"]["PushEventPluginInstallStep"]["data"] | null;
         "error": Error | null;
         "user": string;
         "repository": string;
+        "repositories": string[];
     }
+
+// consts
+
+    const REPOSITORIES_DELAY: number = 400;
 
 // component
 
@@ -45,7 +55,9 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
     // private
 
         private readonly _sdk: SDK = getSDK();
-        private readonly _generateFocus: iGenerateFocusCallback = generateFocus<HTMLInputElement>();
+        private readonly _generateFocus: iGenerateFocusCallback<HTMLSelectElement> = generateFocus<HTMLSelectElement>();
+        private _repositoriesTimeout: Timeout | null = null;
+        private _repositoriesRequest: number = 0;
 
     // constructor
 
@@ -60,7 +72,9 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
             "step": null,
             "error": null,
             "user": "Psychopoulet",
-            "repository": ""
+            "repository": "",
+            "repositories": [],
+            "loading": true
         };
 
     }
@@ -73,13 +87,18 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
             .on("plugin-install-success", this._onPluginInstallSuccess)
             .on("plugin-install-fail", this._onPluginInstallFail);
 
-        // focus
-
-        this._generateFocus.setFocus();
+        this._loadRepositories(this.state.user, this._repositoriesRequest);
 
     }
 
     public componentWillUnmount (): void {
+
+        this._repositoriesRequest++;
+
+        if (null !== this._repositoriesTimeout) {
+            clearTimeout(this._repositoriesTimeout);
+            this._repositoriesTimeout = null;
+        }
 
         this._sdk
             .off("plugin-install-running", this._onPluginInstallRunning)
@@ -126,6 +145,90 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
     };
 
+    // repositories
+
+    private readonly _scheduleRepositories = (user: string): void => {
+
+        if (null !== this._repositoriesTimeout) {
+            clearTimeout(this._repositoriesTimeout);
+            this._repositoriesTimeout = null;
+        }
+
+        this._repositoriesRequest++;
+
+        const name: string = user.trim();
+
+        if ("" === name) {
+
+            this.setState({
+                "loading": false,
+                "repositories": [],
+                "repository": ""
+            });
+
+            return;
+
+        }
+
+        this.setState({
+            "loading": true,
+            "repositories": [],
+            "repository": "",
+            "error": null
+        });
+
+        const request: number = this._repositoriesRequest;
+
+        this._repositoriesTimeout = setTimeout((): void => {
+
+            this._repositoriesTimeout = null;
+            this._loadRepositories(name, request);
+
+        }, REPOSITORIES_DELAY);
+
+    };
+
+    private readonly _loadRepositories = (user: string, request: number): void => {
+
+        this.setState({
+            "loading": true
+        });
+
+        downloadGithubRepositories(user).then((repositories: string[]): void => {
+
+            if (request !== this._repositoriesRequest) {
+                return;
+            }
+
+            this.setState({
+                "loading": false,
+                "repositories": repositories,
+                "repository": repositories[0] ?? ""
+            }, (): void => {
+
+                if (0 < this.state.repositories.length) {
+                    this._generateFocus.setFocus();
+                }
+
+            });
+
+        }).catch((err: Error): void => {
+
+            if (request !== this._repositoriesRequest) {
+                return;
+            }
+
+            this.setState({
+                "loading": false,
+                "repositories": [],
+                "repository": "",
+                "error": err
+            });
+
+        });
+
+    };
+
     // interface handlers
 
     private readonly _handleChangeUser = (e: React.ChangeEvent<HTMLInputElement>, value: string): void => {
@@ -134,9 +237,11 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
             "user": value
         });
 
+        this._scheduleRepositories(value);
+
     };
 
-    private readonly _handleChangeRepository = (e: React.ChangeEvent<HTMLInputElement>, value: string): void => {
+    private readonly _handleChangeRepository = (e: React.ChangeEvent<HTMLSelectElement>, value: string): void => {
 
         this.setState({
             "repository": value
@@ -149,11 +254,18 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
         e.preventDefault();
         e.stopPropagation();
 
+        const user: string = this.state.user.trim();
+        const repository: string = this.state.repository;
+
+        if ("" === user || "" === repository || this.state.running) {
+            return;
+        }
+
         this.setState({
             "error": null
         });
 
-        this._sdk.installPluginFromGithub("https://github.com/" + this.state.user + "/" + this.state.repository).then((): void => {
+        this._sdk.installPluginFromGithub("https://github.com/" + user + "/" + repository).then((): void => {
 
             this.props.onClose();
 
@@ -170,6 +282,8 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
     // render
 
     public render (): React.JSX.Element {
+
+        const repositoryDisabled: boolean = this.state.running || this.state.loading || 0 === this.state.repositories.length;
 
         return <Modal appId="MIAMenu" title="Repository URL"
             centered size="lg"
@@ -191,10 +305,19 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
                     <span className="input-group-text">/</span>
 
-                    <InputText disabled={ this.state.running }
+                    <Select disabled={ repositoryDisabled }
                         value={ this.state.repository } onChange={ this._handleChangeRepository }
-                        _ref={ this._generateFocus.ref as React.RefObject<HTMLInputElement> }
-                    />
+                        _ref={ this._generateFocus.ref }
+                    >
+
+                        { 0 === this.state.repositories.length
+                            ? <option value="">{ this.state.loading ? "Loading..." : "No repository" }</option>
+                            : this.state.repositories.map((name: string): React.JSX.Element => {
+                                return <option key={ name } value={ name }>{ name }</option>;
+                            })
+                        }
+
+                    </Select>
 
                 </div>
 
@@ -208,7 +331,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
                 <Button type="submit"
                     variant="success" outline icon="plus" block
-                    disabled={ this.state.running }
+                    disabled={ this.state.running || this.state.loading || "" === this.state.repository }
                     onClick={ this._handleSubmit }
                 >
                     Add plugin

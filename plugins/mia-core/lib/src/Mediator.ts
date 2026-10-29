@@ -156,7 +156,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         ] = payload;
 
         const data: components["schemas"]["PushEventPluginInstallStep"]["data"] = {
-            "pluginName": pluginName as components["schemas"]["PushEventPluginInstallStep"]["data"]["pluginName"],
+            pluginName,
             currentStep,
             maxSteps,
             stepMessage
@@ -176,7 +176,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         ] = payload;
 
         const data: components["schemas"]["PushEventPluginUpdateStep"]["data"] = {
-            "pluginName": pluginName as components["schemas"]["PushEventPluginUpdateStep"]["data"]["pluginName"],
+            pluginName,
             currentStep,
             maxSteps,
             stepMessage
@@ -298,7 +298,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         return Promise.resolve(this._getContainer().get<PluginsManager>("plugins-manager").plugins.map((plugin: Orchestrator): components["schemas"]["Plugin"] => {
 
             return {
-                "name": plugin.name as components["schemas"]["Plugin"]["name"],
+                "name": plugin.name,
                 "version": plugin.version,
                 "description": plugin.description,
                 "enabled": plugin.enabled,
@@ -325,7 +325,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
         }).then(({ user, repo }: iGithubRepository): Promise<Orchestrator> => {
 
-            const data: components["schemas"]["PushEventPluginInstallRunning"]["data"] = repo as components["schemas"]["PushEventPluginInstallRunning"]["data"];
+            const data: components["schemas"]["PushEventPluginInstallRunning"]["data"] = repo;
 
             this.emit("plugin-install-running", data);
 
@@ -333,14 +333,14 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
         }).then((plugin: Orchestrator): void => {
 
-            const data: components["schemas"]["PushEventPluginInstallSuccess"]["data"] = plugin.name as components["schemas"]["PushEventPluginInstallSuccess"]["data"];
+            const data: components["schemas"]["PushEventPluginInstallSuccess"]["data"] = plugin.name;
 
             this.emit("plugin-install-success", data);
 
         }).catch((err: Error): Promise<void> => {
 
             const data: components["schemas"]["PushEventPluginInstallFail"]["data"] = {
-                "pluginName": body.path as components["schemas"]["PushEventPluginInstallFail"]["data"]["pluginName"],
+                "pluginName": body.path,
                 "error": err.message
             };
 
@@ -407,7 +407,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
                 throw new NotFoundError("Plugin \"" + urlParamsPath.name + "\" not found");
             }
 
-            const data: components["schemas"]["PushEventPluginUninstallRunning"]["data"] = plugin.name as components["schemas"]["PushEventPluginUninstallRunning"]["data"];
+            const data: components["schemas"]["PushEventPluginUninstallRunning"]["data"] = plugin.name;
 
             this.emit("plugin-uninstall-running", data);
 
@@ -415,7 +415,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
         }).then((pluginName: string): void => {
 
-            const data: components["schemas"]["PushEventPluginUninstallSuccess"]["data"] = pluginName as components["schemas"]["PushEventPluginUninstallSuccess"]["data"];
+            const data: components["schemas"]["PushEventPluginUninstallSuccess"]["data"] = pluginName;
 
             this.emit("plugin-uninstall-success", data);
 

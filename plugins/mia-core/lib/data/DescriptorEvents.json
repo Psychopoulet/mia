@@ -2,7 +2,7 @@
 	"openapi": "3.1.2",
 	"info": {
 		"title": "mia-core - events",
-		"version": "2.2.2",
+		"version": "2.2.3",
 		"description": "MIA - easy IOT. Events description.",
 		"license": {
 			"name": "ISC",
@@ -11,6 +11,9 @@
 	},
 	"components": {
 		"schemas": {
+			"GenericPluginName": {
+				"$ref": "./Descriptor.json#/components/schemas/GenericPluginName"
+			},
 			"PluginName": {
 				"$ref": "./Descriptor.json#/components/schemas/PluginName"
 			},
@@ -107,7 +110,7 @@
 						]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					}
 				},
 				"required": [
@@ -137,7 +140,7 @@
 						"type": "object",
 						"properties": {
 							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
+								"$ref": "#/components/schemas/GenericPluginName"
 							},
 							"currentStep": {
 								"type": "number"
@@ -181,7 +184,7 @@
 						]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					}
 				},
 				"required": [
@@ -211,7 +214,7 @@
 						"type": "object",
 						"properties": {
 							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
+								"$ref": "#/components/schemas/GenericPluginName"
 							},
 							"error": {
 								"type": "string"
@@ -247,7 +250,7 @@
 						]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					}
 				},
 				"required": [
@@ -277,7 +280,7 @@
 						"type": "object",
 						"properties": {
 							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
+								"$ref": "#/components/schemas/GenericPluginName"
 							},
 							"currentStep": {
 								"type": "number"
@@ -321,7 +324,7 @@
 						]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					}
 				},
 				"required": [
@@ -351,7 +354,7 @@
 						"type": "object",
 						"properties": {
 							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
+								"$ref": "#/components/schemas/GenericPluginName"
 							},
 							"error": {
 								"type": "string"
@@ -387,7 +390,7 @@
 						]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					}
 				},
 				"required": [
@@ -414,7 +417,7 @@
 						]
 					},
 					"data": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					}
 				},
 				"required": [
@@ -444,7 +447,7 @@
 						"type": "object",
 						"properties": {
 							"pluginName": {
-								"$ref": "#/components/schemas/PluginName"
+								"$ref": "#/components/schemas/GenericPluginName"
 							},
 							"error": {
 								"type": "string"

@@ -2,7 +2,7 @@
 	"openapi": "3.1.2",
 	"info": {
 		"title": "mia-core",
-		"version": "2.2.2",
+		"version": "2.2.3",
 		"description": "MIA - easy IOT.",
 		"license": {
 			"name": "ISC",
@@ -404,7 +404,7 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/PluginName"
+							"$ref": "#/components/schemas/GenericPluginName"
 						}
 					}
 				],
@@ -440,7 +440,7 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/PluginName"
+							"$ref": "#/components/schemas/GenericPluginName"
 						}
 					}
 				],
@@ -478,7 +478,7 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/PluginName"
+							"$ref": "#/components/schemas/GenericPluginName"
 						}
 					}
 				],
@@ -1022,6 +1022,10 @@
 			}
 		},
 		"schemas": {
+			"GenericPluginName": {
+				"type": "string",
+				"pattern": "^mia-[a-z-]+$"
+			},
 			"PluginName": {
 				"type": "string",
 				"enum": [
@@ -1079,7 +1083,7 @@
 				"type": "object",
 				"properties": {
 					"name": {
-						"$ref": "#/components/schemas/PluginName"
+						"$ref": "#/components/schemas/GenericPluginName"
 					},
 					"version": {
 						"$ref": "#/components/schemas/Version"

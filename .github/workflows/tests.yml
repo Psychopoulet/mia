@@ -40,7 +40,7 @@ env:
 
 jobs:
 
-  require-dev-source:
+  require-develop-source:
 
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -52,10 +52,10 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Only allow PRs from dev into master
+      - name: Only allow PRs from develop into master
         run: |
-          if [ "${{ github.base_ref }}" = "master" ] && [ "${{ github.head_ref }}" != "dev" ]; then
-            echo "::error::Merges into master are only allowed from the 'dev' branch (got '${{ github.head_ref }}')."
+          if [ "${{ github.base_ref }}" = "master" ] && [ "${{ github.head_ref }}" != "develop" ]; then
+            echo "::error::Merges into master are only allowed from the 'develop' branch (got '${{ github.head_ref }}')."
             exit 1
           fi
 
@@ -63,7 +63,7 @@ jobs:
 
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: require-dev-source
+    needs: require-develop-source
 
     steps:
 
