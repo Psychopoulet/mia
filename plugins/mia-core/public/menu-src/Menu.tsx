@@ -75,7 +75,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
             .on("plugin-install-step", this._onPluginInstallRunning)
             .on("plugin-install-success", this._onPluginInstallSuccess)
             .on("plugin-install-fail", this._onPluginInstallFail)
-            .on("plugin-uninstall-success", this._onPluginUninstallSuccess);
+            .on("plugin-update-fail", this._loadPlugins)
+            .on("plugin-uninstall-success", this._loadPlugins);
 
         this._sdk.connect();
 
@@ -91,7 +92,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
             .off("plugin-install-step", this._onPluginInstallRunning)
             .off("plugin-install-success", this._onPluginInstallSuccess)
             .off("plugin-install-fail", this._onPluginInstallFail)
-            .off("plugin-uninstall-success", this._onPluginUninstallSuccess);
+            .off("plugin-update-fail", this._loadPlugins)
+            .off("plugin-uninstall-success", this._loadPlugins);
 
         this._sdk.disconnect();
 
@@ -190,12 +192,6 @@ export default class Menu extends React.Component<iPropsNode, iState> {
         this.setState({
             "installingPlugin": false
         });
-
-    };
-
-    private readonly _onPluginUninstallSuccess = (): void => {
-
-        return this._loadPlugins();
 
     };
 
