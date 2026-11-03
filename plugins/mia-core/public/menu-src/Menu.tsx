@@ -9,6 +9,7 @@
     // locals
     import getSDK from "../src/SDK";
     import ModalAddPluginFromGithub from "./ModalAddPluginFromGithub";
+    import ModalPluginOperation from "./ModalPluginOperation";
 
 // types & interfaces
 
@@ -270,6 +271,8 @@ export default class Menu extends React.Component<iPropsNode, iState> {
                 { this.state.addPluginModalOpened && <ModalAddPluginFromGithub
                     onClose={ this._handleCloseAddPluginFromGitHub }
                 /> }
+
+                <ModalPluginOperation />
 
                 <a className="navbar-brand" href="/">
                     <Image src="/public/pictures/favicon.png" alt="Home" width={ 32 } height={ 32 } /> Home
