@@ -28,6 +28,7 @@ export default class ServerCore extends Server {
             .on("plugin-install-fail", this._onPluginInstallFail)
             .on("plugin-update-running", this._onPluginUpdateRunning)
             .on("plugin-update-step", this._onPluginUpdateStep)
+            .on("plugin-update-success", this._onPluginUpdateSuccess)
             .on("plugin-update-fail", this._onPluginUpdateFail)
             .on("plugin-uninstall-running", this._onPluginUninstallRunning)
             .on("plugin-uninstall-success", this._onPluginUninstallSuccess)
@@ -52,6 +53,7 @@ export default class ServerCore extends Server {
             .off("plugin-install-fail", this._onPluginInstallFail)
             .off("plugin-update-running", this._onPluginUpdateRunning)
             .off("plugin-update-step", this._onPluginUpdateStep)
+            .off("plugin-update-success", this._onPluginUpdateSuccess)
             .off("plugin-update-fail", this._onPluginUpdateFail)
             .off("plugin-uninstall-running", this._onPluginUninstallRunning)
             .off("plugin-uninstall-success", this._onPluginUninstallSuccess)
@@ -116,6 +118,12 @@ export default class ServerCore extends Server {
     private readonly _onPluginUpdateStep = (data: components["schemas"]["PushEventPluginUpdateStep"]["data"]): void => {
 
         this.push("plugin-update-step", data);
+
+    };
+
+    private readonly _onPluginUpdateSuccess = (data: components["schemas"]["PushEventPluginUpdateSuccess"]["data"]): void => {
+
+        this.push("plugin-update-success", data);
 
     };
 

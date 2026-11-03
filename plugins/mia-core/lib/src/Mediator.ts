@@ -91,6 +91,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
     "plugin-install-fail": [ components["schemas"]["PushEventPluginInstallFail"]["data"] ];
     "plugin-update-running": [ components["schemas"]["PushEventPluginUpdateRunning"]["data"] ];
     "plugin-update-step": [ components["schemas"]["PushEventPluginUpdateStep"]["data"] ];
+    "plugin-update-success": [ components["schemas"]["PushEventPluginUpdateSuccess"]["data"] ];
     "plugin-update-fail": [ components["schemas"]["PushEventPluginUpdateFail"]["data"] ];
     "plugin-uninstall-running": [ components["schemas"]["PushEventPluginUninstallRunning"]["data"] ];
     "plugin-uninstall-success": [ components["schemas"]["PushEventPluginUninstallSuccess"]["data"] ];
@@ -359,7 +360,7 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
         const container: ContainerPattern = this._getContainer();
         const urlParamsPath: operations["updatePluginFromGithub"]["parameters"]["path"] = url.path as operations["updatePluginFromGithub"]["parameters"]["path"];
 
-        return Promise.resolve().then((): Promise<void> => {
+        return Promise.resolve().then((): Promise<Orchestrator> => {
 
             const pluginsManager: PluginsManager = container.get<PluginsManager>("plugins-manager");
             const plugin: Orchestrator | undefined = findPluginByName(pluginsManager, urlParamsPath.name);
@@ -372,9 +373,13 @@ export default class MediatorCore extends Mediator<iEventsMinimal & {
 
             this.emit("plugin-update-running", data);
 
-            return pluginsManager.updateViaGithub(plugin, container).then((): void => {
-                // plugin updated
-            });
+            return pluginsManager.updateViaGithub(plugin, container);
+
+        }).then((plugin: Orchestrator): void => {
+
+            const data: components["schemas"]["PushEventPluginUpdateSuccess"]["data"] = plugin.name;
+
+            this.emit("plugin-update-success", data);
 
         }).catch((err: Error): Promise<void> => {
 
