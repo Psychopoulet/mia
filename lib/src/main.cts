@@ -86,7 +86,7 @@ export default function startApplication (): Promise<void> {
 
         log.success(container.get<string>("app.name") + " (v" + container.get<string>("app.version") + ")");
         log.debug("env file : " + join(container.get<string>("data-directory"), ".env"));
-        log.debug("logs file : " + container.get<string>("logs-file"));
+        log.debug("logs directory : " + container.get<string>("logs-directory"));
 
         const conf: ConfManager = container.get<ConfManager>("conf");
 

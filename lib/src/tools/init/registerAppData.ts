@@ -64,9 +64,9 @@ export default function registerAppData (container: ContainerPattern): Promise<v
 
         // logs
         container
-            .skeleton("logs-file", "string")
-            .set("logs-file", join(container.get<string>("data-directory"), "logs.txt"))
-            .document("logs-file", "The application's file where the logs are registered");
+            .skeleton("logs-directory", "string")
+            .set("logs-directory", join(homedir(), container.get<string>("app.name"), "data", "logs"))
+            .document("logs-directory", "The application's directory where the logs are registered");
 
         // database
         container

@@ -16,13 +16,13 @@
 
 // module
 
-export default function ensureAppDirectories (container: ContainerPattern): Promise<void> {
+function _ensureDirectory (label: "data" | "logs", container: ContainerPattern): Promise<void> {
 
-    const dataDir: string = container.get<string>("data-directory");
+    const directory: string = container.get<string>(label + "-directory");
 
     return new Promise((resolve: (result: boolean) => void): void => {
 
-        return stat(dataDir, (err: Error | null, stats: Stats): void => {
+        return stat(directory, (err: Error | null, stats: Stats): void => {
             return Boolean(err) || !stats.isDirectory() ? resolve(false) : resolve(true);
         });
 
@@ -34,15 +34,25 @@ export default function ensureAppDirectories (container: ContainerPattern): Prom
                 return resolve();
             }
 
-            container.get<iLogger>("log").warning("App data directory not detected, create one at " + dataDir);
+            container.get<iLogger>("log").warning("'" + label + "' directory not detected, create one at " + directory);
 
-            return mkdir(dataDir, {
+            return mkdir(directory, {
                 "recursive": true
             }, (err: NodeJS.ErrnoException | null): void => {
                 return err ? reject(err) : resolve();
             });
 
         });
+
+    });
+
+}
+
+export default function ensureAppDirectories (container: ContainerPattern): Promise<void> {
+
+    return _ensureDirectory("data", container).then((): Promise<void> => {
+
+        return _ensureDirectory("logs", container);
 
     });
 

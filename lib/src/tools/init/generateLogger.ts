@@ -1,7 +1,11 @@
 // deps
 
+    // natives
+    import { join } from "node:path";
+
     // externals
     import winston from "winston";
+    import DailyRotateFile from "winston-daily-rotate-file";
     import Transport from "winston-transport";
 
     // locals
@@ -30,6 +34,10 @@
         "message"?: unknown;
         "timestamp"?: unknown;
     }
+
+// consts
+
+    const TIMESTAMP_FORMAT = "YYYY-MM-DD HH:mm:ss";
 
 // module
 
@@ -74,16 +82,21 @@ export default function generateLogger (container: ContainerPattern): void {
 
     const conf: ConfManager = container.get<ConfManager>("conf");
     const logLevel: string = conf.get<boolean>("debug") ? "debug" : "info";
+    const logsDirectory: string = container.get<string>("logs-directory");
 
     const logger = winston.createLogger({
 
         "transports": [
-            new winston.transports.File({
+            new DailyRotateFile({
                 "level": logLevel,
-                "filename": container.get<string>("logs-file"),
+                "dirname": logsDirectory,
+                "filename": "%DATE%.log",
+                "datePattern": "YYYY-MM-DD",
+                "maxFiles": "10d",
+                "auditFile": join(logsDirectory, ".audit.json"),
                 "format": winston.format.combine(
                     winston.format.timestamp({
-                        "format": "YYYY-MM-DD HH:mm:ss"
+                        "format": TIMESTAMP_FORMAT
                     }),
                     winston.format.json()
                 )
@@ -92,7 +105,7 @@ export default function generateLogger (container: ContainerPattern): void {
             new SequelizeTransport({
                 "level": logLevel,
                 "format": winston.format.timestamp({
-                    "format": "YYYY-MM-DD HH:mm:ss"
+                    "format": TIMESTAMP_FORMAT
                 })
             })
         ],
@@ -123,7 +136,7 @@ export default function generateLogger (container: ContainerPattern): void {
             "level": "debug",
             "format": winston.format.combine(
                 winston.format.timestamp({
-                    "format": "YYYY-MM-DD HH:mm:ss"
+                    "format": TIMESTAMP_FORMAT
                 }),
                 winston.format.colorize({
                     "level": true

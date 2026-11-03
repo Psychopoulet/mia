@@ -52,7 +52,7 @@
         container.set("data-directory", directory);
         container.set("database-file", join(directory, "app.db"));
         container.set("log", _logger());
-        container.set("logs-file", join(directory, "logs.txt"));
+        container.set("logs-directory", join(directory, "data", "logs"));
 
         return container;
 
