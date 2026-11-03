@@ -73,7 +73,7 @@
     "jsonwebtoken": "9.0.3",
     "node-confmanager": "1.15.1",
     "node-containerpattern": "1.12.1",
-    "node-pluginsmanager": "3.8.1",
+    "node-pluginsmanager": "3.8.2",
     "node-pluginsmanager-plugin": "7.4.5",
     "pg": "8.23.1",
     "sequelize": "6.37.8",
