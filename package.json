@@ -81,7 +81,7 @@
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
     "winston-transport": "4.9.0",
-    "ws": "8.22.0"
+    "ws": "8.22.1"
   },
   "devDependencies": {
     "@types/bcrypt": "6.0.0",
@@ -99,12 +99,12 @@
     "eslint-plugin-personnallinter": "git+ssh://git@github.com/Psychopoulet/eslint-plugin-personnallinter",
     "husky": "9.1.7",
     "mocha": "12.0.3",
-    "rimraf": "6.1.3",
+    "rimraf": "6.1.4",
     "typescript": "5.9.3",
     "used-deps-analyzer": "0.4.1"
   },
   "optionalDependencies": {
-    "pm2": "7.1.1"
+    "pm2": "7.1.2"
   },
   "overrides": {
     "glob": "14.0.3",
