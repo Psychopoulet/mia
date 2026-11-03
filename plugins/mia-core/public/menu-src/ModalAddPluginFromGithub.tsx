@@ -287,7 +287,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
         return <Modal appId="MIAMenu" title="Repository URL"
             centered size="lg"
-            onClose={ this.props.onClose }
+            onClose={ repositoryDisabled ? undefined : this.props.onClose }
             onSubmit={ this._handleSubmit }
         >
 
