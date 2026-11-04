@@ -24,7 +24,6 @@
 
     // locals
     import type { SDK } from "../src/SDK";
-    import type { components } from "../src/Descriptor";
 
     interface iProps extends iPropsNode {
         "onClose": (e?: React.MouseEvent<HTMLButtonElement>) => void;
@@ -33,7 +32,6 @@
     interface iState {
         "running": boolean;
         "loading": boolean;
-        "step": components["schemas"]["PushEventPluginInstallStep"]["data"] | null;
         "error": Error | null;
         "user": string;
         "repository": string;
@@ -69,7 +67,6 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
         this.state = {
             "running": false,
-            "step": null,
             "error": null,
             "user": "Psychopoulet",
             "repository": "",
@@ -83,7 +80,6 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
         this._sdk
             .on("plugin-install-running", this._onPluginInstallRunning)
-            .on("plugin-install-step", this._onPluginInstallStep)
             .on("plugin-install-success", this._onPluginInstallSuccess)
             .on("plugin-install-fail", this._onPluginInstallFail);
 
@@ -102,7 +98,6 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
         this._sdk
             .off("plugin-install-running", this._onPluginInstallRunning)
-            .off("plugin-install-step", this._onPluginInstallStep)
             .off("plugin-install-success", this._onPluginInstallSuccess)
             .off("plugin-install-fail", this._onPluginInstallFail);
 
@@ -118,20 +113,10 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
     };
 
-    private readonly _onPluginInstallStep = (step: components["schemas"]["PushEventPluginInstallStep"]["data"]): void => {
-
-        this.setState({
-            "running": true,
-            "step": step
-        });
-
-    };
-
     private readonly _onPluginInstallSuccess = (): void => {
 
         this.setState({
-            "running": false,
-            "step": null
+            "running": false
         });
 
     };
@@ -139,8 +124,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
     private readonly _onPluginInstallFail = (): void => {
 
         this.setState({
-            "running": false,
-            "step": null
+            "running": false
         });
 
     };
@@ -287,7 +271,7 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
 
         return <Modal appId="MIAMenu" title="Repository URL"
             centered size="lg"
-            onClose={ this.props.onClose }
+            onClose={ repositoryDisabled ? undefined : this.props.onClose }
             onSubmit={ this._handleSubmit }
         >
 
@@ -322,8 +306,6 @@ export default class ModalAddPluginFromGithub extends React.Component<iProps, iS
                 </div>
 
                 { this.state.error && <InvalidFeedBack alert={ this.state.error.message } /> }
-
-                { this.state.step && <div className="form-text">{ this.state.step.currentStep } / { this.state.step.maxSteps } - { this.state.step.stepMessage }</div> }
 
             </ModalBody>
 

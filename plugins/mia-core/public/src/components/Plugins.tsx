@@ -75,6 +75,7 @@ export default class Plugins extends React.Component<iProps, iState> {
         this._sdk
             .on("plugin-install-success", this._onPluginsChange)
             .on("plugin-update-success", this._onPluginsChange)
+            .on("plugin-update-fail", this._onPluginsChange)
             .on("plugin-uninstall-success", this._onPluginsChange);
 
     }
@@ -84,6 +85,7 @@ export default class Plugins extends React.Component<iProps, iState> {
         this._sdk
             .off("plugin-install-success", this._onPluginsChange)
             .off("plugin-update-success", this._onPluginsChange)
+            .off("plugin-update-fail", this._onPluginsChange)
             .off("plugin-uninstall-success", this._onPluginsChange);
 
     }

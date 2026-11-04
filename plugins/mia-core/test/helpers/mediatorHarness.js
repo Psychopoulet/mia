@@ -102,8 +102,8 @@
             return Promise.resolve(fakePlugin("mia-core"));
         };
 
-        manager.updateViaGithub = () => {
-            return Promise.resolve();
+        manager.updateViaGithub = (plugin) => {
+            return Promise.resolve(plugin);
         };
 
         manager.uninstall = () => {

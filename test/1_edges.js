@@ -65,7 +65,7 @@
         container.set("data-directory", directory);
         container.set("database-file", join(directory, "app.db"));
         container.set("log", _logger());
-        container.set("logs-file", join(directory, "logs.txt"));
+        container.set("logs-directory", join(directory, "data", "logs"));
         container.set("plugins-data-directory", join(directory, "plugins-data"));
         container.set("plugins-directory", join(directory, "plugins"));
 
