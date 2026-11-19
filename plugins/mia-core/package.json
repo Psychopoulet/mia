@@ -19,34 +19,34 @@
 
   "scripts": {
 
-    "install-prod": "npm install --omit=dev --omit=optional && npm audit fix --omit=dev --omit=optional",
-    "install-dev": "npm install --allow-git=root && npm audit fix --allow-git=root",
+    "install-prod": "bun install --production",
+    "install-dev": "bun install",
 
-    "transpile-openapi-back": "npx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/Descriptor.ts",
-    "transpile-openapi-front": "npx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
-    "transpile-openapi": "npm run transpile-openapi-back && npm run transpile-openapi-front",
+    "transpile-openapi-back": "bunx openapi-typescript ./lib/data/Descriptor.json -o ./lib/src/Descriptor.ts",
+    "transpile-openapi-front": "bunx openapi-typescript ./lib/data/Descriptor.json -o ./public/src/Descriptor.ts",
+    "transpile-openapi": "bun run transpile-openapi-back && bun run transpile-openapi-front",
 
-    "lint-back": "npm run transpile-openapi-back && npx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\"",
-    "lint-front": "npm run transpile-openapi-front && npx eslint --config .eslintrc-front.js --ext .tsx,.ts \"./public/src/**/*\"",
-    "lint-tests": "npx eslint --config .eslintrc-tests.js --ext .js \"./test/**/*\"",
-    "lint": "npm run lint-back && npm run lint-front && npm run lint-tests",
+    "lint-back": "bun run transpile-openapi-back && bunx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\"",
+    "lint-front": "bun run transpile-openapi-front && bunx eslint --config .eslintrc-front.js --ext .tsx,.ts \"./public/src/**/*\"",
+    "lint-tests": "bunx eslint --config .eslintrc-tests.js --ext .js \"./test/**/*\"",
+    "lint": "bun run lint-back && bun run lint-front && bun run lint-tests",
 
-    "clean-back": "npx rimraf ./lib/cjs",
-    "clean-front": "npx rimraf ./public/dist",
-    "clean": "npm run clean-back && npm run clean-front",
+    "clean-back": "bunx rimraf ./lib/cjs",
+    "clean-front": "bunx rimraf ./public/dist",
+    "clean": "bun run clean-back && bun run clean-front",
 
     "import-types": "node ./build/importTypes.js",
-    "build-back": "npm run clean-back && npm run import-types && npm run transpile-openapi-back && npx tsc --project ./tsconfig.json",
-    "build-front": "npm run clean-front && npm run transpile-openapi-front && npx webpack --config ./webpack.config.js && npx webpack --config ./webpack.config-menu.js",
-    "build": "npm run build-back && npm run build-front",
+    "build-back": "bun run clean-back && bun run import-types && bun run transpile-openapi-back && bunx tsc --project ./tsconfig.json",
+    "build-front": "bun run clean-front && bun run transpile-openapi-front && bunx webpack --config ./webpack.config.js && bunx webpack --config ./webpack.config-menu.js",
+    "build": "bun run build-back && bun run build-front",
 
-    "check-node-engine": "npx check-node-engine",
-    "check-requires": "npx used-deps-analyzer ./package.json ./lib/src --no-dev  --misscalled \"{ \\\"module\\\": \\\"@types/express\\\", \\\"call\\\": \\\"express\\\" }\"",
-    "check-updates": "npx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch",
-    "unit-tests": "npx c8 --reporter=text-summary --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --exclude \"lib/src/**/*.d.ts\" --extension .ts --extension .cts --check-coverage --statements 95 --branches 95 --functions 95 --lines 95 mocha --require ./test/register.js",
-    "unit-tests-local": "npx c8 --reporter=html --reporter=text --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts mocha --require ./test/register.js",
+    "check-node-engine": "bunx check-node-engine",
+    "check-requires": "bunx used-deps-analyzer ./package.json ./lib/src --no-dev  --misscalled \"{ \\\"module\\\": \\\"@types/express\\\", \\\"call\\\": \\\"express\\\" }\"",
+    "check-updates": "bunx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch",
+    "unit-tests": "bunx c8 --reporter=text-summary --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --exclude \"lib/src/**/*.d.ts\" --extension .ts --extension .cts --check-coverage --statements 95 --branches 95 --functions 95 --lines 95 mocha --require ./test/register.js",
+    "unit-tests-local": "bunx c8 --reporter=html --reporter=text --all --include \"lib/src/**/*.ts\" --include \"lib/src/**/*.cts\" --exclude \"lib/src/Descriptor.ts\" --extension .ts --extension .cts mocha --require ./test/register.js",
 
-    "tests": "npm run lint && npm run check-node-engine && npm run check-requires && npm run check-updates && npm run build && npm run unit-tests"
+    "tests": "bun run lint && bun run check-node-engine && bun run check-requires && bun run check-updates && bun run build && bun run unit-tests"
 
   },
   "files": [
@@ -55,8 +55,10 @@
     "public/dist",
     "public/index.html"
   ],
+  "packageManager": "bun@1.4.5",
   "engines": {
-    "node": ">=24.22.2"
+    "node": ">=24.22.2",
+    "bun": ">=1.4.5"
   },
 
   "dependencies": {
