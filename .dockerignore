@@ -1,0 +1,6 @@
+.git
+.cursor
+node_modules
+coverage
+plugins/mia-core/node_modules
+plugins/mia-core/coverage

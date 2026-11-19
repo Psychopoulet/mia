@@ -44,18 +44,14 @@
 
     "start": "bun --conditions=require lib/src/main.cts",
 
-    "daemon-start": "bunx pm2 start pm2.json",
-    "daemon-stop": "bunx pm2 stop pm2.json && bunx pm2 delete pm2.json",
-
-    "docker-start": "docker image build --rm -t image-mia . && docker container run -dti -p 8000:8000 --name container-mia image-mia",
+    "docker-start": "docker image build --rm -t image-mia . && docker container run -dti -p 8000:8000 --restart on-failure --name container-mia image-mia",
     "docker-stop": "docker container stop container-mia && docker container remove -f container-mia && docker image remove -f image-mia"
 
   },
 
   "files": [
     "lib/src",
-    "public/pictures",
-    "pm2.json"
+    "public/pictures"
   ],
   "packageManager": "bun@1.4.5",
   "engines": {
@@ -98,9 +94,6 @@
     "husky": "9.1.7",
     "typescript": "5.9.3",
     "used-deps-analyzer": "0.4.1"
-  },
-  "optionalDependencies": {
-    "pm2": "7.1.2"
   },
   "overrides": {
     "glob": "14.0.3",
