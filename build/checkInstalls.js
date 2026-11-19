@@ -66,7 +66,7 @@ Promise.resolve().then(() => {
 
                 files.forEach((file) => {
 
-                    if ([ "node_modules", "package-lock.json" ].includes(file)) {
+                    if ([ "node_modules", "package-lock.json", "bun.lock" ].includes(file)) {
                         filesToRemove.push(join(pluginDirectory, file));
                     }
 
@@ -94,7 +94,7 @@ Promise.resolve().then(() => {
 
         return new Promise((resolve, reject) => {
 
-            exec("npm install --omit=dev --omit=optional", { "cwd": pluginDirectory }, (err, stdout) => {
+            exec("bun install --production", { "cwd": pluginDirectory }, (err, stdout) => {
                 return err ? reject(err) : resolve(stdout);
             });
 

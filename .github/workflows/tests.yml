@@ -32,7 +32,7 @@ permissions:
 # ══════════════════════════════════════════════════════════════════════════════
 
 env:
-  NODE_VERSION: '24'                        # Available in all jobs
+  BUN_VERSION: '1.4.5'                      # Available in all jobs
 
 # ══════════════════════════════════════════════════════════════════════════════
 # JOBS (Work units)
@@ -61,9 +61,13 @@ jobs:
 
   tests:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     needs: require-develop-source
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
 
@@ -82,38 +86,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup NodeJS v${{ env.NODE_VERSION }}
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # curl -s https://api.github.com/repos/actions/setup-node/commits/v7.1.0 | jq -r .sha
+      - name: Setup Bun v${{ env.BUN_VERSION }}
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # curl -s https://api.github.com/repos/oven-sh/setup-bun/commits/v2.2.0 | jq -r .sha
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install dependencies
-        run: npm run install-dev
+        run: bun run install-dev
 
       - name: Run audit
         run: |
-            npm audit --omit=dev --omit=optional
-            npm --prefix ./plugins/mia-core audit --omit=dev --omit=optional
+            bun audit --omit=dev --omit=optional
+            bun audit --cwd ./plugins/mia-core --omit=dev --omit=optional
 
       # must be FORCED to allow mia-core build
       - name: Run mia-core transpile-openapi
-        run: npm --prefix ./plugins/mia-core run transpile-openapi
+        run: bun --cwd ./plugins/mia-core run transpile-openapi
 
       # must be BEFORE linting for mia-core definitions import
       - name: Run build
-        run: npm run build
+        run: bun run build
 
       - name: Run linters
-        run: npm run lint
+        run: bun run lint
 
       - name: Check node engine
-        run: npm run check-node-engine
+        run: bun run check-node-engine
 
       - name: Check requires (used-deps-analyzer)
-        run: npm run check-requires
+        run: bun run check-requires
 
       - name: Check updates (check-version-modules)
-        run: npm run check-updates
+        run: bun run check-updates
 
       - name: Run unit tests
-        run: npm run unit-tests
+        run: bun run unit-tests
