@@ -3,6 +3,8 @@
 
 		"target": "es2024",
 		"module": "commonjs",
+		"moduleResolution": "bundler",
+		"types": [ "bun", "node" ],
 
 		"noEmit": true,
 
