@@ -1,7 +1,7 @@
 // types & interfaces
 
     // locals
-    import type { LogAttributes } from "../types/tools/models/Log";
+    import type { LogAttributes } from "../../../../../lib/src/tools/models/Log";
 
 // module
 

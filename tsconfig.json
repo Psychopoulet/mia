@@ -4,10 +4,7 @@
 		"target": "es2024",
 		"module": "commonjs",
 
-		"outDir": "./lib/cjs",
-
-		"declaration": true,
-		"declarationDir": "./lib/cjs",
+		"noEmit": true,
 
 		"alwaysStrict": true,
 		"strict": true,

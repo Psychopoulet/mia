@@ -5,14 +5,14 @@
   "description": "MIA - easy IOT.",
 
   "type": "commonjs",
-  "typings": "./lib/cjs/main.d.cts",
-  "main": "./lib/cjs/main.cjs",
+  "typings": "./lib/src/main.cts",
+  "main": "./lib/src/main.cts",
 
   "exports": {
     ".": {
       "require": {
-        "types": "./lib/cjs/main.d.cts",
-        "default": "./lib/cjs/main.cjs"
+        "types": "./lib/src/main.cts",
+        "default": "./lib/src/main.cts"
       }
     }
   },
@@ -27,11 +27,10 @@
     "lint-tests": "echo 'Tests lint not implemented yet.' && bun run --cwd ./plugins/mia-core lint-tests",
     "lint": "bun run lint-back && bun run lint-front && bun run lint-tests",
 
-    "clean-back": "bunx rimraf ./lib/cjs && bunx rimraf ./lib/src/api/Descriptor.ts",
     "clean-front": "echo 'Clean front not implemented (see mia-core plugin).'",
-    "clean": "bun run clean-back && bun run clean-front",
+    "clean": "bun run clean-front",
 
-    "build-back": "bun run clean-back && bunx tsc --project ./tsconfig.json && bun run --cwd ./plugins/mia-core build-back",
+    "build-back": "bunx tsc --project ./tsconfig.json && bun run --cwd ./plugins/mia-core build-back",
     "build-front": "echo 'Build front not implemented (see mia-core plugin).' && bun run --cwd ./plugins/mia-core build-front",
     "build": "bun run build-back && bun run build-front",
 
@@ -54,7 +53,7 @@
   },
 
   "files": [
-    "lib/cjs",
+    "lib/src",
     "public/pictures",
     "pm2.json"
   ],
@@ -97,7 +96,6 @@
     "check-version-modules": "2.5.2",
     "eslint-plugin-personnallinter": "git+ssh://git@github.com/Psychopoulet/eslint-plugin-personnallinter",
     "husky": "9.1.7",
-    "rimraf": "6.1.4",
     "typescript": "5.9.3",
     "used-deps-analyzer": "0.4.1"
   },

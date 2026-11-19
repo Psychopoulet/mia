@@ -28,16 +28,16 @@
     import type ContainerPattern from "node-containerpattern";
     import type ConfManager from "node-confmanager";
     import type PluginsManager from "node-pluginsmanager";
-    import type { Orchestrator, iEventsMinimal, iUrlAllowedParameters } from "node-pluginsmanager-plugin"; // locals — types from the host mia project (imported via build/importTypes.js)
+    import type { Orchestrator, iEventsMinimal, iUrlAllowedParameters } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { sign as tSign } from "./types/tools/AuthJWT";
-    import type tExtractToken from "./types/tools/extractToken";
-    import type tLog from "./types/tools/models/Log";
-    import type tToken from "./types/tools/models/Token";
-    import type { AuthTokenPublic, FullAuthPublic } from "./types/tools/models/Token";
-    import type tUser from "./types/tools/models/User";
-    import type { UserAttributes } from "./types/tools/models/User";
+    import type { sign as tSign } from "../../../../lib/src/tools/AuthJWT";
+    import type tExtractToken from "../../../../lib/src/tools/extractToken";
+    import type tLog from "../../../../lib/src/tools/models/Log";
+    import type tToken from "../../../../lib/src/tools/models/Token";
+    import type { AuthTokenPublic, FullAuthPublic } from "../../../../lib/src/tools/models/Token";
+    import type tUser from "../../../../lib/src/tools/models/User";
+    import type { UserAttributes } from "../../../../lib/src/tools/models/User";
 
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";

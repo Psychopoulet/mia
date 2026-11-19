@@ -1,5 +1,4 @@
 .cursor/plans
 coverage/
-lib/cjs/
 public/dist/
 node_modules/

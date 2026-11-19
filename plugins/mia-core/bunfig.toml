@@ -2,7 +2,7 @@
 root = "test"
 timeout = 10000
 preload = ["./test/preload.js"]
-pathIgnorePatterns = ["**/helpers/**", "**/typescript/**"]
+pathIgnorePatterns = ["**/helpers/**"]
 coverageSkipTestFiles = true
 coverageThreshold = { lines = 0.95, functions = 0.95 }
-coveragePathIgnorePatterns = ["**/Descriptor.ts", "**/*.d.ts", "**/test/**", "**/node_modules/**"]
+coveragePathIgnorePatterns = ["**/Descriptor.ts", "**/test/**", "**/node_modules/**"]

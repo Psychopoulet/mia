@@ -5,13 +5,13 @@ WORKDIR /app
 # copy basic files
 COPY --chown=node:node package.json ./
 COPY --chown=node:node pm2.json ./
-COPY --chown=node:node lib/cjs/ ./lib/cjs/
+COPY --chown=node:node lib/src/ ./lib/src/
 COPY --chown=node:node public/pictures/ ./public/pictures/
 COPY --chown=node:node build/checkInstalls.js ./build/checkInstalls.js
 
 # copy mia-core files
 COPY --chown=node:node plugins/mia-core/package.json ./plugins/mia-core/package.json
-COPY --chown=node:node plugins/mia-core/lib/cjs/ ./plugins/mia-core/lib/cjs/
+COPY --chown=node:node plugins/mia-core/lib/src/ ./plugins/mia-core/lib/src/
 COPY --chown=node:node plugins/mia-core/lib/data/ ./plugins/mia-core/lib/data/
 COPY --chown=node:node plugins/mia-core/public/dist/ ./plugins/mia-core/public/dist/
 COPY --chown=node:node plugins/mia-core/public/index.html ./plugins/mia-core/public/index.html
