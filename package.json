@@ -43,7 +43,7 @@
 
     "tests": "bun run lint && bun run check-node-engine && bun run check-requires && bun run check-updates && bun run build && bun run unit-tests",
 
-    "start": "node lib/cjs/main.cjs",
+    "start": "bun --conditions=require lib/src/main.cts",
 
     "daemon-start": "bunx pm2 start pm2.json",
     "daemon-stop": "bunx pm2 stop pm2.json && bunx pm2 delete pm2.json",

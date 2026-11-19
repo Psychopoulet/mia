@@ -6,13 +6,13 @@
 
   "type": "commonjs",
   "typings": "./lib/cjs/main.d.cts",
-  "main": "./lib/cjs/main.cjs",
+  "main": "./lib/src/main.cts",
 
   "exports": {
     ".": {
       "require": {
         "types": "./lib/cjs/main.d.cts",
-        "default": "./lib/cjs/main.cjs"
+        "default": "./lib/src/main.cts"
       }
     }
   },

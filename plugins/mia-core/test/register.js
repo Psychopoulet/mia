@@ -14,15 +14,17 @@
 // consts
 
     const SOURCE = resolve(__dirname, "..", "lib", "src");
+    const HOST_SOURCE = resolve(__dirname, "..", "..", "..", "lib", "src");
     const EXTENSIONS = [ ".ts", ".cts" ];
 
 // private
 
     function _fromSource (filename) {
 
-        const fromSource = relative(SOURCE, filename);
+        const fromPlugin = relative(SOURCE, filename);
+        const fromHost = relative(HOST_SOURCE, filename);
 
-        return "" !== fromSource && !fromSource.startsWith("..");
+        return ("" !== fromPlugin && !fromPlugin.startsWith("..")) || ("" !== fromHost && !fromHost.startsWith(".."));
 
     }
 

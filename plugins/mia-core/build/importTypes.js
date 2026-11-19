@@ -13,7 +13,7 @@
     const MIA_CJS_DIR = join(PLUGIN_DIR, "..", "..", "lib", "cjs");
 
     const REQUIRE_PATTERN = /require\(\s*"([^"]+)"\s*\)/g;
-    const CJS_PREFIX = "../../../../lib/cjs/";
+    const SRC_PREFIX = "../../../../lib/src/";
 
 // module
 
@@ -24,23 +24,23 @@ async function importTypes () {
     await rm(TYPES_DIR, { "recursive": true, "force": true });
     await mkdir(TYPES_DIR, { "recursive": true });
 
-    // 2 — parse Mediator.ts require() calls pointing to host MIA lib/cjs
+    // 2 — parse Mediator.ts require() calls pointing to host MIA TypeScript sources
 
     const mediatorContent = await readFile(MEDIATOR_FILE, "utf-8");
-    const cjsPaths = new Set();
+    const sourcePaths = new Set();
 
     let match;
     while ((match = REQUIRE_PATTERN.exec(mediatorContent)) !== null) {
 
         const requirePath = match[1];
 
-        if (requirePath.startsWith(CJS_PREFIX)) {
-            cjsPaths.add(requirePath.slice(CJS_PREFIX.length));
+        if (requirePath.startsWith(SRC_PREFIX)) {
+            sourcePaths.add(requirePath.slice(SRC_PREFIX.length).replace(/\.c?ts$/, ""));
         }
 
     }
 
-    if (0 >= cjsPaths.size) {
+    if (0 >= sourcePaths.size) {
         console.log("[importTypes] No host require() found in Mediator.ts — nothing to import.");
         return;
     }
@@ -49,9 +49,9 @@ async function importTypes () {
 
     let imported = 0;
 
-    for (const cjsRelative of cjsPaths) {
+    for (const sourceRelative of sourcePaths) {
 
-        const dtsSource = join(MIA_CJS_DIR, cjsRelative + ".d.ts");
+        const dtsSource = join(MIA_CJS_DIR, sourceRelative + ".d.ts");
 
         // check that the .d.ts actually exists in host build output
         try {
@@ -62,7 +62,7 @@ async function importTypes () {
             continue;
         }
 
-        const dtsTarget = join(TYPES_DIR, cjsRelative + ".d.ts");
+        const dtsTarget = join(TYPES_DIR, sourceRelative + ".d.ts");
 
         await mkdir(dirname(dtsTarget), { "recursive": true });
         await copyFile(dtsSource, dtsTarget);

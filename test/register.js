@@ -14,15 +14,17 @@
 // consts
 
     const SOURCE = resolve(__dirname, "..", "lib", "src");
+    const PLUGIN_SOURCE = resolve(__dirname, "..", "plugins", "mia-core", "lib", "src");
     const EXTENSIONS = [ ".ts", ".cts" ];
 
 // private
 
     function _fromSource (filename) {
 
-        const fromSource = relative(SOURCE, filename);
+        const fromHost = relative(SOURCE, filename);
+        const fromPlugin = relative(PLUGIN_SOURCE, filename);
 
-        return "" !== fromSource && !fromSource.startsWith("..");
+        return ("" !== fromHost && !fromHost.startsWith("..")) || ("" !== fromPlugin && !fromPlugin.startsWith(".."));
 
     }
 
