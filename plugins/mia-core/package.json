@@ -35,7 +35,7 @@
     "clean-front": "bunx rimraf ./public/dist",
     "clean": "bun run clean-back && bun run clean-front",
 
-    "import-types": "node ./build/importTypes.js",
+    "import-types": "bun ./build/importTypes.js",
     "build-back": "bun run clean-back && bun run import-types && bun run transpile-openapi-back && bunx tsc --project ./tsconfig.json",
     "build-front": "bun run clean-front && bun run transpile-openapi-front && bunx webpack --config ./webpack.config.js && bunx webpack --config ./webpack.config-menu.js",
     "build": "bun run build-back && bun run build-front",

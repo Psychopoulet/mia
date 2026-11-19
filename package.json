@@ -19,25 +19,25 @@
 
   "scripts": {
 
-    "install-prod": "bun install --production && bun --cwd ./plugins/mia-core run install-prod",
-    "install-dev": "bun install && bunx husky && bun --cwd ./plugins/mia-core run install-dev",
+    "install-prod": "bun install --production && bun run --cwd ./plugins/mia-core install-prod",
+    "install-dev": "bun install && bunx husky && bun run --cwd ./plugins/mia-core install-dev",
 
-    "lint-back": "bunx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\" && bun --cwd ./plugins/mia-core run lint-back",
-    "lint-front": "echo 'Frontend lint not implemented (see mia-core plugin).' && bun --cwd ./plugins/mia-core run lint-front",
-    "lint-tests": "echo 'Tests lint not implemented yet.' && bun --cwd ./plugins/mia-core run lint-tests",
+    "lint-back": "bunx eslint --config .eslintrc-back.js --ext .ts,.cts,.mts \"./lib/src/**/*\" && bun run --cwd ./plugins/mia-core lint-back",
+    "lint-front": "echo 'Frontend lint not implemented (see mia-core plugin).' && bun run --cwd ./plugins/mia-core lint-front",
+    "lint-tests": "echo 'Tests lint not implemented yet.' && bun run --cwd ./plugins/mia-core lint-tests",
     "lint": "bun run lint-back && bun run lint-front && bun run lint-tests",
 
     "clean-back": "bunx rimraf ./lib/cjs && bunx rimraf ./lib/src/api/Descriptor.ts",
     "clean-front": "echo 'Clean front not implemented (see mia-core plugin).'",
     "clean": "bun run clean-back && bun run clean-front",
 
-    "build-back": "bun run clean-back && bunx tsc --project ./tsconfig.json && bun --cwd ./plugins/mia-core run build-back",
-    "build-front": "echo 'Build front not implemented (see mia-core plugin).' && bun --cwd ./plugins/mia-core run build-front",
+    "build-back": "bun run clean-back && bunx tsc --project ./tsconfig.json && bun run --cwd ./plugins/mia-core build-back",
+    "build-front": "echo 'Build front not implemented (see mia-core plugin).' && bun run --cwd ./plugins/mia-core build-front",
     "build": "bun run build-back && bun run build-front",
 
-    "check-node-engine": "bunx check-node-engine && bun --cwd ./plugins/mia-core run check-node-engine",
-    "check-requires": "bunx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && bun --cwd ./plugins/mia-core run check-requires",
-    "check-updates": "bunx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch && bun --cwd ./plugins/mia-core run check-updates",
+    "check-node-engine": "bunx check-node-engine && bun run --cwd ./plugins/mia-core check-node-engine",
+    "check-requires": "bunx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && bun run --cwd ./plugins/mia-core check-requires",
+    "check-updates": "bunx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch && bun run --cwd ./plugins/mia-core check-updates",
     "unit-tests": "bun test --conditions=require --coverage && bun run --cwd ./plugins/mia-core unit-tests",
     "unit-tests-local": "bun test --conditions=require --coverage --coverage-reporter=text && bun run --cwd ./plugins/mia-core unit-tests-local",
 

@@ -101,7 +101,7 @@ jobs:
 
       # must be FORCED to allow mia-core build
       - name: Run mia-core transpile-openapi
-        run: bun --cwd ./plugins/mia-core run transpile-openapi
+        run: bun run --cwd ./plugins/mia-core transpile-openapi
 
       # must be BEFORE linting for mia-core definitions import
       - name: Run build
