@@ -66,7 +66,6 @@
 
   "dependencies": {
     "@fortawesome/fontawesome-free": "7.3.1",
-    "bcrypt": "6.0.0",
     "bootstrap": "5.3.8",
     "compression": "1.8.2",
     "cors": "2.8.6",
@@ -79,14 +78,13 @@
     "node-pluginsmanager-plugin": "7.4.5",
     "pg": "8.23.1",
     "sequelize": "6.37.8",
-    "sqlite3": "6.0.1",
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
     "winston-transport": "4.9.0",
     "ws": "8.22.1"
   },
   "devDependencies": {
-    "@types/bcrypt": "6.0.0",
+    "@types/bun": "1.4.4",
     "@types/compression": "1.8.1",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
@@ -125,10 +123,6 @@
   },
   "bugs": {
     "url": "https://github.com/Psychopoulet/mia/issues"
-  },
-  "trustedDependencies": [
-    "bcrypt",
-    "sqlite3"
-  ]
+  }
 
 }

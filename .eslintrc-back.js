@@ -11,7 +11,12 @@ module.exports = defineConfig([
         "plugins": {
             personnallinter
         },
-        "extends": [ personnallinter.configs["ts-back"] ]
+        "extends": [ personnallinter.configs["ts-back"] ],
+        "languageOptions": {
+            "globals": {
+                "Bun": "readonly"
+            }
+        }
     },
     globalIgnores([ "lib/src/api/Descriptor.ts" ])
 ]);
