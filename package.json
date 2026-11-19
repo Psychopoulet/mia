@@ -35,7 +35,7 @@
     "build": "bun run build-back && bun run build-front",
 
     "check-node-engine": "bunx check-node-engine && bun run --cwd ./plugins/mia-core check-node-engine",
-    "check-requires": "bunx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && bun run --cwd ./plugins/mia-core check-requires",
+    "check-requires": "bunx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap pg --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && bun run --cwd ./plugins/mia-core check-requires",
     "check-updates": "bunx check-version-modules --no-fail-at-major --fail-at-minor --fail-at-patch && bun run --cwd ./plugins/mia-core check-updates",
     "unit-tests": "bun test --conditions=require --coverage && bun run --cwd ./plugins/mia-core unit-tests",
     "unit-tests-local": "bun test --conditions=require --coverage --coverage-reporter=text && bun run --cwd ./plugins/mia-core unit-tests-local",

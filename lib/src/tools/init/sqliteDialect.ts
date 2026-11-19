@@ -4,12 +4,12 @@
     import { nextTick } from "node:process";
 
     // externals
-    import { Database as BunDatabase } from "bun:sqlite";
+    import { Database as BunDatabase } from "bun:sqlite"; // runtime builtin, not an npm dependency
 
 // types & interfaces
 
     // externals
-    import type { SQLQueryBindings } from "bun:sqlite";
+    import type { SQLQueryBindings } from "bun:sqlite"; // runtime builtin, not an npm dependency
 
     // locals
 
