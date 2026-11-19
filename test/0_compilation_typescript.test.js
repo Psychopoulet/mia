@@ -6,10 +6,6 @@
     const { unlink } = require("node:fs/promises");
     const { lstat } = require("node:fs");
 
-// consts
-
-    const MAX_TIMEOUT = 10000;
-
 // tests
 
 describe("compilation typescript", () => {
@@ -17,7 +13,7 @@ describe("compilation typescript", () => {
     const compilationSource = join(__dirname, "typescript", "compilation.cts");
     const compilationTarget = join(__dirname, "typescript", "compilation.cjs");
 
-    before(() => {
+    beforeAll(() => {
 
         return new Promise((resolve) => {
 
@@ -31,7 +27,7 @@ describe("compilation typescript", () => {
 
     });
 
-    after(() => {
+    afterAll(() => {
 
         return new Promise((resolve) => {
 
@@ -50,7 +46,7 @@ describe("compilation typescript", () => {
         return new Promise((resolve, reject) => {
 
             const args = [
-                "npx tsc",
+                "bunx tsc",
                 compilationSource,
                 "--target es6",
                 "--module commonjs",
@@ -66,12 +62,12 @@ describe("compilation typescript", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
     it("should exec compiled typescript file", (done) => {
 
         const args = [
-            "node",
+            "bun",
             compilationTarget
         ];
 
@@ -82,6 +78,6 @@ describe("compilation typescript", () => {
             return err ? done(err) : done();
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
 });

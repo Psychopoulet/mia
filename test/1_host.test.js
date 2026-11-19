@@ -77,7 +77,7 @@ describe("host helpers", () => {
     let root = "";
     let container = null;
 
-    before(async () => {
+    beforeAll(async () => {
 
         root = await mkdtemp(join(tmpdir(), "mia-host-"));
         container = _container(root);
@@ -85,7 +85,7 @@ describe("host helpers", () => {
 
     });
 
-    after(async () => {
+    afterAll(async () => {
 
         if (User.sequelize) {
 

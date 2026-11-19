@@ -91,11 +91,11 @@ describe("host edges", () => {
 
     let root = "";
 
-    before(async () => {
+    beforeAll(async () => {
         root = await mkdtemp(join(tmpdir(), "mia-edges-"));
     });
 
-    after(async () => {
+    afterAll(async () => {
 
         if (User.sequelize) {
 
@@ -160,7 +160,7 @@ describe("host edges", () => {
 
         });
 
-    }).timeout(15000);
+    });
 
     it("should log plugin manager events", async () => {
 
@@ -206,7 +206,7 @@ describe("host edges", () => {
         await manager.releaseAll();
         await manager.destroyAll();
 
-    }).timeout(30000);
+    });
 
     it("should hash passwords while creating users in bulk", async () => {
 

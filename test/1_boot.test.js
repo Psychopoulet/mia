@@ -149,16 +149,46 @@
 
     }
 
+    const originalEnv = {
+        "HOME": process.env.HOME,
+        "USERPROFILE": process.env.USERPROFILE
+    };
+
+    function _useHome (directory) {
+
+        process.env.HOME = directory;
+        process.env.USERPROFILE = directory;
+
+    }
+
+    function _restoreEnv () {
+
+        if ("undefined" === typeof originalEnv.HOME) {
+            delete process.env.HOME;
+        }
+        else {
+            process.env.HOME = originalEnv.HOME;
+        }
+
+        if ("undefined" === typeof originalEnv.USERPROFILE) {
+            delete process.env.USERPROFILE;
+        }
+        else {
+            process.env.USERPROFILE = originalEnv.USERPROFILE;
+        }
+
+    }
+
 describe("application boot", () => {
 
-    const originalHomedir = os.homedir;
     const originalExit = process.exit;
     const exitState = {
         "code": null
     };
+    const roots = [];
     let root = "";
 
-    before(() => {
+    beforeAll(() => {
 
         process.exit = (code) => {
             exitState.code = code;
@@ -166,25 +196,27 @@ describe("application boot", () => {
 
     });
 
-    after(async () => {
+    afterAll(async () => {
 
-        os.homedir = originalHomedir;
+        process.exitCode = 0;
+        _restoreEnv();
         process.exit = originalExit;
 
         await _shutdown();
 
-        if (root) {
-            await rm(root, {
+        await Promise.all(roots.map((directory) => {
+            return rm(directory, {
                 "force": true,
                 "recursive": true
             });
-        }
+        }));
 
     });
 
     it("should boot in a temporary home and serve public routes", async () => {
 
         root = await mkdtemp(join(os.tmpdir(), "mia-boot-"));
+        roots.push(root);
 
         const dataDir = join(root, "mia", "data");
 
@@ -198,9 +230,7 @@ describe("application boot", () => {
 
         await writeFile(join(dataDir, ".env"), "port=0\ndatabase-uri=sqlite:" + dbFile + "\n", "utf-8");
 
-        os.homedir = () => {
-            return root;
-        };
+        _useHome(root);
 
         await startApplication();
 
@@ -257,6 +287,99 @@ describe("application boot", () => {
         await _wait(exitState);
         strictEqual(exitState.code, 0);
 
-    }).timeout(60000);
+    });
+
+    it("should log the sqlite file when no database uri is set", async () => {
+
+        process.removeAllListeners("SIGINT");
+        process.removeAllListeners("SIGTERM");
+        exitState.code = null;
+        root = await mkdtemp(join(os.tmpdir(), "mia-boot-file-"));
+        roots.push(root);
+
+        const dataDir = join(root, "mia", "data");
+
+        await mkdir(dataDir, {
+            "recursive": true
+        });
+        await mkdir(join(root, "mia", "plugins"), {
+            "recursive": true
+        });
+        await writeFile(join(dataDir, ".env"), "port=0\n", "utf-8");
+
+        _useHome(root);
+
+        await startApplication();
+        process.emit("SIGINT");
+        await _wait(exitState);
+        strictEqual(exitState.code, 0);
+
+    });
+
+    it("should exit when startup fails after the logger exists", async () => {
+
+        process.removeAllListeners("SIGINT");
+        process.removeAllListeners("SIGTERM");
+        exitState.code = null;
+        root = await mkdtemp(join(os.tmpdir(), "mia-boot-fail-"));
+        roots.push(root);
+
+        const dataDir = join(root, "mia", "data");
+
+        await mkdir(dataDir, {
+            "recursive": true
+        });
+        await writeFile(join(dataDir, ".env"), "port=0\ndatabase-uri=postgres://127.0.0.1:1/mia\n", "utf-8");
+
+        _useHome(root);
+
+        await startApplication();
+        await _wait(exitState);
+        strictEqual(exitState.code, 1);
+
+    });
+
+    it("should exit when shutdown fails", async () => {
+
+        const Pluginsmanager = require("node-pluginsmanager");
+        const releaseAll = Pluginsmanager.prototype.releaseAll;
+
+        process.removeAllListeners("SIGINT");
+        process.removeAllListeners("SIGTERM");
+        exitState.code = null;
+        root = await mkdtemp(join(os.tmpdir(), "mia-boot-kill-"));
+        roots.push(root);
+
+        const dataDir = join(root, "mia", "data");
+
+        await mkdir(dataDir, {
+            "recursive": true
+        });
+        await mkdir(join(root, "mia", "plugins"), {
+            "recursive": true
+        });
+        await writeFile(join(dataDir, ".env"), "port=0\n", "utf-8");
+
+        _useHome(root);
+
+        Pluginsmanager.prototype.releaseAll = () => {
+            return Promise.reject(new Error("release failed"));
+        };
+
+        try {
+
+            await startApplication();
+            process.emit("SIGINT");
+            await _wait(exitState);
+            strictEqual(exitState.code, 1);
+
+        }
+        finally {
+
+            Pluginsmanager.prototype.releaseAll = releaseAll;
+
+        }
+
+    });
 
 });

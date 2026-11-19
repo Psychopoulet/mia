@@ -20,7 +20,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -30,7 +29,7 @@ describe("Mediator tokens", () => {
     let resourcesDir = "";
     let mediator = null;
 
-    before(async () => {
+    beforeAll(async () => {
 
         descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
         resourcesDir = await mkdtemp(join(tmpdir(), "mia-core-tokens-"));
@@ -82,7 +81,7 @@ describe("Mediator tokens", () => {
             strictEqual(tokens[0].token, "tok-alice");
             strictEqual(typeof tokens[0].createdAt, "string");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow admin to list another user's tokens", async () => {
 
@@ -95,7 +94,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(tokens.length, 1);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid listing another user's tokens when not admin", async () => {
 
@@ -108,7 +107,7 @@ describe("Mediator tokens", () => {
                 });
             }, UnauthorizedError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should fail when listing tokens of a missing user", async () => {
 
@@ -121,7 +120,7 @@ describe("Mediator tokens", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow owner to delete own token", async () => {
 
@@ -138,7 +137,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(tokens.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow admin to delete another user's token", async () => {
 
@@ -155,7 +154,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(tokens.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid deleting another user's token when not admin", async () => {
 
@@ -165,7 +164,7 @@ describe("Mediator tokens", () => {
                 });
             }, UnauthorizedError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should fail when token is missing", async () => {
 
@@ -175,7 +174,7 @@ describe("Mediator tokens", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -199,7 +198,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(failed, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject invalid authorization header", async () => {
 
@@ -223,7 +222,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(failed, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject invalid token", async () => {
 
@@ -243,7 +242,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(failed, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should accept authorization from header alias and array value", async () => {
 
@@ -258,7 +257,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(user.name, "dave");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -282,7 +281,7 @@ describe("Mediator tokens", () => {
 
             strictEqual(failed, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 

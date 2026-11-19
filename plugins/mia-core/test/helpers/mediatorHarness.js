@@ -3,6 +3,10 @@
     // natives
     const Module = require("node:module");
     const { EventEmitter } = require("node:events");
+    const { resolve } = require("node:path");
+
+    // externals
+    const { mock } = require("bun:test");
 
 // consts
 
@@ -145,13 +149,95 @@
 
     }
 
+    function _hostTool (...parts) {
+
+        return resolve(__dirname, "..", "..", "..", "..", "lib", "src", "tools", ...parts);
+
+    }
+
     function installStubs () {
+
+        mock.module(_hostTool("AuthJWT.ts"), () => {
+            return {
+                "sign": (...args) => {
+                    return stubs.sign(...args);
+                }
+            };
+        });
+
+        mock.module(_hostTool("extractToken.ts"), () => {
+            return {
+                "default": (...args) => {
+                    return stubs.extractToken(...args);
+                }
+            };
+        });
+
+        mock.module(_hostTool("models", "User.ts"), () => {
+            return {
+                "default": {
+                    "getByNameAndPassword": (...args) => {
+                        return stubs.getByNameAndPassword(...args);
+                    },
+                    "findAll": (...args) => {
+                        return stubs.userFindAll(...args);
+                    },
+                    "findOne": (...args) => {
+                        return stubs.userFindOne(...args);
+                    },
+                    "create": (...args) => {
+                        return stubs.userCreate(...args);
+                    },
+                    "count": (...args) => {
+                        return stubs.userCount(...args);
+                    }
+                }
+            };
+        });
+
+        mock.module(_hostTool("models", "Token.ts"), () => {
+            return {
+                "default": {
+                    "create": (...args) => {
+                        return stubs.tokenCreate(...args);
+                    },
+                    "destroy": (...args) => {
+                        return stubs.tokenDestroy(...args);
+                    },
+                    "getUserByToken": (...args) => {
+                        return stubs.tokenGetUserByToken(...args);
+                    },
+                    "getByUserName": (...args) => {
+                        return stubs.tokenGetByUserName(...args);
+                    }
+                }
+            };
+        });
+
+        mock.module(_hostTool("models", "Log.ts"), () => {
+            return {
+                "default": {
+                    "countInRange": (...args) => {
+                        return stubs.logCountInRange(...args);
+                    },
+                    "findInRange": (...args) => {
+                        return stubs.logFindInRange(...args);
+                    },
+                    "destroyInRange": (...args) => {
+                        return stubs.logDestroyInRange(...args);
+                    },
+                    "getLogsLimits": (...args) => {
+                        return stubs.logGetLogsLimits(...args);
+                    }
+                }
+            };
+        });
 
         Module._load = function _load (request, parent, isMain) {
 
             const normalized = normalize(request);
 
-            if (normalized.endsWith("cjs/tools/AuthJWT")) {
+            if (normalized.endsWith("src/tools/AuthJWT.ts")) {
                 return {
                     "sign": (...args) => {
                         return stubs.sign(...args);
@@ -159,7 +245,7 @@
                 };
             }
 
-            if (normalized.endsWith("cjs/tools/extractToken")) {
+            if (normalized.endsWith("src/tools/extractToken.ts")) {
                 return {
                     "__esModule": true,
                     "default": (...args) => {
@@ -168,7 +254,7 @@
                 };
             }
 
-            if (normalized.endsWith("cjs/tools/models/User")) {
+            if (normalized.endsWith("src/tools/models/User.ts")) {
                 return {
                     "__esModule": true,
                     "default": {
@@ -191,7 +277,7 @@
                 };
             }
 
-            if (normalized.endsWith("cjs/tools/models/Token")) {
+            if (normalized.endsWith("src/tools/models/Token.ts")) {
                 return {
                     "__esModule": true,
                     "default": {
@@ -211,7 +297,7 @@
                 };
             }
 
-            if (normalized.endsWith("cjs/tools/models/Log")) {
+            if (normalized.endsWith("src/tools/models/Log.ts")) {
                 return {
                     "__esModule": true,
                     "default": {

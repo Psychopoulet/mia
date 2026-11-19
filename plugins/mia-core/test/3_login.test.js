@@ -22,7 +22,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -32,7 +31,7 @@ describe("login", () => {
     let mediator = null;
     let createdToken = null;
 
-    before(() => {
+    beforeAll(() => {
 
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
@@ -65,7 +64,7 @@ describe("login", () => {
 
     });
 
-    after(() => {
+    afterAll(() => {
 
         return mediator._releaseWorkSpace();
 
@@ -91,7 +90,7 @@ describe("login", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
     it("should reject NotFoundError when credentials are invalid", () => {
 
@@ -117,6 +116,6 @@ describe("login", () => {
             }
         );
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
 });

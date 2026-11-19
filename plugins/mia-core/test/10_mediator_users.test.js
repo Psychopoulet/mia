@@ -20,7 +20,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -30,7 +29,7 @@ describe("Mediator users", () => {
     let resourcesDir = "";
     let mediator = null;
 
-    before(async () => {
+    beforeAll(async () => {
 
         descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
         resourcesDir = await mkdtemp(join(tmpdir(), "mia-core-users-"));
@@ -77,7 +76,7 @@ describe("Mediator users", () => {
             strictEqual(users[0].name, "admin");
             strictEqual(typeof users[0].createdAt, "string");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should get a user by name", async () => {
 
@@ -93,7 +92,7 @@ describe("Mediator users", () => {
                 "createdAt": "2024-01-01T00:00:00.000Z"
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should fail when user is missing", async () => {
 
@@ -105,7 +104,7 @@ describe("Mediator users", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -122,7 +121,7 @@ describe("Mediator users", () => {
             strictEqual(user.name, "carol");
             strictEqual(user.isAdmin, false);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should emit user.added after a successful create", async () => {
 
@@ -142,7 +141,7 @@ describe("Mediator users", () => {
             deepStrictEqual(events[0], user);
             strictEqual(user.isAdmin, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should not emit user.added when create conflicts", async () => {
 
@@ -161,7 +160,7 @@ describe("Mediator users", () => {
 
             strictEqual(events.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid non-admin create", async () => {
 
@@ -172,7 +171,7 @@ describe("Mediator users", () => {
                 });
             }, UnauthorizedError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should conflict when user already exists", async () => {
 
@@ -183,7 +182,7 @@ describe("Mediator users", () => {
                 });
             }, ConflictError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -202,7 +201,7 @@ describe("Mediator users", () => {
 
             strictEqual(user.name, "alice");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should return the user unchanged when there is nothing to update", async () => {
 
@@ -219,7 +218,7 @@ describe("Mediator users", () => {
                 "createdAt": "2024-01-01T00:00:00.000Z"
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow admin to update another user", async () => {
 
@@ -234,7 +233,7 @@ describe("Mediator users", () => {
 
             strictEqual(user.isAdmin, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid editing another user when not admin", async () => {
 
@@ -249,7 +248,7 @@ describe("Mediator users", () => {
                 });
             }, UnauthorizedError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid non-admin from changing isAdmin", async () => {
 
@@ -264,7 +263,7 @@ describe("Mediator users", () => {
                 });
             }, UnauthorizedError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should fail when target user is missing", async () => {
 
@@ -279,7 +278,7 @@ describe("Mediator users", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid removing the last admin", async () => {
 
@@ -302,7 +301,7 @@ describe("Mediator users", () => {
 
             strictEqual(user.isAdmin, true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow demoting an admin when another admin remains", async () => {
 
@@ -326,7 +325,7 @@ describe("Mediator users", () => {
 
             strictEqual(user.isAdmin, false);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -349,7 +348,7 @@ describe("Mediator users", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow admin to delete another user", async () => {
 
@@ -368,7 +367,7 @@ describe("Mediator users", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should emit user.removed after a successful delete", async () => {
 
@@ -390,7 +389,7 @@ describe("Mediator users", () => {
             strictEqual(events[0].isAdmin, false);
             strictEqual(events[0].createdAt, "2024-01-01T00:00:00.000Z");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should not emit user.removed when delete is forbidden", async () => {
 
@@ -411,7 +410,7 @@ describe("Mediator users", () => {
 
             strictEqual(events.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid deleting another user when not admin", async () => {
 
@@ -424,7 +423,7 @@ describe("Mediator users", () => {
                 });
             }, UnauthorizedError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should fail when deleting a missing user", async () => {
 
@@ -437,7 +436,7 @@ describe("Mediator users", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forbid deleting the last admin", async () => {
 
@@ -458,7 +457,7 @@ describe("Mediator users", () => {
 
             strictEqual(user.name, "admin");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow deleting an admin when another admin remains", async () => {
 
@@ -486,7 +485,7 @@ describe("Mediator users", () => {
                 });
             }, NotFoundError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 

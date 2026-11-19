@@ -85,6 +85,12 @@ describe("server", () => {
                 },
                 {
                     "data": {
+                        "plugin": "demo"
+                    },
+                    "name": "plugin-update-success"
+                },
+                {
+                    "data": {
                         "message": "update-fail"
                     },
                     "name": "plugin-update-fail"

@@ -20,7 +20,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -29,7 +28,7 @@ describe("installPluginFromGithub", () => {
     let descriptor = null;
     let resourcesDir = "";
 
-    before(() => {
+    beforeAll(() => {
 
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
@@ -88,7 +87,7 @@ describe("installPluginFromGithub", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
     it("should emit install-fail and reject on error", () => {
 
@@ -129,6 +128,6 @@ describe("installPluginFromGithub", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
 });

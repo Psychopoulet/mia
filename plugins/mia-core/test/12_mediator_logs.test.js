@@ -26,7 +26,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
     const FROM = "2024-03-01T00:00:00.000Z";
     const TO = "2024-03-02T00:00:00.000Z";
@@ -73,7 +72,7 @@ describe("Mediator logs", () => {
     let findCalls = [];
     let destroyCalls = [];
 
-    before(async () => {
+    beforeAll(async () => {
 
         descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
         resourcesDir = await mkdtemp(join(tmpdir(), "mia-core-logs-"));
@@ -148,7 +147,7 @@ describe("Mediator logs", () => {
 
     });
 
-    after(() => {
+    afterAll(() => {
         restoreStubs();
     });
 
@@ -180,7 +179,7 @@ describe("Mediator logs", () => {
             strictEqual(lines[0], "2024-03-01T10:00:00.000Z [INFO] server started");
             strictEqual(lines[1], "2024-03-01T11:30:00.000Z [ERROR] boom {\"code\":500}");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forward the parsed range and the level filter", async () => {
 
@@ -200,7 +199,7 @@ describe("Mediator logs", () => {
             strictEqual(findCalls[0].to.toISOString(), TO);
             strictEqual(findCalls[0].level, "warning");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forward an undefined level when the filter is absent", async () => {
 
@@ -215,7 +214,7 @@ describe("Mediator logs", () => {
             strictEqual(findCalls.length, 1);
             strictEqual(typeof findCalls[0].level, "undefined");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should resolve an empty string when there is no record", async () => {
 
@@ -229,7 +228,7 @@ describe("Mediator logs", () => {
 
             strictEqual(content, "");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when the query is missing", async () => {
 
@@ -239,7 +238,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when \"from\" is missing", async () => {
 
@@ -254,7 +253,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when \"to\" is missing", async () => {
 
@@ -269,7 +268,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError on an unparsable date-time", async () => {
 
@@ -285,7 +284,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError on an inverted range", async () => {
 
@@ -301,7 +300,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should allow a non-admin signed-in caller to read logs", async () => {
 
@@ -320,7 +319,7 @@ describe("Mediator logs", () => {
             strictEqual(content, "");
             strictEqual(findCalls.length, 1);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forward the default hard limit when \"limit\" is absent", async () => {
 
@@ -335,7 +334,7 @@ describe("Mediator logs", () => {
             strictEqual(findCalls.length, 1);
             strictEqual(findCalls[0].limit, 10000);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should forward an explicit in-range limit to the bounded read", async () => {
 
@@ -351,7 +350,7 @@ describe("Mediator logs", () => {
             strictEqual(findCalls.length, 1);
             strictEqual(findCalls[0].limit, 50);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should clamp a limit above the cap to 10000", async () => {
 
@@ -367,7 +366,7 @@ describe("Mediator logs", () => {
             strictEqual(findCalls.length, 1);
             strictEqual(findCalls[0].limit, 10000);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when \"limit\" is 0", async () => {
 
@@ -385,7 +384,7 @@ describe("Mediator logs", () => {
             strictEqual(countCalls.length, 0);
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when \"limit\" is negative", async () => {
 
@@ -403,7 +402,7 @@ describe("Mediator logs", () => {
             strictEqual(countCalls.length, 0);
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when \"limit\" is not numeric", async () => {
 
@@ -421,7 +420,7 @@ describe("Mediator logs", () => {
             strictEqual(countCalls.length, 0);
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when the count exceeds the default limit and skip the read", async () => {
 
@@ -452,7 +451,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError when the count exceeds an explicit small limit and skip the read", async () => {
 
@@ -484,7 +483,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should read when the count equals the effective limit", async () => {
 
@@ -509,7 +508,7 @@ describe("Mediator logs", () => {
             strictEqual(findCalls.length, 1);
             strictEqual(findCalls[0].limit, 50);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject overflow with RangeError for a non-admin signed-in caller", async () => {
 
@@ -537,7 +536,7 @@ describe("Mediator logs", () => {
 
             strictEqual(findCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -560,7 +559,7 @@ describe("Mediator logs", () => {
 
             deepStrictEqual([ destroyCalls[0].from.toISOString(), destroyCalls[0].to.toISOString() ], [ FROM, TO ]);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject UnauthorizedError for a non-admin caller", async () => {
 
@@ -580,7 +579,7 @@ describe("Mediator logs", () => {
 
             strictEqual(destroyCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError on a missing range and purge nothing", async () => {
 
@@ -590,7 +589,7 @@ describe("Mediator logs", () => {
 
             strictEqual(destroyCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should reject RangeError on an invalid range and purge nothing", async () => {
 
@@ -606,7 +605,7 @@ describe("Mediator logs", () => {
 
             strictEqual(destroyCalls.length, 0);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 

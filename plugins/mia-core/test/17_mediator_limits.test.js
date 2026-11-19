@@ -29,14 +29,14 @@ describe("mediator limits", () => {
     let descriptor = null;
     let resourcesDir = "";
 
-    before(async () => {
+    beforeAll(async () => {
 
         descriptor = JSON.parse(await readFile(DESCRIPTOR_FILE, "utf-8"));
         resourcesDir = await mkdtemp(join(tmpdir(), "mia-core-limits-"));
 
     });
 
-    after(() => {
+    afterAll(() => {
         restoreStubs();
     });
 

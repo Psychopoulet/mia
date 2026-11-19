@@ -21,7 +21,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -31,7 +30,7 @@ describe("logout", () => {
     let mediator = null;
     let destroyedWhere = null;
 
-    before(() => {
+    beforeAll(() => {
 
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
@@ -68,7 +67,7 @@ describe("logout", () => {
 
     });
 
-    after(() => {
+    afterAll(() => {
 
         return mediator._releaseWorkSpace();
 
@@ -86,7 +85,7 @@ describe("logout", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
     it("should fall back on empty headers when none is provided", () => {
 
@@ -105,6 +104,6 @@ describe("logout", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
 });

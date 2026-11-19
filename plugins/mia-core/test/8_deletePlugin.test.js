@@ -22,22 +22,21 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
-describe("updatePluginFromGithub", () => {
+describe("deletePlugin", () => {
 
     let descriptor = null;
     let resourcesDir = "";
 
-    before(() => {
+    beforeAll(() => {
 
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
             descriptor = JSON.parse(content);
 
-            return mkdtemp(join(tmpdir(), "mia-core-update-"));
+            return mkdtemp(join(tmpdir(), "mia-core-delete-"));
 
         }).then((created) => {
 
@@ -62,20 +61,22 @@ describe("updatePluginFromGithub", () => {
 
     }
 
-    it("should reject NotFoundError and emit update-fail when plugin is missing", () => {
+    describe("cases", () => {
+
+        it("should reject NotFoundError and emit uninstall-fail when plugin is missing", () => {
 
         const pluginsManager = createPluginsManager([]);
         let failData = null;
 
         return createMediator(pluginsManager).then((mediator) => {
 
-            mediator.on("plugin-update-fail", (data) => {
+            mediator.on("plugin-uninstall-fail", (data) => {
                 failData = data;
             });
 
             return rejects(
                 () => {
-                    return mediator.updatePluginFromGithub({
+                    return mediator.deletePlugin({
                         "path": {
                             "name": "mia-core"
                         }
@@ -99,26 +100,33 @@ describe("updatePluginFromGithub", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
-    it("should emit update-running on success", () => {
+    it("should emit running then success on uninstall", () => {
 
         const pluginsManager = createPluginsManager([ fakePlugin("mia-core") ]);
         const emitted = [];
 
         return createMediator(pluginsManager).then((mediator) => {
 
-            mediator.on("plugin-update-running", (data) => {
-                emitted.push(data);
+            mediator.on("plugin-uninstall-running", (data) => {
+                emitted.push([ "running", data ]);
             });
 
-            return mediator.updatePluginFromGithub({
+            mediator.on("plugin-uninstall-success", (data) => {
+                emitted.push([ "success", data ]);
+            });
+
+            return mediator.deletePlugin({
                 "path": {
                     "name": "mia-core"
                 }
             }).then(() => {
 
-                deepStrictEqual(emitted, [ "mia-core" ]);
+                deepStrictEqual(emitted, [
+                    [ "running", "mia-core" ],
+                    [ "success", "mia-core" ]
+                ]);
 
                 return mediator._releaseWorkSpace();
 
@@ -126,41 +134,41 @@ describe("updatePluginFromGithub", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
-    it("should emit update-fail when updateViaGithub rejects", () => {
+    it("should emit uninstall-fail when uninstall rejects", () => {
 
         const pluginsManager = createPluginsManager([ fakePlugin("mia-core") ]);
 
-        pluginsManager.updateViaGithub = () => {
-            return Promise.reject(new Error("update boom"));
+        pluginsManager.uninstall = () => {
+            return Promise.reject(new Error("uninstall boom"));
         };
 
         return createMediator(pluginsManager).then((mediator) => {
 
             let failData = null;
 
-            mediator.on("plugin-update-fail", (data) => {
+            mediator.on("plugin-uninstall-fail", (data) => {
                 failData = data;
             });
 
             return rejects(
                 () => {
-                    return mediator.updatePluginFromGithub({
+                    return mediator.deletePlugin({
                         "path": {
                             "name": "mia-core"
                         }
                     });
                 },
                 (err) => {
-                    strictEqual(err.message, "update boom");
+                    strictEqual(err.message, "uninstall boom");
                     return true;
                 }
             ).then(() => {
 
                 deepStrictEqual(failData, {
                     "pluginName": "mia-core",
-                    "error": "update boom"
+                    "error": "uninstall boom"
                 });
 
                 return mediator._releaseWorkSpace();
@@ -169,6 +177,8 @@ describe("updatePluginFromGithub", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+        });
+
+    });
 
 });

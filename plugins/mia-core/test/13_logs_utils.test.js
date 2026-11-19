@@ -13,7 +13,6 @@
 
     const FROM = "2024-03-01T00:00:00.000Z";
     const TO = "2024-03-02T00:00:00.000Z";
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -31,7 +30,7 @@ describe("logs utils", () => {
                 "meta": null
             }), "2024-03-01T10:00:00.000Z [INFO] server started");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should append the stringified meta when it is set", () => {
 
@@ -46,7 +45,7 @@ describe("logs utils", () => {
                 }
             }), "2024-03-01T11:30:00.000Z [ERROR] boom {\"code\":500,\"route\":\"/mia-core/api/logs\"}");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should collapse line breaks so one record stays one line", () => {
 
@@ -62,7 +61,7 @@ describe("logs utils", () => {
             strictEqual(line.includes("\r"), false);
             strictEqual(line, "2024-03-01T12:00:00.000Z [CRITICAL] stack:   at first   at second");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should accept a timestamp given as a string", () => {
 
@@ -74,7 +73,7 @@ describe("logs utils", () => {
                 "meta": null
             }), "2024-03-01T13:00:00.000Z [DEBUG] raw row");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should omit meta when it is undefined", () => {
 
@@ -92,7 +91,7 @@ describe("logs utils", () => {
             strictEqual(line.includes("undefined"), false);
             strictEqual(line, "2024-03-01T14:00:00.000Z [WARNING] missing meta");
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -110,7 +109,7 @@ describe("logs utils", () => {
             strictEqual(range.from.toISOString(), FROM);
             strictEqual(range.to.toISOString(), TO);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should accept a range where both bounds are equal", () => {
 
@@ -121,7 +120,7 @@ describe("logs utils", () => {
 
             strictEqual(range.from.getTime(), range.to.getTime());
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when the query is missing", () => {
 
@@ -129,7 +128,7 @@ describe("logs utils", () => {
                 return parseLogsRange();
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"from\" is missing", () => {
 
@@ -139,7 +138,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"to\" is missing", () => {
 
@@ -149,7 +148,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError on a blank value", () => {
 
@@ -160,7 +159,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError on a non-string value", () => {
 
@@ -171,7 +170,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError on an unparsable \"from\"", () => {
 
@@ -182,7 +181,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError on an unparsable \"to\"", () => {
 
@@ -193,7 +192,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError on an inverted range", () => {
 
@@ -204,7 +203,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -216,7 +215,7 @@ describe("logs utils", () => {
             strictEqual(parseLogsLimit(), LOGS_HARD_LIMIT);
             strictEqual(parseLogsLimit({}), LOGS_HARD_LIMIT);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should return the hard cap when \"limit\" is empty", () => {
 
@@ -228,7 +227,7 @@ describe("logs utils", () => {
                 "limit": "   "
             }), LOGS_HARD_LIMIT);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should return a valid in-range value as-is", () => {
 
@@ -240,7 +239,7 @@ describe("logs utils", () => {
                 "limit": "50"
             }), 50);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should clamp a value above the cap to the hard limit", () => {
 
@@ -248,7 +247,7 @@ describe("logs utils", () => {
                 "limit": 999999
             }), LOGS_HARD_LIMIT);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"limit\" is 0", () => {
 
@@ -258,7 +257,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"limit\" is negative", () => {
 
@@ -268,7 +267,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"limit\" is not numeric", () => {
 
@@ -278,7 +277,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"limit\" is a non-integer number", () => {
 
@@ -288,7 +287,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should throw RangeError when \"limit\" is neither a number nor a string", () => {
 
@@ -298,7 +297,7 @@ describe("logs utils", () => {
                 });
             }, RangeError);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 

@@ -10,5 +10,11 @@ module.exports = defineConfig({
     "plugins": {
         personnallinter
     },
-    "extends": [ personnallinter.configs["js-back"] ]
+    "extends": [ personnallinter.configs["js-back"] ],
+    "languageOptions": {
+        "globals": {
+            "afterAll": "readonly",
+            "beforeAll": "readonly"
+        }
+    }
 });

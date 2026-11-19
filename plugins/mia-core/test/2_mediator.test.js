@@ -24,7 +24,6 @@
     const BUNDLE_MAP_FILE = join(DIST_DIR, "bundle.min.js.map");
     const MENU_FILE = join(DIST_DIR, "menu.min.js");
     const MENU_MAP_FILE = join(DIST_DIR, "menu.min.js.map");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -35,7 +34,7 @@ describe("mediator", () => {
     let mediator = null;
     let container = null;
 
-    before(() => {
+    beforeAll(() => {
 
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
@@ -82,7 +81,7 @@ describe("mediator", () => {
 
     });
 
-    after(() => {
+    afterAll(() => {
 
         return Promise.all([
             rm(resourcesDir, {
@@ -111,7 +110,7 @@ describe("mediator", () => {
 
             strictEqual(Boolean(container.get("plugins-manager")), true);
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should release workspace twice without failing", () => {
 
@@ -125,7 +124,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should replace plugin placeholders in front index", () => {
 
@@ -138,7 +137,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should replace plugin placeholders in front app", () => {
 
@@ -148,7 +147,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should replace plugin placeholders in front menu", () => {
 
@@ -158,7 +157,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should return front app sourcemap without placeholder replace", () => {
 
@@ -168,7 +167,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should return front menu sourcemap without placeholder replace", () => {
 
@@ -178,7 +177,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 
@@ -207,7 +206,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
         it("should emit plugin-update-step from plugins-manager updating", () => {
 
@@ -232,7 +231,7 @@ describe("mediator", () => {
 
             });
 
-        }).timeout(MAX_TIMEOUT);
+        });
 
     });
 

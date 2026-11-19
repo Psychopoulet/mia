@@ -21,7 +21,6 @@
 // consts
 
     const DESCRIPTOR_FILE = join(__dirname, "..", "lib", "data", "Descriptor.json");
-    const MAX_TIMEOUT = 10000;
 
 // tests
 
@@ -30,7 +29,7 @@ describe("getPlugins", () => {
     let descriptor = null;
     let mediator = null;
 
-    before(() => {
+    beforeAll(() => {
 
         return readFile(DESCRIPTOR_FILE, "utf-8").then((content) => {
 
@@ -56,7 +55,7 @@ describe("getPlugins", () => {
 
     });
 
-    after(() => {
+    afterAll(() => {
 
         return mediator._releaseWorkSpace();
 
@@ -84,6 +83,6 @@ describe("getPlugins", () => {
 
         });
 
-    }).timeout(MAX_TIMEOUT);
+    });
 
 });
