@@ -106,9 +106,11 @@ describe("systray", () => {
         strictEqual(menu.isTemplateIcon, false);
         strictEqual(menu.items[0].title, "Open");
         strictEqual(menu.items[0].tooltip, "http://127.0.0.1:18765/");
-        strictEqual(menu.items[1].title, "mia-inputs");
-        strictEqual(menu.items[1].tooltip, "http://127.0.0.1:18765/mia-inputs/public/index.html");
-        strictEqual(menu.items[2].title, "Quit");
+        strictEqual(menu.items[1].title, "<SEPARATOR>");
+        strictEqual(menu.items[2].title, "mia-inputs");
+        strictEqual(menu.items[2].tooltip, "http://127.0.0.1:18765/mia-inputs/public/index.html");
+        strictEqual(menu.items[3].title, "<SEPARATOR>");
+        strictEqual(menu.items[4].title, "Quit");
         strictEqual(trayMenu("mia", 1, [], "win32").icon.endsWith("favicon.ico"), true);
         strictEqual(trayMenu("mia", 1, [], "darwin").isTemplateIcon, true);
 
