@@ -21,31 +21,11 @@
     // externals
     import type ConfManager from "node-confmanager";
     import type ContainerPattern from "node-containerpattern";
-    import type { ClickEvent, Conf, MenuItem } from "systray2";
+    import type Pluginsmanager from "node-pluginsmanager";
+    import type { Menu, MenuItem } from "systray2";
 
     // locals
     import type { iLogger } from "./generateLogger";
-
-    interface iTrayItem extends MenuItem {
-        "click"?: () => void;
-    }
-
-    interface iTrayHandle {
-        "onClick": (listener: (action: ClickEvent) => void) => Promise<unknown>;
-        "ready": () => Promise<void>;
-        "kill": (exitNode?: boolean) => Promise<void>;
-    }
-
-    type tLaunch = (command: string, args: string[]) => { "unref": () => void };
-
-    export interface iTrayDeps {
-        "create": (conf: Conf) => iTrayHandle;
-        "open": (url: string) => void;
-        "prepare": () => Promise<void>;
-        "env"?: NodeJS.ProcessEnv;
-        "platform"?: string;
-        "arch"?: string;
-    }
 
 // private
 
@@ -93,18 +73,6 @@
 
     }
 
-    function _deps (): iTrayDeps {
-
-        return {
-            "create": (conf: Conf): SysTray => {
-                return new SysTray(conf);
-            },
-            "open": openLocalUrl,
-            "prepare": prepareInstalledTray
-        };
-
-    }
-
     function _command (url: string, platform: string): { "command": string, "args": string[] } {
 
         if ("win32" === platform) {
@@ -137,33 +105,102 @@
 
     }
 
-    function _listen (tray: iTrayHandle): void {
+    function _launch (command: string, args: string[]): void {
 
-        tray.onClick((action: ClickEvent): void => {
+        spawn(command, args, {
+            "detached": true,
+            "stdio": "ignore",
+            "windowsHide": true
+        }).unref();
 
-            const item = action.item as iTrayItem;
+    }
 
-            if ("function" === typeof item.click) {
-                item.click();
-            }
+    function _onItem (item: MenuItem, tray: SysTray, onQuit: () => void): void {
 
-        }).catch((): void => {
-            return undefined;
+        if ("Quit" === item.title) {
+
+            tray.kill(false).then(onQuit).catch(onQuit);
+            return;
+
+        }
+
+        const opened = _command(item.tooltip, process.platform);
+
+        _launch(opened.command, opened.args);
+
+    }
+
+    function _publish (tray: SysTray, menu: Menu, log: iLogger): void {
+
+        tray.sendAction({
+            "type": "update-menu",
+            "menu": menu
+        }).catch((err: Error): void => {
+            log.error(err.message);
         });
 
     }
 
+    function _follow (manager: Pluginsmanager, tray: SysTray, names: string[], appName: string, port: number, log: iLogger): void {
+
+        let current = names;
+
+        manager.on("initialized", (plugin): void => {
+
+            const next = includePlugin(current, plugin.name);
+
+            if (next !== current) {
+
+                current = next;
+                _publish(tray, trayMenu(appName, port, current, process.platform), log);
+
+            }
+
+        });
+
+        manager.on("released", (plugin): void => {
+
+            const next = excludePlugin(current, plugin.name);
+
+            if (next.length !== current.length) {
+
+                current = next;
+                _publish(tray, trayMenu(appName, port, current, process.platform), log);
+
+            }
+
+        });
+
+    }
+
+    function _openTray (container: ContainerPattern, onQuit: () => void): Promise<void> {
+
+        const port = container.get<ConfManager>("conf").get<number>("port");
+        const appName = container.get<string>("app.name");
+        const log: iLogger = container.get<iLogger>("log");
+        const manager: Pluginsmanager = container.get<Pluginsmanager>("plugins-manager");
+        const names = manager.plugins.map((plugin): string => {
+            return plugin.name;
+        });
+        const tray = new SysTray({
+            "menu": trayMenu(appName, port, names, process.platform),
+            "debug": false,
+            "copyDir": true
+        });
+
+        _follow(manager, tray, names, appName, port, log);
+
+        tray.onClick((action): void => {
+            _onItem(action.item, tray, onQuit);
+        }).catch((err: Error): void => {
+            log.error(err.message);
+        });
+
+        return tray.ready();
+
+    }
+
 // module
-
-export function launchDetached (command: string, args: string[]): { "unref": () => void } {
-
-    return spawn(command, args, {
-        "detached": true,
-        "stdio": "ignore",
-        "windowsHide": true
-    });
-
-}
 
 export function traySkipReason (env: NodeJS.ProcessEnv, platform: string, arch: string): string {
 
@@ -208,11 +245,67 @@ export function trayHelperName (platform: string): string {
 
 }
 
-export function openLocalUrl (url: string, launch: tLaunch = launchDetached, platform: string = process.platform): void {
+export function pluginPageUrl (port: number, pluginName: string): string {
 
-    const opened = _command(url, platform);
+    return "http://127.0.0.1:" + String(port) + "/" + pluginName + "/public/index.html";
 
-    launch(opened.command, opened.args).unref();
+}
+
+export function includePlugin (names: string[], pluginName: string): string[] {
+
+    if (names.includes(pluginName)) {
+        return names;
+    }
+
+    return names.concat(pluginName);
+
+}
+
+export function excludePlugin (names: string[], pluginName: string): string[] {
+
+    return names.filter((listed): boolean => {
+        return listed !== pluginName;
+    });
+
+}
+
+export function trayMenu (appName: string, port: number, pluginNames: string[], platform: string): Menu {
+
+    const home = "http://127.0.0.1:" + String(port) + "/";
+    const plugins: MenuItem[] = pluginNames.map((pluginName): MenuItem => {
+
+        return {
+            "title": pluginName,
+            "tooltip": pluginPageUrl(port, pluginName),
+            "checked": false,
+            "enabled": true
+        };
+
+    });
+
+    return {
+        "icon": join(installRoot(), "public", "pictures", trayIconFile(platform)),
+        "isTemplateIcon": trayIsTemplateIcon(platform),
+        "title": appName,
+        "tooltip": appName,
+        "items": [
+            {
+                "title": "Open",
+                "tooltip": home,
+                "checked": false,
+                "enabled": true
+            },
+            SysTray.separator,
+            ...plugins,
+            SysTray.separator,
+            {
+                "title": "Quit",
+                "tooltip": "Quit",
+                "checked": false,
+                "enabled": true
+            }
+        ]
+    };
 
 }
 
@@ -259,11 +352,8 @@ export function prepareInstalledTray (): Promise<void> {
 
 }
 
-export default function generateSystray (container: ContainerPattern, onQuit: () => void, deps: iTrayDeps = _deps()): Promise<void> {
+export default function generateSystray (container: ContainerPattern, onQuit: () => void): Promise<void> {
 
-    const env = deps.env ?? process.env;
-    const platform = deps.platform ?? process.platform;
-    const arch = deps.arch ?? process.arch;
     const enabled = container.get<ConfManager>("conf").get<boolean>("tray-enable");
     const log: iLogger = container.get<iLogger>("log");
 
@@ -274,7 +364,7 @@ export default function generateSystray (container: ContainerPattern, onQuit: ()
 
     }
 
-    const reason = traySkipReason(env, platform, arch);
+    const reason = traySkipReason(process.env, process.platform, process.arch);
 
     if ("" !== reason) {
 
@@ -283,65 +373,10 @@ export default function generateSystray (container: ContainerPattern, onQuit: ()
 
     }
 
-    return _openTray(container, onQuit, deps, platform);
-
-}
-
-function _openTray (container: ContainerPattern, onQuit: () => void, deps: iTrayDeps, platform: string): Promise<void> {
-
-    const port = container.get<ConfManager>("conf").get<number>("port");
-    const url = "http://127.0.0.1:" + String(port) + "/";
-    const name = container.get<string>("app.name");
-    const log: iLogger = container.get<iLogger>("log");
-    const started: { "tray": iTrayHandle | null } = { "tray": null };
-    const openItem: iTrayItem = {
-        "title": "Open",
-        "tooltip": url,
-        "checked": false,
-        "enabled": true,
-        "click": (): void => {
-            deps.open(url);
-        }
-    };
-    const quitItem: iTrayItem = {
-        "title": "Quit",
-        "tooltip": "Quit",
-        "checked": false,
-        "enabled": true,
-        "click": (): void => {
-
-            if (null !== started.tray) {
-                started.tray.kill(false).then(onQuit).catch(onQuit);
-            }
-
-        }
-    };
-
-    return deps.prepare().then(() => {
-
-        started.tray = deps.create({
-            "menu": {
-                "icon": join(installRoot(), "public", "pictures", trayIconFile(platform)),
-                "isTemplateIcon": trayIsTemplateIcon(platform),
-                "title": name,
-                "tooltip": name,
-                "items": [
-                    openItem,
-                    quitItem
-                ]
-            },
-            "debug": false,
-            "copyDir": true
-        });
-
-        _listen(started.tray);
-
-        return started.tray.ready();
-
+    return prepareInstalledTray().then((): Promise<void> => {
+        return _openTray(container, onQuit);
     }).catch((err: Error): void => {
-
         log.error(err.message);
-
     });
 
 }
