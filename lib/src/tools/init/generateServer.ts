@@ -14,6 +14,7 @@
 
     // locals
 
+    import installRoot from "../installRoot";
     import getRequestPath from "./getRequestPath";
 
     import authorization from "../../api/authorization";
@@ -36,8 +37,8 @@
 
 // consts
 
-    const PUBLIC_DIRECTORY: string = join(__dirname, "..", "..", "..", "..", "public");
-    const LIBS_DIRECTORY: string = join(__dirname, "..", "..", "..", "..", "node_modules");
+    const PUBLIC_DIRECTORY: string = join(installRoot(), "public");
+    const LIBS_DIRECTORY: string = join(installRoot(), "node_modules");
 
 // module
 
