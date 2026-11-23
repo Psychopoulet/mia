@@ -8,6 +8,9 @@
 
 // module
 
+// The boot test starts the real server. ConfManager reads tray-enable from the environment.
+process.env["tray-enable"] = "false";
+
 // Bun leaves process._getActiveHandles() empty, even while an HTTP server is listening.
 // The boot test reads this list for the real bound port (the config port stays 0) and to close the servers.
 const handles = new Set();

@@ -96,6 +96,28 @@
 
     // mia-core and the host sources stay on disk: the plugin requires those host files
     // by a relative path, and a compiled require() only resolves packages through index.js.
+    function _copyTray (directory) {
+
+        // Published helpers are x64 only. arm64 skips the tray.
+        if ("arm64" === process.arch) {
+            return Promise.resolve();
+        }
+
+        const name = "win32" === process.platform
+            ? "tray_windows_release.exe"
+            : ("darwin" === process.platform ? "tray_darwin_release" : "tray_linux_release");
+        const source = join(STAGE, "node_modules", "systray2", "traybin", name);
+
+        if (!existsSync(source)) {
+            return Promise.resolve();
+        }
+
+        return mkdir(join(directory, "traybin"), { "recursive": true }).then(() => {
+            return cp(source, join(directory, "traybin", name));
+        });
+
+    }
+
     function _copyAssets (directory) {
 
         const plugin = join(directory, "plugins", "mia-core");
@@ -122,6 +144,8 @@
 
             return cp(pluginModules, join(plugin, "node_modules"), { "recursive": true, "dereference": true });
 
+        }).then(() => {
+            return _copyTray(directory);
         }).then(() => {
 
             // A compiled executable resolves a package through index.js and ignores "main".
@@ -281,7 +305,8 @@
                         ...process.env,
                         "HOME": home,
                         "USERPROFILE": home,
-                        "port": SMOKE_PORT
+                        "port": SMOKE_PORT,
+                        "tray-enable": "false"
                     },
                     "stdio": [ "ignore", "pipe", "pipe" ]
                 });

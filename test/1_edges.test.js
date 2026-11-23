@@ -119,7 +119,22 @@ describe("host edges", () => {
 
         await ensureAppDirectories(container);
         strictEqual(0 < container.get("log").calls.length, true);
-        await generateConf(container);
+
+        const previousTray = process.env["tray-enable"];
+
+        delete process.env["tray-enable"];
+
+        try {
+            await generateConf(container);
+            strictEqual(container.get("conf").get("tray-enable"), true);
+        }
+        finally {
+
+            if ("string" === typeof previousTray) {
+                process.env["tray-enable"] = previousTray;
+            }
+
+        }
 
     });
 

@@ -33,6 +33,7 @@ RUN bun ./build/checkInstalls.js
 
 EXPOSE 8000
 ENV PORT=8000
+ENV tray-enable=false
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
     CMD sh -c 'curl -fsS "http://127.0.0.1:${PORT:-8000}/" || exit 1'
