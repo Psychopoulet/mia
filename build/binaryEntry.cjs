@@ -8,7 +8,27 @@
 // private
 
     // A compiled require() resolves a directory through index.js and ignores "main".
-    function _exportEntry (value) {
+    function _namedExport (value, name) {
+
+        if (!value || "object" !== typeof value) {
+            return "";
+        }
+
+        const field = value[name];
+
+        if ("string" === typeof field) {
+            return field;
+        }
+
+        if (field && "string" === typeof field.default) {
+            return field.default;
+        }
+
+        return "";
+
+    }
+
+    function _exportEntry (value, prefer) {
 
         if ("string" === typeof value) {
             return value;
@@ -19,27 +39,21 @@
         }
 
         if (value["."]) {
-            return _exportEntry(value["."]);
+            return _exportEntry(value["."], prefer);
         }
 
-        if ("string" === typeof value.require) {
-            return value.require;
-        }
+        const names = "import" === prefer
+            ? [ "import", "default", "require", "node", "bun" ]
+            : [ "require", "default", "import", "node", "bun" ];
 
-        if (value.require && "string" === typeof value.require.default) {
-            return value.require.default;
-        }
+        for (let index = 0; index < names.length; index++) {
 
-        if ("string" === typeof value.default) {
-            return value.default;
-        }
+            const found = _namedExport(value, names[index]);
 
-        if ("string" === typeof value.node) {
-            return value.node;
-        }
+            if (found) {
+                return found;
+            }
 
-        if ("string" === typeof value.bun) {
-            return value.bun;
         }
 
         return "";
@@ -67,7 +81,7 @@
 
     }
 
-    function _directoryEntry (directory) {
+    function _directoryEntry (directory, prefer) {
 
         const manifest = join(directory, "package.json");
 
@@ -76,7 +90,9 @@
         }
 
         const pkg = JSON.parse(readFileSync(manifest, "utf8"));
-        const declared = "string" === typeof pkg.main && "" !== pkg.main ? pkg.main : _exportEntry(pkg.exports);
+        const main = "string" === typeof pkg.main && "" !== pkg.main ? pkg.main : "";
+        const exported = _exportEntry(pkg.exports, prefer);
+        const declared = "import" === prefer ? (exported || main) : (main || exported);
 
         if (!declared) {
             return "";
@@ -86,14 +102,14 @@
 
     }
 
-    function _packageEntry (request, parent) {
+    function _packageEntry (request, parent, prefer) {
 
         if (isAbsolute(request)) {
 
             try {
 
                 if (statSync(request).isDirectory()) {
-                    return _directoryEntry(request);
+                    return _directoryEntry(request, prefer);
                 }
 
             }
@@ -113,7 +129,7 @@
 
         for (let index = 0; index < bases.length; index++) {
 
-            const found = _directoryEntry(join(bases[index], request));
+            const found = _directoryEntry(join(bases[index], request), prefer);
 
             if (found) {
                 return found;
@@ -134,7 +150,28 @@
         }
         catch (err) {
 
-            const resolved = _packageEntry(request, parent);
+            const message = err && "string" === typeof err.message ? err.message : "";
+            const prefer = message.includes("imported from") ? "import" : "require";
+            let resolved = _packageEntry(request, parent, prefer);
+
+            // The compiled resolver reports the real importer in the message
+            // when the parent module is still the virtual /$bunfs file.
+            if (!resolved) {
+
+                const marker = "imported from ";
+                const at = message.lastIndexOf(marker);
+
+                if (-1 !== at) {
+
+                    const importer = message.slice(at + marker.length).split("\n")[0].trim();
+
+                    if (importer) {
+                        resolved = _packageEntry(request, { "filename": importer }, prefer);
+                    }
+
+                }
+
+            }
 
             if (!resolved) {
                 throw err;
