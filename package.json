@@ -33,6 +33,7 @@
     "build-back": "bunx tsc --project ./tsconfig.json && bun run --cwd ./plugins/mia-core build-back",
     "build-front": "echo 'Build front not implemented (see mia-core plugin).' && bun run --cwd ./plugins/mia-core build-front",
     "build": "bun run build-back && bun run build-front",
+    "build-binary": "bun run build-front && bun ./build/buildBinary.js",
 
     "check-node-engine": "bunx check-node-engine && bun run --cwd ./plugins/mia-core check-node-engine",
     "check-requires": "bunx used-deps-analyzer \"./package.json\" \"./lib/src\" --no-dev --shadows @fortawesome/fontawesome-free bootstrap pg --misscalled \"{ \\\"module\\\": \\\"@fortawesome/fontawesome-free\\\", \\\"call\\\": \\\"@fortawesome\\\" }\" && bun run --cwd ./plugins/mia-core check-requires",
