@@ -1,7 +1,7 @@
 // deps
 
     // externals
-    const { defineConfig, globalIgnores } = require("eslint/config");
+    const { defineConfig } = require("eslint/config");
     const personnallinter = require("eslint-plugin-personnallinter");
 
 // module
@@ -11,7 +11,11 @@ module.exports = defineConfig([
         "plugins": {
             personnallinter
         },
-        "extends": [ personnallinter.configs["ts-back"] ]
-    },
-    globalIgnores([ "lib/src/api/Descriptor.ts" ])
+        "extends": [ personnallinter.configs["ts-back"] ],
+        "languageOptions": {
+            "globals": {
+                "Bun": "readonly"
+            }
+        }
+    }
 ]);

@@ -149,6 +149,14 @@ export default function generateLogger (container: ContainerPattern): void {
 
     }
 
+    // A failed SQL insert emits "error". With no listener, EventEmitter throws and the process
+    // can exit 1, so a requested stop comes back up under the container restart policy.
+    logger.on("error", (): void => {
+
+        // listener only: the event must not become an uncaught exception
+
+    });
+
     // replace basic logger
 
     container.set("log", logger);

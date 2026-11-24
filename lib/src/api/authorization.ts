@@ -10,6 +10,7 @@
     import { readJSONFile, UnauthorizedError } from "node-pluginsmanager-plugin";
 
     // locals
+    import installRoot from "../tools/installRoot";
     import { verify } from "../tools/AuthJWT";
     import extractToken from "../tools/extractToken";
     import Token from "../tools/models/Token";
@@ -39,7 +40,7 @@
 
 // consts
 
-    const DESCRIPTOR_FILE: string = join(__dirname, "..", "..", "..", "plugins", "mia-core", "lib", "data", "Descriptor.json");
+    const DESCRIPTOR_FILE: string = join(installRoot(), "plugins", "mia-core", "lib", "data", "Descriptor.json");
 
     const HTTP_METHODS: string[] = [
         "get",

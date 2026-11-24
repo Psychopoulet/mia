@@ -36,7 +36,9 @@ export default function generateConf (container: ContainerPattern): Promise<void
             .skeleton("auth-access-token", "string")
             .document("auth-access-token", "The application's access token")
             .skeleton("database-uri", "string")
-            .document("database-uri", "URI of the application database (postgres://, postgresql:// or sqlite://). Empty or unset uses local SQLite.");
+            .document("database-uri", "URI of the application database (postgres://, postgresql:// or sqlite://). Empty or unset uses local SQLite.")
+            .skeleton("tray-enable", "boolean")
+            .document("tray-enable", "Show the system tray icon");
 
     const envFile: string = join(container.get<string>("data-directory"), ".env");
 
@@ -71,6 +73,10 @@ export default function generateConf (container: ContainerPattern): Promise<void
 
         if (!confManager.has("debug")) {
             confManager.set("debug", true);
+        }
+
+        if (!confManager.has("tray-enable")) {
+            confManager.set("tray-enable", true);
         }
 
         if (!confManager.get<boolean>("debug")) {

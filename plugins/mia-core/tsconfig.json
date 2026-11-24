@@ -3,13 +3,10 @@
 
         "target": "es2024",
         "module": "commonjs",
+        "moduleResolution": "bundler",
+        "types": [ "bun", "node" ],
 
-        "rootDir": "./lib/src",
-        "outDir": "./lib/cjs",
-
-        "declaration": true,
-        "declarationDir": "./lib/cjs",
-
+        "noEmit": true,
 
         "alwaysStrict": true,
         "strict": true,

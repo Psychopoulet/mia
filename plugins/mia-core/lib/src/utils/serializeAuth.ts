@@ -1,5 +1,5 @@
 // locals
-import type { AuthTokenPublic } from "../types/tools/models/Token";
+import type { AuthTokenPublic } from "../../../../../lib/src/tools/models/Token";
 import type { components } from "../Descriptor";
 
 // public shape of a host User row (password excluded by the model default scope)

@@ -3,13 +3,13 @@
 
         "target": "es2024",
         "module": "es6",
+        "moduleResolution": "bundler",
+        "types": [ "react", "react-dom" ],
 
         "lib": [ "es2024", "dom" ],
 
         "outDir": "./public/dist/",
         "sourceMap": true,
-
-        "moduleResolution": "node",
 
         "alwaysStrict": true,
         "strict": true,

@@ -33,7 +33,7 @@ permissions:
 # ══════════════════════════════════════════════════════════════════════════════
 
 env:
-  NODE_VERSION: '24'                        # Same as tests.yml; used by setup-node
+  BUN_VERSION: '1.4.5'                      # Same as tests.yml; used by setup-bun
 
 # ══════════════════════════════════════════════════════════════════════════════
 # JOBS (Work units)
@@ -70,16 +70,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup NodeJS v${{ env.NODE_VERSION }}
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # curl -s https://api.github.com/repos/actions/setup-node/commits/v7.1.0 | jq -r .sha
+      - name: Setup Bun v${{ env.BUN_VERSION }}
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # curl -s https://api.github.com/repos/oven-sh/setup-bun/commits/v2.2.0 | jq -r .sha
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          bun-version: ${{ env.BUN_VERSION }}
 
       - name: Create version tag if missing on github
         id: create_version_tag
         run: |
           set -euo pipefail
-          VERSION="$(node -p "require('./package.json').version")"
+          VERSION="$(bun -p "require('./package.json').version")"
           if [ -z "${VERSION}" ]; then
             echo "::error::package.json is missing a non-empty \"version\" field"
             exit 1
@@ -115,17 +115,16 @@ jobs:
   #         fetch-depth: 0                    # gitleaks uses a git rev range (e.g. push before..after); depth 1 often misses those commits
   #         fetch-tags: true                  # so local checks stay consistent; ls-remote still authoritative
 
-  #     - name: Setup NodeJS v${{ env.NODE_VERSION }}
-  #       uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # curl -s https://api.github.com/repos/actions/setup-node/commits/v7.1.0 | jq -r .sha
+  #     - name: Setup Bun v${{ env.BUN_VERSION }}
+  #       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # curl -s https://api.github.com/repos/oven-sh/setup-bun/commits/v2.2.0 | jq -r .sha
   #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         registry-url: 'https://registry.npmjs.org'
+  #         bun-version: ${{ env.BUN_VERSION }}
 
   #     - name: Install dependencies
-  #       run: npm run install-dev
+  #       run: bun run install-dev
 
   #     - name: Run build
-  #       run: npm run build
+  #       run: bun run build
 
   #     - name: Publish to npm
   #       run: npm publish --provenance --access public

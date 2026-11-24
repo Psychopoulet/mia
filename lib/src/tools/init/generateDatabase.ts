@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
-// - @typescript-eslint/no-require-imports is disabled because we need to import dynamically the SQL module (depends of the database dialect)
-// - @typescript-eslint/no-var-requires is disabled for the same reason
-
 // deps
 
     // natives
@@ -10,6 +6,9 @@
     // externals
     import { isFile } from "node-pluginsmanager-plugin";
     import { Sequelize } from "sequelize";
+
+    // locals
+    import sqliteDialect from "./sqliteDialect";
     import User, { registerUser } from "../models/User";
     import { registerLog } from "../models/Log";
     import { registerToken } from "../models/Token";
@@ -53,18 +52,16 @@
 
     function _getSequelizeSqliteOptions (storage: string): Options {
 
-        const sqlite3 = require("sqlite3") as object;
-
         return {
             "dialect": "sqlite",
             "storage": storage,
             "logging": false, // SQL echo would recurse once Winston writes to this database
-            "dialectModule": sqlite3
+            "dialectModule": sqliteDialect
         };
 
     }
 
-    function _getSequelizeUriOptions (databaseUri: string): Options {
+    function _getSequelizeUriOptions (databaseUri: string): Promise<Options> {
 
         const dialect: string = _getUriDialect(databaseUri);
 
@@ -73,27 +70,32 @@
         }
 
         if ("sqlite" === dialect) {
-            return _getSequelizeSqliteOptions(_getSqliteStorage(databaseUri));
+            return Promise.resolve(_getSequelizeSqliteOptions(_getSqliteStorage(databaseUri)));
         }
 
-        const pg = require("pg") as object;
+        // literal specifier: loaded only for postgres, still embedded by bun build
+        return import("pg").then((pg): Options => {
 
-        return {
-            "logging": false, // SQL echo would recurse once Winston writes to this database
-            "dialectModule": pg
-        };
+            return {
+                "logging": false, // SQL echo would recurse once Winston writes to this database
+                "dialectModule": pg
+            };
+
+        });
 
     }
 
-    function _createSequelize (databaseUri: string): Sequelize {
+    function _createSequelize (databaseUri: string): Promise<Sequelize> {
 
-        const options: Options = _getSequelizeUriOptions(databaseUri);
+        return _getSequelizeUriOptions(databaseUri).then((options: Options): Sequelize => {
 
-        if ("sqlite" === options.dialect) {
-            return new Sequelize(options);
-        }
+            if ("sqlite" === options.dialect) {
+                return new Sequelize(options);
+            }
 
-        return new Sequelize(databaseUri, options);
+            return new Sequelize(databaseUri, options);
+
+        });
 
     }
 
@@ -147,7 +149,9 @@ export default function generateDatabase (container: ContainerPattern): Promise<
         const databaseUri: string = conf.get<string>("database-uri").trim();
 
         if ("" !== databaseUri) {
-            return _initDatabase(container, _createSequelize(databaseUri));
+            return _createSequelize(databaseUri).then((sequelize: Sequelize): Promise<void> => {
+                return _initDatabase(container, sequelize);
+            });
         }
 
     }

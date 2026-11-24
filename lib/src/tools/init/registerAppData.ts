@@ -5,6 +5,9 @@
     import { homedir } from "node:os";
     import { join } from "node:path";
 
+    // locals
+    import installRoot from "../installRoot";
+
 // types & interfaces
 
     // externals
@@ -23,7 +26,7 @@ export default function registerAppData (container: ContainerPattern): Promise<v
 
     return new Promise((resolve: (content: iPackageData) => void, reject: (err: Error) => void): void => {
 
-        const packageFile: string = join(__dirname, "..", "..", "..", "..", "package.json");
+        const packageFile: string = join(installRoot(), "package.json");
 
         return readFile(packageFile, "utf-8", (err: Error | null, content: string): void => {
             return err ? reject(err) : resolve(JSON.parse(content) as iPackageData);

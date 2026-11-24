@@ -21,8 +21,8 @@ export default class OrchestratorCore extends Orchestrator {
             ...data,
             "packageFile": join(__dirname, "..", "..", "package.json"),
             "descriptorFile": join(__dirname, "..", "data", "Descriptor.json"),
-            "mediatorFile": join(__dirname, "Mediator.js"),
-            "serverFile": join(__dirname, "Server.js")
+            "mediatorFile": join(__dirname, "Mediator.ts"),
+            "serverFile": join(__dirname, "Server.ts")
         });
 
     }

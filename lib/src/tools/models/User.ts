@@ -1,7 +1,6 @@
 // deps
 
     // externals
-    import bcrypt from "bcrypt";
     import { DataTypes, Model } from "sequelize";
 
     // locals
@@ -56,7 +55,10 @@ function _hashPassword (plain: string): Promise<string> {
         return Promise.resolve(plain);
     }
 
-    return bcrypt.hash(plain, BCRYPT_ROUNDS);
+    return Bun.password.hash(plain, {
+        "algorithm": "bcrypt",
+        "cost": BCRYPT_ROUNDS
+    });
 
 }
 
@@ -100,7 +102,7 @@ export default class User extends Model<UserAttributes, UserCreationAttributes> 
 
     public checkPassword (password: string): Promise<boolean> {
 
-        return bcrypt.compare(password, this.password);
+        return Bun.password.verify(password, this.password);
 
     }
 

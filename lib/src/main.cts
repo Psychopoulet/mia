@@ -17,6 +17,7 @@
     import generateLogger from "./tools/init/generateLogger";
     import managePlugins from "./tools/init/managePlugins";
     import generateServer from "./tools/init/generateServer";
+    import generateSystray from "./tools/init/generateSystray";
 
 // types & interfaces
 
@@ -109,8 +110,8 @@ export default function startApplication (): Promise<void> {
 
         return generateServer(container);
 
-    // catch
-    }).then((): void => {
+    // tray, after the server is listening
+    }).then((): Promise<void> => {
 
         function _handleKill (): void {
 
@@ -149,6 +150,8 @@ export default function startApplication (): Promise<void> {
         process
             .on("SIGTERM", _handleKill)
             .on("SIGINT", _handleKill);
+
+        return generateSystray(container, _handleKill);
 
     // fail to run
     }).catch((err: Error): void => {

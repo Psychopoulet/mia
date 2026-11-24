@@ -28,28 +28,28 @@
     import type ContainerPattern from "node-containerpattern";
     import type ConfManager from "node-confmanager";
     import type PluginsManager from "node-pluginsmanager";
-    import type { Orchestrator, iEventsMinimal, iUrlAllowedParameters } from "node-pluginsmanager-plugin"; // locals — types from the host mia project (imported via build/importTypes.js)
+    import type { Orchestrator, iEventsMinimal, iUrlAllowedParameters } from "node-pluginsmanager-plugin";
 
     // locals
-    import type { sign as tSign } from "./types/tools/AuthJWT";
-    import type tExtractToken from "./types/tools/extractToken";
-    import type tLog from "./types/tools/models/Log";
-    import type tToken from "./types/tools/models/Token";
-    import type { AuthTokenPublic, FullAuthPublic } from "./types/tools/models/Token";
-    import type tUser from "./types/tools/models/User";
-    import type { UserAttributes } from "./types/tools/models/User";
+    import type { sign as tSign } from "../../../../lib/src/tools/AuthJWT";
+    import type tExtractToken from "../../../../lib/src/tools/extractToken";
+    import type tLog from "../../../../lib/src/tools/models/Log";
+    import type tToken from "../../../../lib/src/tools/models/Token";
+    import type { AuthTokenPublic, FullAuthPublic } from "../../../../lib/src/tools/models/Token";
+    import type tUser from "../../../../lib/src/tools/models/User";
+    import type { UserAttributes } from "../../../../lib/src/tools/models/User";
 
     import type { operations, components } from "./Descriptor";
     import type { iGithubRepository } from "./utils/parseGithubPath";
     import type { iLogsRange } from "./utils/parseLogsRange";
 
-// runtime bindings (host mia project, compiled CJS)
+// runtime bindings (host mia project, TypeScript sources)
 
-    const { sign } = require("../../../../lib/cjs/tools/AuthJWT") as { "sign": typeof tSign };
-    const extractToken = (require("../../../../lib/cjs/tools/extractToken") as { "default": typeof tExtractToken }).default;
-    const Log = (require("../../../../lib/cjs/tools/models/Log") as { "default": typeof tLog }).default;
-    const Token = (require("../../../../lib/cjs/tools/models/Token") as { "default": typeof tToken }).default;
-    const User = (require("../../../../lib/cjs/tools/models/User") as { "default": typeof tUser }).default;
+    const { sign } = require("../../../../lib/src/tools/AuthJWT.ts") as { "sign": typeof tSign };
+    const extractToken = (require("../../../../lib/src/tools/extractToken.ts") as { "default": typeof tExtractToken }).default;
+    const Log = (require("../../../../lib/src/tools/models/Log.ts") as { "default": typeof tLog }).default;
+    const Token = (require("../../../../lib/src/tools/models/Token.ts") as { "default": typeof tToken }).default;
+    const User = (require("../../../../lib/src/tools/models/User.ts") as { "default": typeof tUser }).default;
 
 // private
 

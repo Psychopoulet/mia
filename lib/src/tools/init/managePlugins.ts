@@ -6,6 +6,9 @@
     // externals
     import Pluginsmanager from "node-pluginsmanager";
 
+    // locals
+    import installRoot from "../installRoot";
+
 // types & interfaces
 
     // externals
@@ -97,7 +100,7 @@ export default function managePlugins (container: ContainerPattern): Promise<voi
         });
 
     return pluginsManager.setOrder([ "mia-core" ]).then((): Promise<void> => {
-        return pluginsManager.addExternalPluginDirectory(join(__dirname, "..", "..", "..", "..", "plugins", "mia-core"));
+        return pluginsManager.addExternalPluginDirectory(join(installRoot(), "plugins", "mia-core"));
     }).then((): Promise<void> => {
         return pluginsManager.loadAll(container);
     }).then((): Promise<void> => {
